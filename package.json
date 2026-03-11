@@ -1,0 +1,10 @@
+{
+    "name": "equuscert",
+    "private": true,
+    "workspaces": [
+        "mobile",
+        "frontend",
+        "cert-server",
+        "backend"
+    ]
+}

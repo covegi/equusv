@@ -1,0 +1,34 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "equuscert",
+    },
+    "backend": {
+      "name": "@equuscert/backend",
+      "version": "0.0.1",
+    },
+    "cert-server": {
+      "name": "@equuscert/cert-server",
+      "version": "0.0.1",
+    },
+    "frontend": {
+      "name": "@equuscert/frontend",
+      "version": "0.0.1",
+    },
+    "mobile": {
+      "name": "@equuscert/mobile",
+      "version": "0.0.1",
+    },
+  },
+  "packages": {
+    "@equuscert/backend": ["@equuscert/backend@workspace:backend"],
+
+    "@equuscert/cert-server": ["@equuscert/cert-server@workspace:cert-server"],
+
+    "@equuscert/frontend": ["@equuscert/frontend@workspace:frontend"],
+
+    "@equuscert/mobile": ["@equuscert/mobile@workspace:mobile"],
+  }
+}
