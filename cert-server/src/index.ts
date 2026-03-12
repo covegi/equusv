@@ -9,7 +9,7 @@
 
     app.use(express.json())
 
-    app.get("/", (req: Request, res: Response) => {
+    app.get('/', (req: Request, res: Response) => {
         res.json({ status: 'ok' })
     })
 

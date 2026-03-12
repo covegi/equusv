@@ -1,0 +1,25 @@
+{
+    "configs": [
+        {
+            "name": "Local LARS",
+            "provider": "LARS",
+            "network": "testnet",
+            "run": [
+                "frontend",
+                "backend"
+            ]
+        },
+        {
+            "name": "Production",
+            "provider": "CARS",
+            "CARSCloudURL": "https://cars.babbage.systems",
+            "network": "mainnet",
+            "deploy": [
+                "frontend",
+                "backend"
+            ],
+            "frontendHostingMethod": "HTTPS",
+            "projectID": "YOUR_PROJECT_ID"
+        }
+    ]
+}

@@ -8,6 +8,15 @@
     "backend": {
       "name": "@equuscert/backend",
       "version": "0.0.1",
+      "dependencies": {
+        "express": "^5.2.1",
+      },
+      "devDependencies": {
+        "@types/express": "^5.0.6",
+        "@types/node": "^25.4.0",
+        "tsx": "^4.21.0",
+        "typescript": "^5.9.3",
+      },
     },
     "cert-server": {
       "name": "@equuscert/cert-server",
