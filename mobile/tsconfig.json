@@ -8,7 +8,8 @@
       ],
       "@/assets/*": [
         "./assets/*"
-      ]
+      ],
+      "@bsv/sdk": ["./node_modules/@bsv/sdk"]
     }
   },
   "include": [

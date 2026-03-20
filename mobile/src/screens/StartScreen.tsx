@@ -1,5 +1,4 @@
-import { StyleSheet, View } from "react-native"
-import { ImageBackground } from "react-native"
+import { StyleSheet, View, ImageBackground } from "react-native"
 import { router } from "expo-router"
 import Heading from "@/components/text/Heading"
 import BodyText from "@/components/text/BodyText"

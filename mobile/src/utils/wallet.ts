@@ -1,27 +1,47 @@
-import * as bip39 from 'bip39'
-import { BIP32Factory } from 'bip32'
-import * as ecc from 'tiny-secp256k1'
+import { generateMnemonic, mnemonicToSeedSync } from '@scure/bip39'
+import { wordlist } from '@scure/bip39/wordlists/english.js'
+import { HDKey } from '@scure/bip32'
+import { PrivateKey, CachedKeyDeriver } from '@bsv/sdk'
+import {
+    Wallet,
+    Services,
+    WalletStorageManager,
+    StorageClient,
+    type Wallet as WalletType
+} from '@bsv/wallet-toolbox/out/src/index.mobile'
 import * as SecureStore from 'expo-secure-store'
-import { SetupClient } from '@bsv/wallet-toolbox'
 
-const bip32 = BIP32Factory(ecc)
-
-export async function generateAndStoreKey(): Promise<string> {
-    const mnemonic = bip39.generateMnemonic()
-    const seed = await bip39.mnemonicToSeed(mnemonic)
-    const root = bip32.fromSeed(seed)
+export async function generateKey(): Promise<{ mnemonic: string, rootKeyHex: string}> {
+    const mnemonic = generateMnemonic(wordlist)
+    const seed = mnemonicToSeedSync(mnemonic)
+    const root = HDKey.fromMasterSeed(seed)
     const rootKeyHex = Buffer.from(root.privateKey!).toString('hex')
-    await SecureStore.setItemAsync('rootKeyHex', rootKeyHex)
-    return mnemonic
+    
+    return { mnemonic, rootKeyHex }
 }
 
-export async function loadWallet() {
+export async function storeKey(rootKeyHex: string): Promise<void> {
+    await SecureStore.setItemAsync('rootKeyHex', rootKeyHex)
+}
+
+export async function loadWallet(): Promise<Wallet | null> {
     const rootKeyHex = await SecureStore.getItemAsync('rootKeyHex')
     if (!rootKeyHex) return null
-    const wallet = await SetupClient.createWalletClientNoEnv({
-        chain: 'test',
-        rootKeyHex: rootKeyHex,
-        storageUrl: process.env.EXPO_PUBLIC_STORAGE_URL
-    })
+
+    const chain = 'test'
+    const endpointUrl = process.env.EXPO_PUBLIC_STORAGE ?? 'https://staging-storage.babbage.systems'
+
+    const rootKey = PrivateKey.fromHex(rootKeyHex)
+    // Todo: Type conflict due to duplicate @bsv/sdk instances (global vs local)
+    // CachedKeyDeriver is compatible at runtime but TypeScript sees two separate declarations
+    const keyDeriver = new CachedKeyDeriver(rootKey) as any
+    const storage = new WalletStorageManager(keyDeriver.identityKey)
+    const services = new Services(chain)
+    const wallet = new Wallet({ chain, keyDeriver, storage, services })
+    const client = new StorageClient(wallet, endpointUrl)
+    await storage.addWalletStorageProvider(client)
+    await storage.makeAvailable()
+    
+    console.log('WALLET:', wallet)
     return wallet
-}
+}   

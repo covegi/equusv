@@ -1,6 +1,6 @@
 import { StyleSheet, Text, Pressable } from "react-native"
 
-export default function PrimaryButton({ children, onPress }: { children: string, onPress: () => void }) {
+export default function PrimaryButton({ children, onPress }: { children: string, onPress: () => void | Promise<void> }) {
     return (
         <Pressable style={styles.container} onPress={onPress}>
             <Text style={styles.label}>{children}</Text>
@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         shadowColor: '#1a1a1a',
         shadowOffset: { width: 0, height: 2},
-        shadowOpacity: 0.8,
+        shadowOpacity: 0.5,
         shadowRadius: 8,
         paddingVertical: 10,
         paddingHorizontal: 18,

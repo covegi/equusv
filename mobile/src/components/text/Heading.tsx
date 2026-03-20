@@ -10,8 +10,8 @@ export default function Heading( { children, fontSize=24 }: { children: string, 
 
 const styles = StyleSheet.create({
     text: {
-        fontFamily: 'Inter_400Regular',
+        fontFamily: 'Inter_600SemiBold',
         color: '#f7f2f2',
-        letterSpacing: 0.2
+        letterSpacing: 0.2,
     }
 })
