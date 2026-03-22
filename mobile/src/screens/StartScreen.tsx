@@ -7,14 +7,14 @@ import SecondaryButton from "@/components/buttons/SecondaryButton"
 
 export default function StartScreen() {
     return (
-        <ImageBackground source={require('@/assets/images/horse-start-screen.jpg')} style={styles.image} imageStyle={{ right: -25 }}>
+        <ImageBackground source={require('@/assets/images/horse-start-screen.jpg')} style={styles.image} imageStyle={{ right: -30 }}>
             <View style={styles.containerText}>
                 <Heading fontSize={48}>EquusCert</Heading>
                 <BodyText >Sanningen om din häst</BodyText>
             </View>
             <View style={styles.containerButtons}>
-                <PrimaryButton onPress={() => router.push('/backup')}>Skapa plånbok</PrimaryButton>
-                <SecondaryButton onPress={() => router.push('/restore')}>Återställ plånbok</SecondaryButton>
+                <PrimaryButton onPress={() => router.push('/backup')}>Skapa nytt arkiv</PrimaryButton>
+                <SecondaryButton onPress={() => router.push('/restore')}>Återställ arkiv</SecondaryButton>
             </View>
         </ImageBackground>
     )

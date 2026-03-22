@@ -1,4 +1,4 @@
-import { generateMnemonic, mnemonicToSeedSync } from '@scure/bip39'
+import { generateMnemonic, mnemonicToSeed, mnemonicToSeedSync } from '@scure/bip39'
 import { wordlist } from '@scure/bip39/wordlists/english.js'
 import { HDKey } from '@scure/bip32'
 import { PrivateKey, CachedKeyDeriver } from '@bsv/sdk'
@@ -44,4 +44,36 @@ export async function loadWallet(): Promise<Wallet | null> {
     
     console.log('WALLET:', wallet)
     return wallet
-}   
+} 
+
+export async function restoreWallet(mnemonic: string[]): Promise<Wallet | null > {
+    try {
+        const enteredMnemonic = mnemonic.map(word => word.trim()).join(' ')
+        const seed = mnemonicToSeedSync(enteredMnemonic )
+        const root = HDKey.fromMasterSeed(seed)
+        const rootKeyHex = Buffer.from (root.privateKey!).toString('hex')
+
+        const chain = 'test'
+        const endpointUrl = process.env.EXPO_PUBLIC_STORAGE ?? 'https://staging-storage.babbage.systems'
+
+        const rootKey = PrivateKey.fromHex(rootKeyHex)
+        // Todo: Type conflict due to duplicate @bsv/sdk instances (global vs local)
+        // CachedKeyDeriver is compatible at runtime but TypeScript sees two separate declarations
+        const keyDeriver = new CachedKeyDeriver(rootKey) as any
+        const storage = new WalletStorageManager(keyDeriver.identityKey)
+        const services = new Services(chain)
+        const wallet = new Wallet({ chain, keyDeriver, storage, services })
+        const client = new StorageClient(wallet, endpointUrl)
+        await storage.addWalletStorageProvider(client)
+        await storage.makeAvailable()
+        await SecureStore.setItemAsync('rootKeyHex', rootKeyHex)
+
+        console.log('WALLET:', wallet)
+        
+        return wallet
+
+    } catch (error) {
+        console.log('restoreWallet error', error)
+        return null
+    }
+}

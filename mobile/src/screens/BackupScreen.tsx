@@ -27,11 +27,9 @@ export default function BackupScreen() {
                     return
                 }
                 const { mnemonic, rootKeyHex } = await generateKey()
-                console.log('mnemonic:', mnemonic)
                 setMnemonic(mnemonic)
                 setRootKeyHex(rootKeyHex)
             } catch (error) {
-                console.log('Error...', error)
                 Alert.alert(
                     'Något gick fel.',
                     'Kunde inte generera nyckeln. Försök igen.',
@@ -51,7 +49,7 @@ export default function BackupScreen() {
 
     if (loading) return null
 
-    const mnemonicArray = mnemonic ? mnemonic.split(' ') : ['try', 'maximum', 'enroll', 'solution', 'veteran', 'winner', 'outside', 'aware', 'boost', 'comfort', 'impose', 'skull']
+    const mnemonicArray = mnemonic ? mnemonic.split(' ') : [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '', ' ']
 
     return (
         <ImageBackground source={require('@/assets/images/horse-backup-screen.jpg')} style={styles.image} imageStyle={{ left: -25, top: -30}}>
@@ -93,11 +91,11 @@ const styles = StyleSheet.create({
         position: 'absolute',
         left: 0,
         right: 0,
-        alignItems: 'center'
+        alignItems: 'center',
     },
     container: {
         flex: 1,
-        justifyContent: 'center'
+        justifyContent: 'center',
     },
     bodyTextTop: {
         alignItems: 'center',
@@ -114,6 +112,6 @@ const styles = StyleSheet.create({
     },
     bodyTextBottom: {
         alignItems: 'center',
-        marginTop: 84
+        marginTop: 36
     }
 })

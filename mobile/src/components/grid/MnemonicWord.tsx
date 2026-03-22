@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, Dimensions } from 'react-native'
 export default function MnemonicWord({ children, boxNumber=1 }: { children: string, boxNumber?: number }) {
     const { width } = Dimensions.get('window')
     const boxWidth = (width - 60) / 3
-    const boxHeight = width * 0.12
+    const boxHeight = width * 0.15
 
     return (
         <View style={[styles.container, { width: boxWidth, height: boxHeight }]}>
