@@ -32,7 +32,7 @@ export default function RestoreScreen() {
         }
         const wallet = await restoreWallet(words)
         if (wallet) {
-            router.replace('pin/create')
+            router.replace('/pin/create')
         } else {
             Alert.alert(
                 'Något gick fel.',

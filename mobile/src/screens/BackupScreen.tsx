@@ -44,7 +44,7 @@ export default function BackupScreen() {
 
     const handleSaveKey = async () => {
         await storeKey(rootKeyHex)
-        router.push('pin/create')
+        router.push('/pin/create')
     }
 
     if (loading) return null
