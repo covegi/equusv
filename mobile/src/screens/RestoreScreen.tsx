@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
-        paddingTop: 140
+        paddingTop: 160
     },
     boxContainer: {
         flexDirection: 'row',

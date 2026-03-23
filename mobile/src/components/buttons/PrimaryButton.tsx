@@ -10,7 +10,7 @@ export default function PrimaryButton({ children, onPress }: { children: string,
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#c8963e',
+        backgroundColor: '#d06212',
         borderRadius: 8,
         shadowColor: '#1a1a1a',
         shadowOffset: { width: 0, height: 2},
