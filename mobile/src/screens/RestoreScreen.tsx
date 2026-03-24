@@ -45,7 +45,7 @@ export default function RestoreScreen() {
     return (
             <ImageBackground source={require('@/assets/images/horse-backup-screen.jpg')} style={styles.image} imageStyle={{ left: -25, top: -30 }}>
             <View style={[styles.backButton, { top: insets.top + 16 }]} >
-                <BackButton/>
+                <BackButton />
             </View>
             <View style={[styles.heading, { top: insets.top + 72 }]} >
                 <Heading>Återställ arkiv</Heading>
