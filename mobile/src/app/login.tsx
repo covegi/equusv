@@ -1,4 +1,4 @@
-import { Text, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import PrimaryButton from '@/components/buttons/PrimaryButton'
 import * as SecureStore from 'expo-secure-store'
 import { useRouter } from 'expo-router'
@@ -12,10 +12,18 @@ export default function Login() {
     }
     
     return (
-        <View style={{ paddingLeft: '40%', paddingTop: '50%'}}>
+        <View style={styles.container}>
             <Text>Login Screen</Text>
             <PrimaryButton onPress={handleDeleteSecureStore}>Rensa SecureStore</PrimaryButton>
         </View>
         
     )
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
+    }
+})

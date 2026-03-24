@@ -1,16 +1,24 @@
 import { StyleSheet, View, Pressable } from 'react-native'
 import { useRouter } from 'expo-router'
+import * as SecureStore from 'expo-secure-store'
 import AntDesign from '@expo/vector-icons/AntDesign'
 
-export default function BackButton({ color='#f7f2f2' }: { color?: string }) {
+export default function BackButton({ color='#f7f2f2', emptyPin }: { color?: string, emptyPin: boolean}) {
     const router = useRouter()
 
+    const handleOnPress = async () => {
+        if (emptyPin) {
+            await SecureStore.deleteItemAsync('pin')
+        }
+        router.back()
+    }
+
     return (
-        <Pressable onPress={() => router.back()} style={styles.container}>
+        <Pressable onPress={handleOnPress} style={styles.container}>
             <View>
                 <AntDesign name="arrow-left" size={24} color={color} />
             </View>
-        </Pressable>
+        </Pressable> 
     )
 }
 

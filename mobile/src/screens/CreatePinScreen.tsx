@@ -1,9 +1,9 @@
 import { StyleSheet, Text, View, ImageBackground, TouchableOpacity } from 'react-native'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import * as SecureStore from 'expo-secure-store'
-import { useRouter } from 'expo-router'
+import { useRouter, useFocusEffect } from 'expo-router'
 
 import Heading from '@/components/text/Heading'
 
@@ -22,6 +22,12 @@ export default function CreatePinScreen() {
         }
         checkPin()
     }, [pin])
+
+    useFocusEffect(
+        useCallback(() => {
+            setPin([])
+        }, [])
+    )
 
     const handlePress = (num: string): void => {
         if (pin.length < 6) setPin([...pin, num])
