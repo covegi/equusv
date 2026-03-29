@@ -21,9 +21,9 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         marginTop: 5,
         shadowColor: '#1a1a1a',
-        shadowOffset: { width: 0, height: 2},
+        shadowOffset: { width: 2, height: 2},
         shadowOpacity: 0.5,
-        shadowRadius: 8,
+        shadowRadius: 2,
         flexDirection: 'column'
     },
     boxNumber: {

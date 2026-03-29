@@ -1,9 +1,9 @@
 import { StyleSheet, Text, Pressable } from 'react-native'
 
-export default function SecondaryButton({ children, onPress }: { children: string, onPress: () => void }) {
+export default function SecondaryButton({ children, color='#f7f2f2', fontSize=12, onPress }: { children: string,color?: string, fontSize?: number, onPress: () => void }) {
     return (
         <Pressable style={styles.container} onPress={onPress}>
-            <Text style={styles.label}>{children}</Text>
+            <Text style={[styles.label, { color, fontSize }]}>{children}</Text>
         </Pressable>
     )
 }
@@ -17,8 +17,6 @@ const styles = StyleSheet.create({
     },
     label: {
         fontFamily: 'Inter_400Regular',
-        fontSize: 12,
-        color: '#f7f2f2',
         letterSpacing: 0.2
     }
 })
