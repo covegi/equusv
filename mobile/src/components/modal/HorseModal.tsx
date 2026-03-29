@@ -9,6 +9,7 @@ import Section from '../journal/Section'
 import SectionHeading from '../journal/SectionHeading'
 import SectionRowInput from '../journal/SectionRowInput'
 import SectionRowDateInput from '../journal/SectionRowDateInput'
+import SectionRowCheckbox from '../journal/SectionRowCheckbox'
 import type { Horse } from '@/types/horse'
 import PrimaryButton from '../buttons/PrimaryButton'
 
@@ -16,8 +17,6 @@ export default function HorseModal({ visible, onClose }: {visible: boolean, onCl
     const insets = useSafeAreaInsets()
     const [horse, setHorse] = useState<Partial<Horse>>({})
     const [errors, setErrors] = useState<Partial<Record<keyof Horse, boolean>>>({})
-    const [show, setShow] = useState()
-    const [date, setDate] = useState()
 
     const validate = (): boolean => {
         const newErrors: Partial<Record<keyof Horse, boolean>> = {}
@@ -181,14 +180,12 @@ export default function HorseModal({ visible, onClose }: {visible: boolean, onCl
                             <Section>
                                 <View style={styles.sectionStyle}>
                                     <SectionHeading fontSize={18}>Livsmedelskedjan</SectionHeading>
-                                    <SectionRowInput
+                                    <SectionRowCheckbox 
                                         label='Status'
                                         value={horse.foodChainStatus ?? ''}
-                                        onChangeText={(text) => {
-                                            setHorse({ ...horse, foodChainStatus: text })
-                                            setErrors({ ...errors, foodChainStatus: false })
+                                        onValueChange={(option) => {
+                                            setHorse({ ...horse, foodChainStatus: option})
                                         }}
-                                        hasError={errors.foodChainStatus}   
                                     />
                                 </View>
                             </Section>
@@ -219,6 +216,6 @@ const styles = StyleSheet.create({
         marginTop: 12
     },
     submitButton: {
-        marginTop: 36
+        marginTop: 40
     }
 })

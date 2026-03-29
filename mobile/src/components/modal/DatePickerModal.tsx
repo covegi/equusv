@@ -1,7 +1,6 @@
 import { StyleSheet, Text, View, Modal, TouchableOpacity } from "react-native"
 import { useState } from 'react'
 import { useSafeAreaInsets } from "react-native-safe-area-context"
-import Ionicons from "@expo/vector-icons/Ionicons"
 import DateTimePicker from '@react-native-community/datetimepicker'
 
 import SecondaryButton from "../buttons/SecondaryButton"
@@ -23,7 +22,7 @@ export default function DatePickerModal({ show, onClose, onChangeText }: { show:
                             display='spinner'
                             locale='sv-SE'
                             onChange={(event, selectedDate) => {
-                                const dateStr = selectedDate?.toLocaleDateString('sv-SE') ?? ''
+                                const dateStr = selectedDate?.toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' }) ?? ''
                                 setDate(selectedDate ?? date)
                                 onChangeText(dateStr)
                             }}
@@ -34,7 +33,7 @@ export default function DatePickerModal({ show, onClose, onChangeText }: { show:
                             color='#1a1a1a'
                             fontSize={16}
                             onPress={() => {
-                                onChangeText(date.toLocaleDateString('sv-SE'))
+                                onChangeText(date.toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' }))
                                 onClose()
                             }}
                         >
