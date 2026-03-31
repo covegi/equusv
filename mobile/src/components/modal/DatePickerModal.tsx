@@ -54,7 +54,6 @@ const styles = StyleSheet.create({
     headerContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginLeft: 15,
     },
     headerText: {
         fontFamily: 'Inter_400Regular',

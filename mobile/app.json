@@ -11,7 +11,9 @@
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.equuscert.app",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "EquusCert behöver kameraåtkomst för att ta hästfoton.",
+        "NSPhotoLibraryUsageDescription": "EquusCert behöver åtkomst till bildbiblioteket för att välja hästfoton."
       }
     },
     "android": {

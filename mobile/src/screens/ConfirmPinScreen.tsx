@@ -1,18 +1,21 @@
-import { StyleSheet, Text, View, ImageBackground, TouchableOpacity, Animated } from 'react-native'
+import { StyleSheet, Text, View, ImageBackground, TouchableOpacity, Animated, Alert } from 'react-native'
 import { useState, useEffect, useRef } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import * as SecureStore from 'expo-secure-store'
 import { useRouter } from 'expo-router'
+import { useWallet } from '@/context/WalletContext'
 
 import BackButton from '@/components/buttons/BackButton'
 import Heading from '@/components/text/Heading'
+import { loadWallet } from '@/utils/wallet'
 
 export default function CreatePinScreen() {
     const insets = useSafeAreaInsets()
     const [pin, setPin] = useState<string[]>([])
     const shakeAnim = useRef(new Animated.Value(0)).current
     const router = useRouter()
+    const { setWallet } = useWallet()
 
     const shake = () => {
         Animated.sequence([
@@ -30,7 +33,17 @@ export default function CreatePinScreen() {
                 const pinStr = pin.join('')
 
                 if (enteredPin === pinStr) {
-                    router.push('/horses')
+                    try {
+                        const wallet = await loadWallet()
+                        if (wallet !== null) {
+                            setWallet(wallet)
+                            router.push('/horses')
+                        } else {
+                            Alert.alert('Fel', 'Kunde inte ladda arkivet.')
+                        }
+                    } catch (error) {
+                        Alert.alert('Fel', 'Ingen internetanslutning. Försök igen.')
+                    }
                 } else {
                     shake()
                 }

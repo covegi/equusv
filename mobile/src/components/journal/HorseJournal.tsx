@@ -1,7 +1,7 @@
 import { StyleSheet, View, TouchableOpacity } from 'react-native'
 import Feather from '@expo/vector-icons/Feather'
+import Ionicons from '@expo/vector-icons/Ionicons'
 
-import PhotoPicker from './PhotoPicker'
 import Section from './Section'
 import SectionHeading from './SectionHeading'
 import SectionRow from './SectionRow'
@@ -11,7 +11,9 @@ import type { Horse } from '@/types/horse'
 export default function HorseJournal({ horse }: { horse: Horse }) {
     return (
         <View style={styles.outerContainer}>
-           <PhotoPicker />
+           <View style={styles.imagePlaceholder}>
+                <Ionicons name="camera-outline" size={48} color="#1a1a1a" />
+           </View>
            <TouchableOpacity style={styles.editIcon}>
                 <Feather name="edit-3" size={18} color="#1a1a1a"/>
            </TouchableOpacity>
@@ -50,6 +52,18 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         backgroundColor: '#f7f2f2',
         borderRadius: 10
+    },
+    imagePlaceholder: {
+            width: '100%',
+            height: 150,
+            alignSelf: 'center',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderTopLeftRadius: 10,
+            borderTopRightRadius: 10,
+            borderColor: '#1a1a1a',
+            borderWidth: 2,
+            marginTop: 15
     },
     editIcon: {
         position: 'absolute',

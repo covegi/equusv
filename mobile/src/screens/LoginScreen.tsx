@@ -1,9 +1,11 @@
-import { StyleSheet, Text, View, ImageBackground, TouchableOpacity, Animated, Image } from 'react-native'
+import { StyleSheet, Text, View, ImageBackground, TouchableOpacity, Animated, Image, Alert } from 'react-native'
 import { useState, useEffect, useRef } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as SecureStore from 'expo-secure-store'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useRouter } from 'expo-router'
+import { useWallet } from '@/context/WalletContext'
+import { loadWallet } from '@/utils/wallet'
 
 import Heading from '@/components/text/Heading'
 import PrimaryButton from '@/components/buttons/PrimaryButton'
@@ -13,6 +15,7 @@ export default function LoginScreen() {
     const [pin, setPin] = useState<string[]>([])
     const shakeAnim = useRef(new Animated.Value(0)).current
     const router = useRouter()
+    const { setWallet } = useWallet()
 
     useEffect(() => {
         if (pin.length === 6) {
@@ -20,7 +23,17 @@ export default function LoginScreen() {
                 const storedPin = await SecureStore.getItemAsync('pin')
                 const pinStr = pin.join('')
                 if (storedPin === pinStr) {
-                    router.replace('/horses')
+                    try {
+                        const wallet = await loadWallet()
+                        if (wallet !== null) {
+                        setWallet(wallet)
+                        router.replace('/horses')
+                    } else {
+                        Alert.alert('Fel', 'Kunde inte ladda arkivet.')
+                        }
+                    } catch (error) {
+                        Alert.alert('Fel', 'Ingen internetanslutning. Försök igen.')
+                    }
                     return
                 }
                 shake()

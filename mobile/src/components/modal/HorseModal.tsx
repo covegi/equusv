@@ -17,6 +17,8 @@ export default function HorseModal({ visible, onClose }: {visible: boolean, onCl
     const insets = useSafeAreaInsets()
     const [horse, setHorse] = useState<Partial<Horse>>({})
     const [errors, setErrors] = useState<Partial<Record<keyof Horse, boolean>>>({})
+    const [photoUri, setPhotoUri] = useState<string | null>(null)
+    const [photoSource, setPhotoSource] = useState<'camera' | 'gallery' | null>(null)
 
     const validate = (): boolean => {
         const newErrors: Partial<Record<keyof Horse, boolean>> = {}
@@ -64,7 +66,14 @@ export default function HorseModal({ visible, onClose }: {visible: boolean, onCl
                             </TouchableOpacity>
                         </View>
                         <View style={styles.container}>
-                            <PhotoPicker />
+                            <PhotoPicker
+                                photoUri={photoUri ?? ''}
+                                onPhotoSelected={(uri, source) => {
+                                    setPhotoUri(uri)
+                                    setPhotoSource(source)
+                                }} 
+                            
+                            />
                             <Section>
                                 <SectionHeading fontSize={18}>Häst</SectionHeading>
                                 <SectionRowInput
