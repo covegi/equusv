@@ -7,7 +7,6 @@ import { useRouter } from 'expo-router'
 import { useWallet } from '@/context/WalletContext'
 import { loadWallet } from '@/utils/wallet'
 
-import Heading from '@/components/text/Heading'
 import PrimaryButton from '@/components/buttons/PrimaryButton'
 
 export default function LoginScreen() {

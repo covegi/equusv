@@ -2,6 +2,10 @@ import { StyleSheet, View, Modal, TouchableOpacity, ScrollView, KeyboardAvoiding
 import { useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import * as FileSystem from 'expo-file-system/legacy'
+import * as SecureStore from 'expo-secure-store'
+import { PrivateKey, ECIES, AuthFetch } from '@bsv/sdk'
+import { useWallet } from '@/context/WalletContext'
 
 import Heading from '../text/Heading'
 import PhotoPicker from '../journal/PhotoPicker'
@@ -19,6 +23,9 @@ export default function HorseModal({ visible, onClose }: {visible: boolean, onCl
     const [errors, setErrors] = useState<Partial<Record<keyof Horse, boolean>>>({})
     const [photoUri, setPhotoUri] = useState<string | null>(null)
     const [photoSource, setPhotoSource] = useState<'camera' | 'gallery' | null>(null)
+    const { wallet } = useWallet()
+
+    const CERT_SERVER_URL = process.env.EXPO_PUBLIC_CERT_SERVER_URL
 
     const validate = (): boolean => {
         const newErrors: Partial<Record<keyof Horse, boolean>> = {}
@@ -39,8 +46,43 @@ export default function HorseModal({ visible, onClose }: {visible: boolean, onCl
         return Object.keys(newErrors).length === 0
     }
 
-    const handleSave = () => {
+    const encryptPhoto = async ({ photoUri }: { photoUri: string}): Promise<Buffer> => {
+        const base64 = await FileSystem.readAsStringAsync(photoUri, { encoding: FileSystem.EncodingType.Base64 })
+        const rootKeyHex = await SecureStore.getItemAsync('rootKeyHex') 
+        const privateKey = PrivateKey.fromString(rootKeyHex!)
+        const publicKey = privateKey.toPublicKey()
+        const photoBuffer = Buffer.from(base64, 'base64')
+        const encrypted = ECIES.electrumEncrypt(Array.from(photoBuffer), publicKey)
+        return Buffer.from(encrypted)
+    }
+
+    const uploadPhoto = async ({ photoUri}: { photoUri: string }): Promise<string> =>{
+        const encryptedBuffer = await encryptPhoto({ photoUri })
+        if (!wallet) throw new Error('Wallet not initialized') 
+        const authFetch = new AuthFetch(wallet)
+
+        const response = await authFetch.fetch(`${CERT_SERVER_URL}/upload`, {
+            method: 'POST',
+            body: encryptedBuffer,
+            headers: {
+                'Content-Type': 'application/octet-stream'
+            }
+        })
+
+        const { uhrpurl } = await response.json()
+        return uhrpurl
+    }
+
+    const handleSave = async () => {
         if (!validate()) return
+        
+        let uhrpUrl: string | undefined
+        if (photoUri) {
+            uhrpUrl = await uploadPhoto({ photoUri })
+        }
+
+        // Create PushDrop token
+
         handleOnClose()
     }
 

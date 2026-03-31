@@ -26,7 +26,7 @@ export default function RootLayout() {
 
   if (!fontsLoaded || !checked) return null
 
-  return (
+  return  (
       <WalletProvider>
          <Stack screenOptions={{ headerShown: false }}/>
       </WalletProvider>
