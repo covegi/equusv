@@ -63,25 +63,42 @@ export default function HorseModal({ visible, onClose }: {visible: boolean, onCl
 
         const response = await authFetch.fetch(`${CERT_SERVER_URL}/upload`, {
             method: 'POST',
-            body: encryptedBuffer,
+            body: new Uint8Array(encryptedBuffer),
             headers: {
                 'Content-Type': 'application/octet-stream'
             }
         })
+        console.log('response status:', response.status)
+        console.log('response headers:', response.headers)
 
-        const { uhrpurl } = await response.json()
-        return uhrpurl
+        try {
+            const json = await response.json()
+            console.log('full json', json)
+            return json
+        } catch (e) {
+            console.error('response.json() error:', e)
+            const text = await response.text()
+            console.log('raw response:', text)
+            return ''
+        }
     }
 
     const handleSave = async () => {
+        console.log('handleSave called, photoUri:', photoUri)
+        console.log('validate result:', validate())
         if (!validate()) return
         
-        let uhrpUrl: string | undefined
+        try {
+            let uhrpUrl: string | undefined
         if (photoUri) {
             uhrpUrl = await uploadPhoto({ photoUri })
         }
+        console.log(uhrpUrl)
 
         // Create PushDrop token
+        } catch (e) {
+            console.error('handleSave error:', e)
+        }
 
         handleOnClose()
     }

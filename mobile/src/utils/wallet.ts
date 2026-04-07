@@ -28,7 +28,7 @@ export async function loadWallet(): Promise<Wallet | null> {
     const rootKeyHex = await SecureStore.getItemAsync('rootKeyHex')
     if (!rootKeyHex) return null
 
-    const chain = 'test'
+    const chain = 'main'
     const endpointUrl = process.env.EXPO_PUBLIC_STORAGE ?? 'https://staging-storage.babbage.systems'
 
     const rootKey = PrivateKey.fromHex(rootKeyHex)
@@ -42,7 +42,6 @@ export async function loadWallet(): Promise<Wallet | null> {
     await storage.addWalletStorageProvider(client)
     await storage.makeAvailable()
     
-    console.log('WALLET:', wallet)
     return wallet
 } 
 
@@ -53,7 +52,7 @@ export async function restoreWallet(mnemonic: string[]): Promise<Wallet | null >
         const root = HDKey.fromMasterSeed(seed)
         const rootKeyHex = Buffer.from (root.privateKey!).toString('hex')
 
-        const chain = 'test'
+        const chain = 'main'
         const endpointUrl = process.env.EXPO_PUBLIC_STORAGE ?? 'https://staging-storage.babbage.systems'
 
         const rootKey = PrivateKey.fromHex(rootKeyHex)
