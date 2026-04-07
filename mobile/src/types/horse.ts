@@ -1,4 +1,5 @@
 export type Horse = {
+    version: string,
     name: string
     breed: string
     birthDate: string

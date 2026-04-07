@@ -6,6 +6,7 @@ import * as FileSystem from 'expo-file-system/legacy'
 import * as SecureStore from 'expo-secure-store'
 import { PrivateKey, ECIES, AuthFetch } from '@bsv/sdk'
 import { useWallet } from '@/context/WalletContext'
+import { createHorseToken } from '@/utils/token'
 
 import Heading from '../text/Heading'
 import PhotoPicker from '../journal/PhotoPicker'
@@ -22,6 +23,7 @@ export default function HorseModal({ visible, onClose }: {visible: boolean, onCl
     const [horse, setHorse] = useState<Partial<Horse>>({})
     const [errors, setErrors] = useState<Partial<Record<keyof Horse, boolean>>>({})
     const [photoUri, setPhotoUri] = useState<string | null>(null)
+    const [uhrpUrl, setUhrpUrl] = useState<string | null>(null)
     const [photoSource, setPhotoSource] = useState<'camera' | 'gallery' | null>(null)
     const { wallet } = useWallet()
 
@@ -90,13 +92,18 @@ export default function HorseModal({ visible, onClose }: {visible: boolean, onCl
         if (!validate()) return
         
         try {
-            let uhrpUrl: string | undefined
-        if (photoUri) {
-            uhrpUrl = await uploadPhoto({ photoUri })
-        }
-        console.log(uhrpUrl)
+            let uhrpUrl: string | null = null
+            
+            if (photoUri) {
+                uhrpUrl = await uploadPhoto({ photoUri })
+                setUhrpUrl(uhrpUrl)
+            }
 
-        // Create PushDrop token
+            if (wallet) {
+                const horseToken = await createHorseToken(horse as Horse, uhrpUrl, wallet)
+                console.log('Token created', horseToken)
+            }
+
         } catch (e) {
             console.error('handleSave error:', e)
         }
