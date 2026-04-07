@@ -5,19 +5,19 @@
     import { StorageUploader } from '@bsv/sdk'
     import { createAuthMiddleware } from '@bsv/auth-express-middleware'
 
+    dotenv.config()
     const app = express()
     const PORT = process.env.PORT ?? 3000
     app.use(express.json())
+    app.use(express.text({ type: 'text/plain', limit: '10mb' }))
 
     const init = async () => {
-        dotenv.config()
         const STORAGE_URL = process.env.STORAGE_URL
         const EQUUS_ROOT_KEY = process.env.EQUUSV_ROOT_KEY
 
         const wallet = await Setup.createWalletClientNoEnv({
             chain: 'main',
             rootKeyHex: EQUUS_ROOT_KEY!,
-            
         })
 
         const corsMiddleware = (req: Request, res: Response, next: NextFunction) => {
@@ -31,7 +31,10 @@
                 'x-bsv-auth-your-nonce, ' +
                 'x-bsv-auth-signature, ' +
                 'x-bsv-auth-request-id, ' +
-                'x-bsv-auth-requested-certificates'
+                'x-bsv-auth-requested-certificates, ' +
+                'x-bsv-auth-version, ' +
+                'x-bsv-auth-identity-key, ' +
+                'x-bsv-auth-signature'
             )
             res.header('Access-Control-Allow-Methods', '*')
             res.header('Access-Control-Expose-Headers',
@@ -42,7 +45,10 @@
                 'x-bsv-auth-your-nonce, ' +
                 'x-bsv-auth-signature, ' +
                 'x-bsv-auth-request-id, ' +
-                'x-bsv-auth-requested-certificates'
+                'x-bsv-auth-requested-certificates, ' +
+                'x-bsv-auth-version, ' +
+                'x-bsv-auth-identity-key, ' +
+                'x-bsv-auth-signature'
             )
             res.header('Access-Control-Allow-Private-Network', 'true')
             if (req.method === 'OPTIONS') {
@@ -67,8 +73,8 @@
         app.use(corsMiddleware)
         app.use(authMiddleware)
 
-        app.post('/upload', express.raw({ type: 'application/octet-stream', limit: '10mb' }), async (req: Request, res: Response) => {
-            const encryptedBuffer = req.body
+        app.post('/upload', async (req: Request, res: Response) => {
+            const encryptedBuffer = Buffer.from(req.body, 'base64')
             if (!encryptedBuffer) {
                 res.send('No encryptedBuffer received')
             }

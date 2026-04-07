@@ -58,14 +58,15 @@ export default function HorseModal({ visible, onClose }: {visible: boolean, onCl
 
     const uploadPhoto = async ({ photoUri}: { photoUri: string }): Promise<string> =>{
         const encryptedBuffer = await encryptPhoto({ photoUri })
+        const base64body = encryptedBuffer.toString('base64')
         if (!wallet) throw new Error('Wallet not initialized') 
         const authFetch = new AuthFetch(wallet)
 
         const response = await authFetch.fetch(`${CERT_SERVER_URL}/upload`, {
             method: 'POST',
-            body: new Uint8Array(encryptedBuffer),
+            body: base64body,
             headers: {
-                'Content-Type': 'application/octet-stream'
+                'Content-Type': 'text/plain'
             }
         })
         console.log('response status:', response.status)
