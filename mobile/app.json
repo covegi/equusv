@@ -1,15 +1,14 @@
 {
   "expo": {
-    "name": "EquusCert",
+    "name": "EquusV",
     "slug": "equuscert",
     "version": "0.0.1",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "equuscert",
+    "icon": "./assets/images/equus-app-icon.png",
+    "scheme": "equusv",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.equuscert.app",
+      "bundleIdentifier": "com.equusv.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "EquusCert behöver kameraåtkomst för att ta hästfoton.",
