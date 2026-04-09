@@ -4,9 +4,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import * as FileSystem from 'expo-file-system/legacy'
 import * as SecureStore from 'expo-secure-store'
-import { PrivateKey, ECIES, AuthFetch } from '@bsv/sdk'
+import { PrivateKey, ECIES, AuthFetch, CreateActionResult } from '@bsv/sdk'
 import { useWallet } from '@/context/WalletContext'
-import { createHorseToken } from '@/utils/token'
 
 import Heading from '../text/Heading'
 import PhotoPicker from '../journal/PhotoPicker'
@@ -27,7 +26,7 @@ export default function HorseModal({ visible, onClose }: {visible: boolean, onCl
     const [photoSource, setPhotoSource] = useState<'camera' | 'gallery' | null>(null)
     const { wallet } = useWallet()
 
-    const CERT_SERVER_URL = process.env.EXPO_PUBLIC_CERT_SERVER_URL
+    const TOKEN_SERVER_URL = process.env.EXPO_PUBLIC_TOKEN_SERVER_URL
 
     const validate = (): boolean => {
         const newErrors: Partial<Record<keyof Horse, boolean>> = {}
@@ -58,58 +57,48 @@ export default function HorseModal({ visible, onClose }: {visible: boolean, onCl
         return Buffer.from(encrypted)
     }
 
-    const uploadPhoto = async ({ photoUri}: { photoUri: string }): Promise<string> =>{
-        const encryptedBuffer = await encryptPhoto({ photoUri })
-        const base64body = encryptedBuffer.toString('base64')
+    const createToken = async ({ photoUri, horse }: { photoUri: string | null, horse: Horse }): Promise<CreateActionResult> =>{
+        let base64body
+        if (photoUri) {
+            const encryptedBuffer = await encryptPhoto({ photoUri })
+            base64body = encryptedBuffer.toString('base64')
+        }
         if (!wallet) throw new Error('Wallet not initialized') 
         const authFetch = new AuthFetch(wallet)
+        
+        const identityKey = wallet.identityKey
 
-        const response = await authFetch.fetch(`${CERT_SERVER_URL}/upload`, {
+        const response = await authFetch.fetch(`${TOKEN_SERVER_URL}/create-token`, {
             method: 'POST',
-            body: base64body,
+            body: JSON.stringify({ base64body, horse, identityKey }),
             headers: {
-                'Content-Type': 'text/plain'
+                'Content-Type': 'application/json'
             }
         })
-        console.log('response status:', response.status)
-        console.log('response headers:', response.headers)
 
         try {
             const json = await response.json()
             console.log('full json', json)
+            console.log('txid:', json.txid)
             return json
-        } catch (e) {
-            console.error('response.json() error:', e)
+        } catch (error: any) {
+            console.error('response.json() error:', error)
             const text = await response.text()
             console.log('raw response:', text)
-            return ''
+            throw new Error(error)
         }
     }
 
-    const handleSave = async () => {
-        console.log('handleSave called, photoUri:', photoUri)
-        console.log('validate result:', validate())
-        if (!validate()) return
-        
-        try {
-            let uhrpUrl: string | null = null
+        const handleSave = async () => {
+            if (!validate()) return
             
-            if (photoUri) {
-                uhrpUrl = await uploadPhoto({ photoUri })
-                setUhrpUrl(uhrpUrl)
+            try {
+                await createToken({ photoUri, horse: horse as Horse})
+                handleOnClose()
+            } catch (error) {
+                console.error('handleSave error:', error)
             }
-
-            if (wallet) {
-                const horseToken = await createHorseToken(horse as Horse, uhrpUrl, wallet)
-                console.log('Token created', horseToken)
-            }
-
-        } catch (e) {
-            console.error('handleSave error:', e)
         }
-
-        handleOnClose()
-    }
 
     const handleOnClose = () => {
         setHorse({})
