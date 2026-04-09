@@ -2,14 +2,15 @@
     import type { NextFunction, Request, Response } from 'express'
     import dotenv from 'dotenv'
     import { Setup } from '@bsv/wallet-toolbox'
-    import { StorageUploader } from '@bsv/sdk'
+    import { StorageUploader, PushDrop } from '@bsv/sdk'
+    import type { CreateActionResult, WalletInterface } from '@bsv/sdk'
     import { createAuthMiddleware } from '@bsv/auth-express-middleware'
+    import type { Horse } from './types/horse.ts'
 
     dotenv.config()
     const app = express()
     const PORT = process.env.PORT ?? 3000
-    app.use(express.json())
-    app.use(express.text({ type: 'text/plain', limit: '10mb' }))
+    app.use(express.json({ limit: '10mb' }))
 
     const init = async () => {
         const STORAGE_URL = process.env.STORAGE_URL
@@ -73,12 +74,9 @@
         app.use(corsMiddleware)
         app.use(authMiddleware)
 
-        app.post('/upload', async (req: Request, res: Response) => {
-            const encryptedBuffer = Buffer.from(req.body, 'base64')
-            if (!encryptedBuffer) {
-                res.send('No encryptedBuffer received')
-            }
-    
+        const uploadToUhrp = async (base64body: string): Promise<string | undefined> => {
+            const encryptedBuffer = Buffer.from(base64body, 'base64')
+        
             const storageUploader = new StorageUploader({
                 storageURL: STORAGE_URL!,
                 wallet: wallet
@@ -94,15 +92,71 @@
                 })
                 if (uploadFileResult) {
                     console.log('uploadFileResult:', uploadFileResult)
-                    return res.json(uploadFileResult.uhrpURL)
+                    return uploadFileResult.uhrpURL
                 }
             } catch (error) {
                 console.error(error)
             }
-        })
+        }
 
+        app.post('/create-token', async (req: Request, res: Response) => {
+            try {
+                const { base64body, horse, identityKey }: { base64body: string, horse: Horse, identityKey: string } = req.body
+
+                const uhrpUrl = await uploadToUhrp(base64body)
+
+                const pushdrop = new PushDrop(wallet)
+
+                const VERSION = '1'
+
+                const fields = [
+                    VERSION,
+                    horse.name,
+                    horse.breed,
+                    horse.birthDate,
+                    horse.sex,
+                    horse.color,
+                    horse.ueln,
+                    horse.chip,
+                    horse.owner,
+                    horse.location,
+                    horse.organisation,
+                    horse.issuedDate,
+                    horse.foodChainStatus,
+                    uhrpUrl ?? ''
+                ].map(field => Array.from(Buffer.from(field ?? '', 'utf-8')))
+
+                const lockingScript = await pushdrop.lock(
+                    fields,
+                    [2, 'equusv horse journal'],
+                    horse.ueln!,
+                    identityKey,
+                    true,
+                )
+
+                const result = await wallet.createAction({
+                    description: 'Create horse journal',
+                    outputs: [
+                        {
+                            lockingScript: lockingScript.toHex(),
+                            satoshis: 10,
+                            outputDescription: `Horse journal for ${horse.name}`,
+                            basket: 'My Horses',
+                            customInstructions: JSON.stringify({ type: 'horse-journal' })
+                        }
+                    ]
+                })
+
+                return res.json(result)
+
+            } catch (error) {
+                console.error(error)
+                return res.status(500).json({ error: 'Failed to create token' })
+            }
+        })
+        
         app.listen(PORT, () => {
-            console.log(`cert-server is running on port ${PORT}`)
+            console.log(`token-server is running on port ${PORT}`)
         })
     }
 

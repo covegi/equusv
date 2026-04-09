@@ -1,10 +1,10 @@
 {
-    "name": "equuscert",
+    "name": "equusv",
     "private": true,
     "workspaces": [
         "mobile",
         "frontend",
-        "cert-server",
+        "token-server",
         "backend"
     ]
 }
