@@ -1,3 +1,3 @@
-import MyHorses from '@/screens/MyHorses'
+import MyHorsesScreen from '@/screens/MyHorsesScreen'
 
-export default MyHorses
+export default MyHorsesScreen

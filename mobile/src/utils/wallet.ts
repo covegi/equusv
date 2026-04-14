@@ -29,7 +29,7 @@ export async function loadWallet(): Promise<Wallet | null> {
     if (!rootKeyHex) return null
 
     const chain = 'main'
-    const endpointUrl = process.env.EXPO_PUBLIC_STORAGE ?? 'https://staging-storage.babbage.systems'
+    const endpointUrl = process.env.EXPO_PUBLIC_STORAGE_URL ?? 'https://storage.babbage.systems'
 
     const rootKey = PrivateKey.fromHex(rootKeyHex)
     // Todo: Type conflict due to duplicate @bsv/sdk instances (global vs local)
@@ -53,7 +53,7 @@ export async function restoreWallet(mnemonic: string[]): Promise<Wallet | null >
         const rootKeyHex = Buffer.from (root.privateKey!).toString('hex')
 
         const chain = 'main'
-        const endpointUrl = process.env.EXPO_PUBLIC_STORAGE ?? 'https://staging-storage.babbage.systems'
+        const endpointUrl = process.env.EXPO_PUBLIC_STORAGE_URL ?? 'https://storage.babbage.systems'
 
         const rootKey = PrivateKey.fromHex(rootKeyHex)
         // Todo: Type conflict due to duplicate @bsv/sdk instances (global vs local)

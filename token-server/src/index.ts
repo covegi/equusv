@@ -2,8 +2,8 @@
     import type { NextFunction, Request, Response } from 'express'
     import dotenv from 'dotenv'
     import { Setup } from '@bsv/wallet-toolbox'
-    import { StorageUploader, PushDrop } from '@bsv/sdk'
-    import type { CreateActionResult, WalletInterface } from '@bsv/sdk'
+    import { StorageUploader, PushDrop, Transaction } from '@bsv/sdk'
+    import { type CreateActionResult, type WalletInterface } from '@bsv/sdk'
     import { createAuthMiddleware } from '@bsv/auth-express-middleware'
     import type { Horse } from './types/horse.ts'
 
@@ -128,26 +128,34 @@
 
                 const lockingScript = await pushdrop.lock(
                     fields,
-                    [2, 'equusv horse journal'],
+                    [2, 'equusv horse passport'],
                     horse.ueln!,
                     identityKey,
                     true,
                 )
 
                 const result = await wallet.createAction({
-                    description: 'Create horse journal',
+                    description: `Create horse passport for ${horse.name}`,
                     outputs: [
                         {
                             lockingScript: lockingScript.toHex(),
-                            satoshis: 10,
-                            outputDescription: `Horse journal for ${horse.name}`,
-                            basket: 'My Horses',
-                            customInstructions: JSON.stringify({ type: 'horse-journal' })
+                            satoshis: 1,
+                            outputDescription: `Horse passport for ${horse.name}`,
+                            basket: `equusv-${horse.ueln}`,
+                            customInstructions: JSON.stringify({ type: 'horse-passport' }),
+                            tags: ['passport']
                         }
                     ]
                 })
 
-                return res.json(result)
+                console.log('result.tx type:', typeof result.tx)
+                console.log('result.tx:', result.tx)
+
+                return res.json({
+                    tx: Buffer.from(result.tx!).toString('base64'), 
+                    txid: result.txid,
+                    outputIndex: 2
+                })
 
             } catch (error) {
                 console.error(error)

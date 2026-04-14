@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import * as FileSystem from 'expo-file-system/legacy'
 import * as SecureStore from 'expo-secure-store'
-import { PrivateKey, ECIES, AuthFetch, CreateActionResult } from '@bsv/sdk'
+import { PrivateKey, ECIES, AuthFetch } from '@bsv/sdk'
 import { useWallet } from '@/context/WalletContext'
 
 import Heading from '../text/Heading'
@@ -17,12 +17,11 @@ import SectionRowCheckbox from '../journal/SectionRowCheckbox'
 import type { Horse } from '@/types/horse'
 import PrimaryButton from '../buttons/PrimaryButton'
 
-export default function HorseModal({ visible, onClose }: {visible: boolean, onClose: () => void }) {
+export default function HorseModal({ visible, onClose, onSaved }: {visible: boolean, onClose: () => void, onSaved: () => void }) {
     const insets = useSafeAreaInsets()
     const [horse, setHorse] = useState<Partial<Horse>>({})
     const [errors, setErrors] = useState<Partial<Record<keyof Horse, boolean>>>({})
     const [photoUri, setPhotoUri] = useState<string | null>(null)
-    const [uhrpUrl, setUhrpUrl] = useState<string | null>(null)
     const [photoSource, setPhotoSource] = useState<'camera' | 'gallery' | null>(null)
     const { wallet } = useWallet()
 
@@ -57,7 +56,7 @@ export default function HorseModal({ visible, onClose }: {visible: boolean, onCl
         return Buffer.from(encrypted)
     }
 
-    const createToken = async ({ photoUri, horse }: { photoUri: string | null, horse: Horse }): Promise<CreateActionResult> =>{
+    const createToken = async ({ photoUri, horse }: { photoUri: string | null, horse: Horse }): Promise<void> =>{
         let base64body
         if (photoUri) {
             const encryptedBuffer = await encryptPhoto({ photoUri })
@@ -76,17 +75,36 @@ export default function HorseModal({ visible, onClose }: {visible: boolean, onCl
             }
         })
 
-        try {
-            const json = await response.json()
-            console.log('full json', json)
-            console.log('txid:', json.txid)
-            return json
-        } catch (error: any) {
-            console.error('response.json() error:', error)
-            const text = await response.text()
-            console.log('raw response:', text)
-            throw new Error(error)
+        const { tx: txBase64, txid, outputIndex } = await response.json()
+        console.log('txBase64 type:', typeof txBase64)
+        console.log('txBase64 length:', txBase64?.length)
+        const tx = Array.from(Buffer.from(txBase64, 'base64'))
+        console.log('tx first 4 bytes:', tx.slice(0, 4))
+        console.log('tx length:', tx.length)
+        console.log('outputIndex:', outputIndex)
+
+        await wallet.internalizeAction({
+            tx,
+            outputs: [{
+                outputIndex: outputIndex,
+                protocol: 'basket insertion',
+                insertionRemittance: {
+                    basket: `equusv-${horse.ueln}`,
+                    customInstructions: JSON.stringify({ type: 'horse-passport'}),
+                    tags: ['passport']
+                }
+            }],
+            description: 'Internalize horse passport'
+        })
+
+        const stored = await SecureStore.getItemAsync('horseUelns')
+        const uelns: string[] = stored ? JSON.parse(stored) : []
+        if (!uelns.includes(horse.ueln)) {
+            uelns.push(horse.ueln)
+            await SecureStore.setItemAsync('horseUelns', JSON.stringify(uelns))
         }
+
+        await SecureStore.setItemAsync(`passportTxid-${horse.ueln}`, txid)
     }
 
         const handleSave = async () => {
@@ -94,6 +112,7 @@ export default function HorseModal({ visible, onClose }: {visible: boolean, onCl
             
             try {
                 await createToken({ photoUri, horse: horse as Horse})
+                onSaved()
                 handleOnClose()
             } catch (error) {
                 console.error('handleSave error:', error)
