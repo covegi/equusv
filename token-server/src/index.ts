@@ -88,7 +88,7 @@
                         data: new Uint8Array(encryptedBuffer),
                         type: 'application/octet-stream'
                     },
-                    retentionPeriod: 60
+                    retentionPeriod: 10080
                 })
                 if (uploadFileResult) {
                     console.log('uploadFileResult:', uploadFileResult)
@@ -134,6 +134,7 @@
                     true,
                 )
 
+                console.log('calling createAction...')
                 const result = await wallet.createAction({
                     description: `Create horse passport for ${horse.name}`,
                     outputs: [
@@ -147,14 +148,21 @@
                         }
                     ]
                 })
+                console.log('createAction done, txid:', result.txid)
 
-                console.log('result.tx type:', typeof result.tx)
-                console.log('result.tx:', result.tx)
+                const tx = Transaction.fromAtomicBEEF(result.tx!)
+                console.log('tx outputs count:', tx.outputs.length)
+                const outputIndex = tx.outputs.findIndex(out => out.lockingScript.toHex() === lockingScript.toHex())
+                console.log('outputIndex found:', outputIndex)
+
+                if (outputIndex === -1) {
+                    throw new Error('PushDrop output not found in transaction')
+                }
 
                 return res.json({
                     tx: Buffer.from(result.tx!).toString('base64'), 
                     txid: result.txid,
-                    outputIndex: 2
+                    outputIndex
                 })
 
             } catch (error) {

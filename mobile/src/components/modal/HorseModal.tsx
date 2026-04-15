@@ -76,12 +76,7 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
         })
 
         const { tx: txBase64, txid, outputIndex } = await response.json()
-        console.log('txBase64 type:', typeof txBase64)
-        console.log('txBase64 length:', txBase64?.length)
         const tx = Array.from(Buffer.from(txBase64, 'base64'))
-        console.log('tx first 4 bytes:', tx.slice(0, 4))
-        console.log('tx length:', tx.length)
-        console.log('outputIndex:', outputIndex)
 
         await wallet.internalizeAction({
             tx,

@@ -27,13 +27,15 @@ export default function MyHorsesScreen() {
 
        if (uelns.length === 0) return  
 
+       console.log('uelns:', uelns)
+
        const allOutputs = await Promise.all(
         uelns.map(ueln => wallet.listOutputs({
             basket: `equusv-${ueln}`,
             include: 'locking scripts',
-            tags: ['passport']
         }))
        )
+       console.log('allOutputs raw:', JSON.stringify(allOutputs))
 
         console.log('All outputs:', allOutputs)
 
@@ -72,6 +74,12 @@ export default function MyHorsesScreen() {
        }
        fetchHorses()
     }, [wallet, refresh])
+
+    const emptySecureStore = async () => {
+        await SecureStore.deleteItemAsync('horseUelns')
+    }
+
+    if (!wallet) return null
     
     return (
         <View style={styles.outerContainer}>
@@ -100,6 +108,11 @@ export default function MyHorsesScreen() {
                         <Text style={styles.iconText}>Ny häst</Text>
                     </View>
                 </TouchableOpacity>
+                <TouchableOpacity onPress={emptySecureStore}>
+                    <View>
+                        <Text style={styles.iconText}>Töm SecureStore</Text>
+                    </View>
+                </TouchableOpacity> 
             </View>
         </View>
     )
@@ -135,5 +148,5 @@ const styles = StyleSheet.create({
         fontFamily: 'Inter_400Regular',
         fontSize: 12,
         color: '#f7f2f2'
-    }
+    },
 })

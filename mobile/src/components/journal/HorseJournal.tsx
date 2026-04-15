@@ -1,4 +1,5 @@
-import { StyleSheet, View, TouchableOpacity } from 'react-native'
+import { StyleSheet, View, TouchableOpacity, Image } from 'react-native'
+import { useState, useEffect } from 'react'
 import Feather from '@expo/vector-icons/Feather'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
@@ -6,13 +7,33 @@ import Section from './Section'
 import SectionHeading from './SectionHeading'
 import SectionRow from './SectionRow'
 import type { Horse } from '@/types/horse'
-
+import { fetchFromUhrp } from '@/utils/uhrp'
 
 export default function HorseJournal({ horse }: { horse: Horse }) {
+     const [image, setImage] = useState<string | null>()
+
+     useEffect(() => {
+          const fetchImage = async () => {
+               if (!horse.photoUhrp) return
+               try {
+                    console.log('calling fetchFromUhrp...')
+                    const dataUri = await fetchFromUhrp({ uhrpUrl: horse.photoUhrp })
+                    console.log('dataUri length:', dataUri?.length)
+                    setImage(dataUri)
+               } catch (error) {
+                    console.error('fetchImage error:', error)
+               }
+          }
+          fetchImage().catch(error => console.error('unhandled fetchImage error:', error))
+     }, [horse.photoUhrp])
+
     return (
         <View style={styles.outerContainer}>
            <View style={styles.imagePlaceholder}>
-                <Ionicons name="camera-outline" size={48} color="#1a1a1a" />
+               {image 
+                    ? <Image source={{ uri: image }} style={{ width: '100%', height: '100%', borderRadius: 10 }} />
+                    :  <Ionicons name="camera-outline" size={48} color="#1a1a1a" />
+               }
            </View>
            <TouchableOpacity style={styles.editIcon}>
                 <Feather name="edit-3" size={18} color="#1a1a1a"/>
