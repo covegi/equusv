@@ -1,5 +1,5 @@
 {
-    "name": "@equuscert/backend",
+    "name": "@equusv/backend",
     "version": "0.0.1",
     "private": true,
     "type": "module",
@@ -7,7 +7,10 @@
         "dev": "tsx watch src/index.ts"
     },
     "dependencies": {
-        "express": "^5.2.1"
+        "@bsv/overlay": "^2.0.2",
+        "express": "^5.2.1",
+        "knex": "^3.2.9",
+        "mongodb": "^7.1.1"
     },
     "devDependencies": {
         "@types/express": "^5.0.6",

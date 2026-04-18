@@ -1,0 +1,2 @@
+export default `# EquusV Horse Passport Topic Manager
+Validates horse passport tokens for the tm_horse_passport topic. Checks PushDrop fields: protocol, name, breed, birth date, sex, color, UELN, chip, owner, location, organisation, issued date, food chain status and photo UHRP URL.`

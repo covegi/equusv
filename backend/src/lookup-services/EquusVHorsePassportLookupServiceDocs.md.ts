@@ -1,0 +1,2 @@
+export default `# EquusV Horse Passport Lookup Service
+Provides lookup functionality for horse passport tokens in the EquusV overlay. Supports querying by UELN number and chip number to retrieve passport token references.`
