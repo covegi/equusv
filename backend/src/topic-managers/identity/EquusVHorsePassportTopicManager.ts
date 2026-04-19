@@ -9,7 +9,7 @@ export default class EquusVHorsePassportTopicManager implements TopicManager {
 
     async getMetaData(): Promise<{ name: string, shortDescription: string, iconURL?: string, version?: string, informationURL?: string}> {
         return {
-            name: 'EquusV Horse Passport Protocol',
+            name: 'EquusV Identity Passport Protocol',
             shortDescription: 'Manages horse passport tokens for EquusV platform',
             version: '0.1.0',
             informationURL: 'https://equusv.com'

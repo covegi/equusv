@@ -3,8 +3,9 @@
     "version": "0.0.1",
     "private": true,
     "type": "module",
-    "script": {
-        "dev": "tsx watch src/index.ts"
+    "scripts": {
+        "dev": "tsx watch src/index.ts",
+        "start": "lars"
     },
     "dependencies": {
         "@bsv/overlay": "^2.0.2",

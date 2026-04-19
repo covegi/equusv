@@ -1,6 +1,9 @@
 {
     "name": "equusv",
     "private": true,
+    "scripts": {
+        "start": "lars"
+    },
     "workspaces": [
         "mobile",
         "frontend",

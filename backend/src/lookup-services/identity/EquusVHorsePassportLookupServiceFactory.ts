@@ -1,7 +1,7 @@
 import type { AdmissionMode, LookupService, OutputAdmittedByTopic, OutputSpent, SpendNotificationMode } from "@bsv/overlay"
 import { PushDrop, Utils, LockingScript } from '@bsv/sdk'
-import type { EquusVHorsePassportRecord, UTXOReference } from "../types/types.js"
-import equusVHorsePassportLookupServiceDocsMd from "./EquusVHorsePassportLookupServiceDocs.md.js"
+import type { EquusVHorsePassportRecord, UTXOReference } from "../../types/identity/horse-passport.js"
+import equusVHorsePassportLookupServiceDocsMd from "../../docs/identity/EquusVHorsePassportLookupServiceDocs.md.js"
 import { Db, Collection } from 'mongodb'
 
 class EquusVHorsePassportLookupService implements LookupService {
@@ -19,7 +19,7 @@ class EquusVHorsePassportLookupService implements LookupService {
 
     async getMetaData(): Promise<{name: string, shortDescription: string, iconURL?: string, version?: string, informationURL: string}> {
         return {
-            name: 'EquusV Horse Passport Lookup Service',
+            name: 'EquusV Identity Passport Lookup Service',
             shortDescription: 'Query horse passport tokens by UELN or chip number',
             version: '0.1.0',
             informationURL: 'https://www.equusv.com'

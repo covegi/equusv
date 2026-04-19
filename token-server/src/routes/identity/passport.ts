@@ -39,7 +39,7 @@ export default (wallet: WalletInterface) => {
 
             const lockingScript = await pushdrop.lock(
                 fields,
-                [2, 'equusv horse passport'],
+                [2, 'equusv identity passport'],
                 horse.ueln!,
                 identityKey,
                 true,
