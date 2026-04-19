@@ -5,6 +5,7 @@ import type { WalletInterface } from '@bsv/sdk'
 import type { HorsePassport } from '../../types/horse-passport.js'
 import { uploadToUhrp } from '../../services/uhrp.js'
 
+const LARS_URL = process.env.LARS_URL
 
 export default (wallet: WalletInterface) => {
     const router = Router()
@@ -68,6 +69,18 @@ export default (wallet: WalletInterface) => {
             if (outputIndex === -1) {
                 throw new Error('PushDrop output not found in transaction')
             }
+
+            if (!result.tx) throw new Error('No transaction data.')
+
+            await fetch(`${LARS_URL}/submit`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/octet-stream',
+                    'X-Topics': JSON.stringify(['tm_horse_passport'])   
+                },
+                body: Buffer.from(result.tx)
+            })
+            console.log(`Submitted to LARS overlay: ${result.txid}`)
 
             return res.json({
                 tx: Buffer.from(result.tx!).toString('base64'), 
