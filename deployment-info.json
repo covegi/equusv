@@ -3,7 +3,7 @@
         {
             "name": "Local LARS",
             "provider": "LARS",
-            "network": "testnet",
+            "network": "mainnet",
             "run": [
                 "frontend",
                 "backend"

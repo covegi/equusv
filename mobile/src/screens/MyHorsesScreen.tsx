@@ -10,12 +10,12 @@ import HorseModal from '@/components/modal/HorseModal'
 import Heading from '@/components/text/Heading'
 import HorseJournal from '@/components/journal/HorseJournal'
 
-import type { Horse } from '@/types/horse'
+import type { HorsePassport } from '@/types/horse-passport'
 
 export default function MyHorsesScreen() {
     const [visible, setVisible] = useState(false)
     const insets = useSafeAreaInsets()
-    const [horse, setHorse] = useState<Horse[]>([])
+    const [horse, setHorse] = useState<HorsePassport[]>([])
     const { wallet } = useWallet()
     const [refresh, setRefresh] = useState(0)
 
@@ -44,7 +44,7 @@ export default function MyHorsesScreen() {
         console.log('lockingScript type:', typeof outputs[0]?.lockingScript)
         console.log('lockingScript value:', outputs[0]?.lockingScript)
 
-        const horses: Horse[] = outputs
+        const horses: HorsePassport[] = outputs
             .filter(output => {
                 return output.lockingScript && !output.lockingScript.startsWith('76a914')
             })
@@ -62,13 +62,13 @@ export default function MyHorsesScreen() {
                 color: decode(fields[5]),
                 ueln: decode(fields[6]),
                 chip: decode(fields[7]),
-                owner: decode(fields[8]),
+                ownerAtRegistration: decode(fields[8]),
                 location: decode(fields[9]),
                 organisation: decode(fields[10]),
                 issuedDate: decode(fields[11]),
-                foodChainStatus: decode(fields[12]),
+                foodChainStatus: decode(fields[12]) === 'true',
                 photoUhrp: decode(fields[13]),
-            } as Horse
+            } as HorsePassport
         })
         setHorse(horses)
        }

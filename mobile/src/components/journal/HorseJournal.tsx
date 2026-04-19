@@ -6,11 +6,11 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import Section from './Section'
 import SectionHeading from './SectionHeading'
 import SectionRow from './SectionRow'
-import type { Horse } from '@/types/horse'
+import type { HorsePassport } from '@/types/horse-passport'
 import { fetchFromUhrp } from '@/utils/uhrp'
 
-export default function HorseJournal({ horse }: { horse: Horse }) {
-     const [image, setImage] = useState<string | null>()
+export default function HorseJournal({ horse }: { horse: HorsePassport }) {
+     const [image, setImage] = useState<string | null>(null)
 
      useEffect(() => {
           const fetchImage = async () => {
@@ -50,7 +50,7 @@ export default function HorseJournal({ horse }: { horse: Horse }) {
            </Section>
            <Section>
                 <SectionHeading>Ägare:</SectionHeading>
-                <SectionRow label='Ägare' value={horse.owner} />
+                <SectionRow label='Ägare' value={horse.ownerAtRegistration} />
                 <SectionRow label='Ort' value={horse.location} />
            </Section>
            <Section>
@@ -60,7 +60,7 @@ export default function HorseJournal({ horse }: { horse: Horse }) {
            </Section>
            <Section>
                 <SectionHeading>Livsmedelskedjan:</SectionHeading>
-                <SectionRow label='Status' value={horse.foodChainStatus} />
+                <SectionRow label='Status' value={horse.foodChainStatus ? 'Ingår' : 'Ingår ej'} />
            </Section>
         </View>
     )

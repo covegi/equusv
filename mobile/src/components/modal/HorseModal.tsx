@@ -14,13 +14,13 @@ import SectionHeading from '../journal/SectionHeading'
 import SectionRowInput from '../journal/SectionRowInput'
 import SectionRowDateInput from '../journal/SectionRowDateInput'
 import SectionRowCheckbox from '../journal/SectionRowCheckbox'
-import type { Horse } from '@/types/horse'
+import type { HorsePassport } from '@/types/horse-passport'
 import PrimaryButton from '../buttons/PrimaryButton'
 
 export default function HorseModal({ visible, onClose, onSaved }: {visible: boolean, onClose: () => void, onSaved: () => void }) {
     const insets = useSafeAreaInsets()
-    const [horse, setHorse] = useState<Partial<Horse>>({})
-    const [errors, setErrors] = useState<Partial<Record<keyof Horse, boolean>>>({})
+    const [horsePassport, setHorsePassport] = useState<Partial<HorsePassport>>({})
+    const [errors, setErrors] = useState<Partial<Record<keyof HorsePassport, boolean>>>({})
     const [photoUri, setPhotoUri] = useState<string | null>(null)
     const [photoSource, setPhotoSource] = useState<'camera' | 'gallery' | null>(null)
     const { wallet } = useWallet()
@@ -28,19 +28,19 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
     const TOKEN_SERVER_URL = process.env.EXPO_PUBLIC_TOKEN_SERVER_URL
 
     const validate = (): boolean => {
-        const newErrors: Partial<Record<keyof Horse, boolean>> = {}
-        if (!horse.name) newErrors.name = true
-        if (!horse.breed) newErrors.breed = true
-        if (!horse.birthDate) newErrors.birthDate = true
-        if (!horse.sex) newErrors.sex = true
-        if (!horse.color) newErrors.color = true
-        if (!horse.ueln) newErrors.ueln = true
-        if (!horse.chip) newErrors.chip = true
-        if (!horse.owner) newErrors.owner = true
-        if (!horse.location) newErrors.location = true
-        if (!horse.organisation) newErrors.organisation = true
-        if (!horse.issuedDate) newErrors.issuedDate = true
-        if (!horse.foodChainStatus) newErrors.foodChainStatus = true
+        const newErrors: Partial<Record<keyof HorsePassport, boolean>> = {}
+        if (!horsePassport.name) newErrors.name = true
+        if (!horsePassport.breed) newErrors.breed = true
+        if (!horsePassport.birthDate) newErrors.birthDate = true
+        if (!horsePassport.sex) newErrors.sex = true
+        if (!horsePassport.color) newErrors.color = true
+        if (!horsePassport.ueln) newErrors.ueln = true
+        if (!horsePassport.chip) newErrors.chip = true
+        if (!horsePassport.ownerAtRegistration) newErrors.ownerAtRegistration = true
+        if (!horsePassport.location) newErrors.location = true
+        if (!horsePassport.organisation) newErrors.organisation = true
+        if (!horsePassport.issuedDate) newErrors.issuedDate = true
+        if (!horsePassport.foodChainStatus) newErrors.foodChainStatus = true
 
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
@@ -56,7 +56,7 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
         return Buffer.from(encrypted)
     }
 
-    const createToken = async ({ photoUri, horse }: { photoUri: string | null, horse: Horse }): Promise<void> =>{
+    const createToken = async ({ photoUri, horse }: { photoUri: string | null, horse: HorsePassport }): Promise<void> =>{
         let base64body
         if (photoUri) {
             const encryptedBuffer = await encryptPhoto({ photoUri })
@@ -67,7 +67,7 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
         
         const identityKey = wallet.identityKey
 
-        const response = await authFetch.fetch(`${TOKEN_SERVER_URL}/create-token`, {
+        const response = await authFetch.fetch(`${TOKEN_SERVER_URL}/identity/passport/create`, {
             method: 'POST',
             body: JSON.stringify({ base64body, horse, identityKey }),
             headers: {
@@ -106,7 +106,7 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
             if (!validate()) return
             
             try {
-                await createToken({ photoUri, horse: horse as Horse})
+                await createToken({ photoUri, horse: horsePassport as HorsePassport })
                 onSaved()
                 handleOnClose()
             } catch (error) {
@@ -115,7 +115,7 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
         }
 
     const handleOnClose = () => {
-        setHorse({})
+        setHorsePassport({})
         setErrors({})
         onClose()
     }
@@ -148,63 +148,63 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
                                 <SectionHeading fontSize={18}>Häst</SectionHeading>
                                 <SectionRowInput
                                     label='Namn'
-                                    value={horse.name ?? ''}
+                                    value={horsePassport.name ?? ''}
                                     onChangeText={(text) => {
-                                        setHorse({ ...horse, name: text })
+                                        setHorsePassport({ ...horsePassport, name: text })
                                         setErrors({ ...errors, name: false })
                                     }}
                                     hasError={errors.name}
                                 />
                                 <SectionRowInput 
                                     label='Ras'
-                                    value={horse.breed ?? ''}
+                                    value={horsePassport.breed ?? ''}
                                     onChangeText={(text) => {
-                                        setHorse({ ...horse, breed: text })
+                                        setHorsePassport({ ...horsePassport, breed: text })
                                         setErrors({ ...errors, breed: false })
                                     }}
                                     hasError={errors.breed}
                                 />
                                 <SectionRowDateInput
                                     label='Född'
-                                    value={horse.birthDate ?? ''}
+                                    value={horsePassport.birthDate ?? ''}
                                     onChangeText={(text) => {
-                                        setHorse({ ...horse, birthDate: text })
+                                        setHorsePassport({ ...horsePassport, birthDate: text })
                                         setErrors({ ...errors, birthDate: false })
                                     }}
                                     hasError={errors.birthDate}
                                 />
                                 <SectionRowInput 
                                     label='Kön'
-                                    value={horse.sex ?? ''}
+                                    value={horsePassport.sex ?? ''}
                                     onChangeText={(text) => {
-                                        setHorse({ ...horse, sex: text })
+                                        setHorsePassport({ ...horsePassport, sex: text })
                                         setErrors({ ...errors, sex: false })
                                     }}
                                     hasError={errors.sex}
                                 />
                                 <SectionRowInput 
                                     label='Färg'
-                                    value={horse.color ?? ''}
+                                    value={horsePassport.color ?? ''}
                                     onChangeText={(text) => {
-                                        setHorse({ ...horse, color: text })
+                                        setHorsePassport({ ...horsePassport, color: text })
                                         setErrors({ ...errors, color: false })
                                     }}
                                     hasError={errors.color}
                                 />
                                 <SectionRowInput 
                                     label='UELN'
-                                    value={horse.ueln ?? ''}
+                                    value={horsePassport.ueln ?? ''}
                                     onChangeText={(text) => {
-                                        setHorse({ ...horse, ueln: text })
+                                        setHorsePassport({ ...horsePassport, ueln: text })
                                         setErrors({ ...errors, ueln: false })
                                     }}
                                     hasError={errors.ueln}
                                 />
                                 <SectionRowInput 
                                     label='Chip'
-                                    value={horse.chip ?? ''}
+                                    value={horsePassport.chip ?? ''}
                                     onChangeText={(text) => {
-                                        setHorse({ ...horse, chip: text})
+                                        setHorsePassport({ ...horsePassport, chip: text})
                                         setErrors({ ...errors, chip: false})
                                     }}
                                     hasError={errors.chip}
@@ -215,18 +215,18 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
                                     <SectionHeading fontSize={18}>Ägare</SectionHeading>
                                     <SectionRowInput
                                         label='Ägare'
-                                        value={horse.owner ?? ''}
+                                        value={horsePassport.ownerAtRegistration ?? ''}
                                         onChangeText={(text) => {
-                                            setHorse({ ...horse, owner: text })
-                                            setErrors({ ...errors, owner: false })
+                                            setHorsePassport({ ...horsePassport, ownerAtRegistration: text })
+                                            setErrors({ ...errors, ownerAtRegistration: false })
                                         }}
-                                        hasError={errors.owner}    
+                                        hasError={errors.ownerAtRegistration}    
                                     />
                                     <SectionRowInput 
                                         label='Ort'
-                                        value={horse.location ?? ''}
+                                        value={horsePassport.location ?? ''}
                                         onChangeText={(text) => {
-                                            setHorse({ ...horse, location: text })
+                                            setHorsePassport({ ...horsePassport, location: text })
                                             setErrors({ ...errors, location: false })
                                         }}
                                         hasError={errors.location}
@@ -238,18 +238,18 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
                                     <SectionHeading fontSize={18}>Utfärdare</SectionHeading>
                                     <SectionRowInput
                                         label='Organisation'
-                                        value={horse.organisation ?? ''}
+                                        value={horsePassport.organisation ?? ''}
                                         onChangeText={(text) => {
-                                            setHorse({ ...horse, organisation: text })
+                                            setHorsePassport({ ...horsePassport, organisation: text })
                                             setErrors({ ...errors, organisation: false })
                                         }}
                                         hasError={errors.organisation}    
                                     />
                                     <SectionRowDateInput
                                     label='Utfärdat'
-                                    value={horse.issuedDate ?? ''}
+                                    value={horsePassport.issuedDate ?? ''}
                                     onChangeText={(text) => {
-                                        setHorse({ ...horse, issuedDate: text })
+                                        setHorsePassport({ ...horsePassport, issuedDate: text })
                                         setErrors({ ...errors, issuedDate: false })
                                     }}
                                     hasError={errors.issuedDate}
@@ -261,9 +261,9 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
                                     <SectionHeading fontSize={18}>Livsmedelskedjan</SectionHeading>
                                     <SectionRowCheckbox 
                                         label='Status'
-                                        value={horse.foodChainStatus ?? ''}
+                                        value={horsePassport.foodChainStatus ? 'Ingår' : 'Ingår ej'}
                                         onValueChange={(option) => {
-                                            setHorse({ ...horse, foodChainStatus: option})
+                                            setHorsePassport({ ...horsePassport, foodChainStatus: option === 'Ingår'})
                                         }}
                                     />
                                 </View>

@@ -1,6 +1,6 @@
 import type { AdmittanceInstructions, TopicManager } from '@bsv/overlay'
 import { Transaction, PushDrop } from '@bsv/sdk'
-import equusVHorsePassportTopicDocsMd from './EquusVHorsePassportTopicDocs.md.js'
+import equusVHorsePassportTopicDocsMd from '../../docs/identity/EquusVHorsePassportTopicDocs.md.js'
 
 export default class EquusVHorsePassportTopicManager implements TopicManager {
     async getDocumentation(): Promise<string> {
@@ -58,7 +58,7 @@ export default class EquusVHorsePassportTopicManager implements TopicManager {
                     }
                     
                     if (!decoded.fields[8].length) {
-                        throw new Error('Owner cannot be empty')
+                        throw new Error('OwnerAtRegistration cannot be empty')
                     }
                     
                     if (!decoded.fields[9].length) {

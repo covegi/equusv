@@ -1,4 +1,4 @@
-export interface EquusVHorsePassportRecord {
+export type HorsePassport = {
     version: string,
     name: string
     breed: string
@@ -7,16 +7,10 @@ export interface EquusVHorsePassportRecord {
     color: string
     ueln: string
     chip: string
-    owner: string
+    ownerAtRegistration: string
     location: string
     organisation: string
     issuedDate: string
     foodChainStatus: boolean
-    txid: string,
-    outputIndex: number
-}
-
-export interface UTXOReference {
-    txid: string,
-    outputIndex: number
+    photoUhrp?: string
 }

@@ -45,7 +45,7 @@ class EquusVHorsePassportLookupService implements LookupService {
             color: Utils.toUTF8(decoded.fields[5]),
             ueln: Utils.toUTF8(decoded.fields[6]),
             chip: Utils.toUTF8(decoded.fields[7]),
-            owner: Utils.toUTF8(decoded.fields[8]),
+            ownerAtRegistration: Utils.toUTF8(decoded.fields[8]),
             location: Utils.toUTF8(decoded.fields[9]),
             organisation: Utils.toUTF8(decoded.fields[10]),
             issuedDate: Utils.toUTF8(decoded.fields[11]),
@@ -81,7 +81,7 @@ class EquusVHorsePassportLookupService implements LookupService {
         if (query.color) filter.color = query.color
         if (query.ueln) filter.ueln = query.ueln
         if (query.chip) filter.chip = query.chip
-        if (query.owner) filter.owner = query.owner
+        if (query.ownerAtRegistration) filter.ownerAtRegistration = query.ownerAtRegistration
         if (query.location) filter.location = query.location
         if (query.organisation) filter.organisation = query.organisation
         if (query.issuedDate) filter.issuedDate = query.issuedDate
