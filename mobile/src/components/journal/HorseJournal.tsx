@@ -1,4 +1,4 @@
-import { StyleSheet, View, TouchableOpacity, Image } from 'react-native'
+import { StyleSheet, View, Text, TouchableOpacity, Image, ActivityIndicator } from 'react-native'
 import { useState, useEffect } from 'react'
 import Feather from '@expo/vector-icons/Feather'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -11,17 +11,37 @@ import { fetchFromUhrp } from '@/utils/uhrp'
 
 export default function HorseJournal({ horse }: { horse: HorsePassport }) {
      const [image, setImage] = useState<string | null>(null)
+     const [isLoading, setIsLoading] = useState(false)
 
      useEffect(() => {
           const fetchImage = async () => {
-               if (!horse.photoUhrp) return
+               setIsLoading(true)
+
+               if (!horse.photoUhrp) {
+                    setIsLoading(false)
+                    return
+               }
+     
                try {
                     console.log('calling fetchFromUhrp...')
-                    const dataUri = await fetchFromUhrp({ uhrpUrl: horse.photoUhrp })
-                    console.log('dataUri length:', dataUri?.length)
-                    setImage(dataUri)
+
+                    const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+                    for (let attempt = 0; attempt < 5; attempt++) {
+                         try {
+                              const dataUri = await fetchFromUhrp({ uhrpUrl: horse.photoUhrp })
+                              setImage(dataUri)
+                              setIsLoading(false)
+                              return
+                         } catch (error) {
+                              if (attempt < 4) {
+                                   await wait(2000)
+                              }
+                         }
+                    }
+                    setIsLoading(false)
                } catch (error) {
                     console.error('fetchImage error:', error)
+                    setIsLoading(false)
                }
           }
           fetchImage().catch(error => console.error('unhandled fetchImage error:', error))
@@ -30,9 +50,14 @@ export default function HorseJournal({ horse }: { horse: HorsePassport }) {
     return (
         <View style={styles.outerContainer}>
            <View style={styles.imagePlaceholder}>
-               {image 
-                    ? <Image source={{ uri: image }} style={{ width: '100%', height: '100%', borderRadius: 10 }} />
-                    :  <Ionicons name="camera-outline" size={48} color="#1a1a1a" />
+               {isLoading
+                    ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 30, gap: 12 }}>
+                         <ActivityIndicator color="#C8963E" size="small" />
+                         <Text style={styles.iconText}>Hämtar krypterad bild...</Text>
+                    </View>
+                    : image 
+                         ? <Image source={{ uri: image }} style={{ width: '100%', height: '100%', borderRadius: 10 }} />
+                         : <Ionicons name="camera-outline" size={48} color="#1a1a1a" />
                }
            </View>
            <TouchableOpacity style={styles.editIcon}>
@@ -90,5 +115,10 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 180,
         right: 15
-    }
+    },
+    iconText: {
+     fontFamily: 'Inter_400Regular',
+     fontSize: 12,
+     color: '#1a1a1a'
+ },
 })

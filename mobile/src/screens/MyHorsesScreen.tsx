@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native'
 import { useState, useEffect } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import AntDesign from '@expo/vector-icons/AntDesign'
@@ -18,14 +18,22 @@ export default function MyHorsesScreen() {
     const [horse, setHorse] = useState<HorsePassport[]>([])
     const { wallet } = useWallet()
     const [refresh, setRefresh] = useState(0)
+    const [isLoading, setIsLoading] = useState(false)
 
     useEffect(() => {
        const fetchHorses = async () => {
-        if (!wallet) return
-
+        setIsLoading(true)
+        if (!wallet) {
+            setIsLoading(false)
+            return
+        }   
+        
        const uelns: string[] = JSON.parse(await SecureStore.getItemAsync('horseUelns') ?? '[]')
 
-       if (uelns.length === 0) return  
+       if (uelns.length === 0) {
+            setIsLoading(false)
+            return
+       }
 
        console.log('uelns:', uelns)
 
@@ -71,13 +79,10 @@ export default function MyHorsesScreen() {
             } as HorsePassport
         })
         setHorse(horses)
+        setIsLoading(false)
        }
        fetchHorses()
     }, [wallet, refresh])
-
-    const emptySecureStore = async () => {
-        await SecureStore.deleteItemAsync('horseUelns')
-    }
 
     if (!wallet) return null
     
@@ -92,14 +97,19 @@ export default function MyHorsesScreen() {
                 <Heading>Mina hästar</Heading>
             </View>
             <View style={styles.centerContainer}>
-              <FlatList 
+              {isLoading 
+                ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 }}>
+                    <ActivityIndicator color='#C8963E' size="large" />
+                    <Text style={styles.iconText}>Hämtar dina hästar... </Text>
+                </View>
+                : <FlatList 
                 data={horse}
                 renderItem={({ item }) => <HorseJournal horse={item} />}
-                snapToInterval={580}
+                snapToInterval={590}
                 decelerationRate='fast'
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 50 }}
-              />
+              />}
             </View>
             <View style={[styles.footerContainer, { bottom: insets.bottom }]}>
                 <TouchableOpacity onPress={() => setVisible(true)}>
@@ -108,11 +118,6 @@ export default function MyHorsesScreen() {
                         <Text style={styles.iconText}>Ny häst</Text>
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={emptySecureStore}>
-                    <View>
-                        <Text style={styles.iconText}>Töm SecureStore</Text>
-                    </View>
-                </TouchableOpacity> 
             </View>
         </View>
     )

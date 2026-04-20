@@ -1,4 +1,4 @@
-import { StyleSheet, View, Modal, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native'
+import { StyleSheet, View, Text, Modal, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native'
 import { useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -24,6 +24,7 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
     const [photoUri, setPhotoUri] = useState<string | null>(null)
     const [photoSource, setPhotoSource] = useState<'camera' | 'gallery' | null>(null)
     const { wallet } = useWallet()
+    const [isLoading, setIsLoading] = useState(false)
 
     const TOKEN_SERVER_URL = process.env.EXPO_PUBLIC_TOKEN_SERVER_URL
 
@@ -103,14 +104,20 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
     }
 
         const handleSave = async () => {
-            if (!validate()) return
+            setIsLoading(true)
+            if (!validate()) {
+                setIsLoading(false)
+                return
+            }
             
             try {
                 await createToken({ photoUri, horse: horsePassport as HorsePassport })
                 onSaved()
                 handleOnClose()
+                setIsLoading(false)
             } catch (error) {
                 console.error('handleSave error:', error)
+                setIsLoading(false)
             }
         }
 
@@ -126,6 +133,12 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
                     behavior={Platform.OS === 'ios' ? 'padding': 'height'}
                     style={{ flex: 1, backgroundColor: '#f7f2f2' }}
                 >
+                    {isLoading && (
+                        <View style={styles.loadingOverlay}>
+                            <ActivityIndicator color="#C8963E" size="large" />
+                            <Text style={styles.loadingText}>Skapar pass...</Text>
+                        </View>
+                    )}
                     <ScrollView>
                         <View style={[styles.headerContainer, { top: insets.top + 26 }]}>
                             <View>
@@ -296,5 +309,22 @@ const styles = StyleSheet.create({
     },
     submitButton: {
         marginTop: 40
-    }
+    },
+    loadingOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 12,
+        zIndex: 10
+    },
+    loadingText: {
+        fontFamily: 'Inter_400Regular',
+        fontSize: 12,
+        color: '#f7f2f2'
+    },
 })
