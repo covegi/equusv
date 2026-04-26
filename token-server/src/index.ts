@@ -4,7 +4,8 @@
     import { Setup } from '@bsv/wallet-toolbox'
     import { createAuthMiddleware } from '@bsv/auth-express-middleware'
     import passportRouter from './routes/identity/passport.js'
-
+    import horseOwnerCertificate from './routes/certify/horse-owner.js'
+    import identityKey from './routes/utils/identityKey.js'
 
     dotenv.config()
     const app = express()
@@ -66,6 +67,10 @@
         app.use(authMiddleware)
 
        app.use('/', passportRouter(wallet))
+
+       app.use('/', horseOwnerCertificate(wallet))
+
+       app.use('/', identityKey(wallet))
         
         app.listen(PORT, () => {
             console.log(`token-server is running on port ${PORT}`)
