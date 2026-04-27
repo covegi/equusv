@@ -5,12 +5,16 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import * as SecureStore from 'expo-secure-store'
 import { useRouter } from 'expo-router'
 import { useWallet } from '@/context/WalletContext'
+import { CERT_TYPE_HORSE_OWNER } from '../constants/certificates'
 
 import BackButton from '@/components/buttons/BackButton'
 import Heading from '@/components/text/Heading'
 import { loadWallet } from '@/utils/wallet'
 
-export default function CreatePinScreen() {
+const TOKEN_SERVER_URL = process.env.EXPO_PUBLIC_TOKEN_SERVER_URL
+const EQUUSV_IDENTITY_KEY = process.env.EXPO_PUBLIC_EQUUSV_IDENTITY_KEY
+
+export default function ConfirmPinScreen() {
     const insets = useSafeAreaInsets()
     const [pin, setPin] = useState<string[]>([])
     const shakeAnim = useRef(new Animated.Value(0)).current
@@ -29,20 +33,37 @@ export default function CreatePinScreen() {
     useEffect(() => {
         const matchPin = async () => {
             if (pin.length === 6) {
+                console.log('matchPin called, pin length', pin.length)
                 const enteredPin = await SecureStore.getItemAsync('pin')
                 const pinStr = pin.join('')
 
                 if (enteredPin === pinStr) {
+                    console.log('PIN correct')
                     try {
                         const wallet = await loadWallet()
-                        if (wallet !== null) {
-                            setWallet(wallet)
-                            router.push('/horses')
-                        } else {
+                        console.log('wallet loaded', wallet !== null)
+                        if (!wallet) {
                             Alert.alert('Fel', 'Kunde inte ladda arkivet.')
+                            return
                         }
+
+                        console.log('About to aquireCertificate')
+                        const cert = await wallet?.acquireCertificate({
+                            type: CERT_TYPE_HORSE_OWNER,
+                            certifier: EQUUSV_IDENTITY_KEY!,
+                            acquisitionProtocol: 'issuance',
+                            fields: { role: 'equusv-horse-owner'},
+                            certifierUrl: `${TOKEN_SERVER_URL}/certify/horse-owner`
+                        })
+                        console.log('certificate acquired:', JSON.stringify(cert))
+                        
+                        setWallet(wallet)
+                        router.push('/horses')
+                        
                     } catch (error) {
-                        Alert.alert('Fel', 'Ingen internetanslutning. Försök igen.')
+                        // Alert.alert('Fel', 'Ingen internetanslutning. Försök igen.')
+                        console.log('ConfirmPin error:', error)
+                        Alert.alert('Fel', String(error))
                     }
                 } else {
                     shake()

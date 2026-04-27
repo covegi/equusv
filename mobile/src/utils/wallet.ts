@@ -41,6 +41,8 @@ export async function loadWallet(): Promise<Wallet | null> {
     const client = new StorageClient(wallet, endpointUrl)
     await storage.addWalletStorageProvider(client)
     await storage.makeAvailable()
+
+    console.log('storage available')
     
     return wallet
 } 
