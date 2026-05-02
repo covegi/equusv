@@ -1,6 +1,17 @@
-import mongoose from "mongoose"
+import mongoose, { Document } from "mongoose"
 
-const draftSchema = new mongoose.Schema({
+interface IDraft extends Document {
+    tokenType: string
+    identityKey: string
+    ueln: string
+    status: string
+    encryptedData: string
+    comment?: string
+    createdAt: string
+    updatedAt: string
+}
+
+const draftSchema = new mongoose.Schema<IDraft>({
     tokenType: { type: String, required: true },
     identityKey: { type: String, required: true },
     ueln: { type: String, required: true },
@@ -11,4 +22,4 @@ const draftSchema = new mongoose.Schema({
     updatedAt: { type: String, required: true}
 })
 
-export const Draft = mongoose.model('Draft', draftSchema)
+export const Draft = mongoose.model<IDraft>('Draft', draftSchema)

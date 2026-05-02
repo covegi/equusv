@@ -25,7 +25,7 @@ export default (wallet: WalletInterface) => {
                         createdAt: new Date().toISOString()
                     }
                 },
-                { upsert: true, returnDocument: true }
+                { upsert: true, returnDocument: 'after' }
             )
 
             return res.json({ success: true, draft})
