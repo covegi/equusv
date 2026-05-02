@@ -115,7 +115,7 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
         const encryptedData = ECIES.electrumEncrypt(Array.from(draftBuffer), publicKey)
 
         const response = await authFetch.fetch(`${TOKEN_SERVER_URL}/draft`, {
-            method: 'POST',
+            method: 'PUT',
             headers: {
                 'content-type': 'application/json'
             },
@@ -164,7 +164,7 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
                     {isLoading && (
                         <View style={styles.loadingOverlay}>
                             <ActivityIndicator color="#C8963E" size="large" />
-                            <Text style={styles.loadingText}>Skapar pass...</Text>
+                            <Text style={styles.loadingText}>Skapar draft...</Text>
                         </View>
                     )}
                     <ScrollView>
@@ -302,7 +302,7 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
                                 </View>
                             </Section>
                             <View style={[styles.submitButton, { paddingBottom: insets.bottom }]}>
-                                <PrimaryButton onPress={handleSave}>Spara</PrimaryButton>
+                                <PrimaryButton onPress={handleSave}>Skapa draft</PrimaryButton>
                             </View>
                         </View>
                     </ScrollView>

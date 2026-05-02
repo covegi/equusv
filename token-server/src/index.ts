@@ -8,6 +8,7 @@
     import horseBreederCertificate from './routes/certify/breeding-organisation.js'
     import identityKey from './routes/utils/identityKey.js'
     import connectDB from './db.js'
+    import draftRouter from './routes/drafts.js'
 
     dotenv.config()
     const app = express()
@@ -70,12 +71,13 @@
         app.use(corsMiddleware)
         app.use(authMiddleware)
 
-       app.use('/', passportRouter(wallet))
+        app.use('/', draftRouter(wallet))
+        app.use('/', passportRouter(wallet))
 
-       app.use('/', horseOwnerCertificate(wallet))
-       app.use('/', horseBreederCertificate(wallet))
+        app.use('/', horseOwnerCertificate(wallet))
+        app.use('/', horseBreederCertificate(wallet))
     
-       app.use('/', identityKey(wallet))
+        app.use('/', identityKey(wallet))
        
         
         app.listen(PORT, () => {
