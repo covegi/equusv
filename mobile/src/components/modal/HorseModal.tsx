@@ -2,27 +2,24 @@ import { StyleSheet, View, Text, Modal, TouchableOpacity, ScrollView, KeyboardAv
 import { useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
-import * as FileSystem from 'expo-file-system/legacy'
 import * as SecureStore from 'expo-secure-store'
-import { PrivateKey, ECIES, AuthFetch } from '@bsv/sdk'
+import { AuthFetch, PrivateKey, ECIES } from '@bsv/sdk'
 import { useWallet } from '@/context/WalletContext'
 
 import Heading from '../text/Heading'
-import PhotoPicker from '../journal/PhotoPicker'
 import Section from '../journal/Section'
 import SectionHeading from '../journal/SectionHeading'
 import SectionRowInput from '../journal/SectionRowInput'
 import SectionRowDateInput from '../journal/SectionRowDateInput'
 import SectionRowCheckbox from '../journal/SectionRowCheckbox'
 import type { HorsePassport } from '@/types/horse-passport'
+import type { HorsePassportDraft } from '@/types/horse-passport-draft'
 import PrimaryButton from '../buttons/PrimaryButton'
 
 export default function HorseModal({ visible, onClose, onSaved }: {visible: boolean, onClose: () => void, onSaved: () => void }) {
     const insets = useSafeAreaInsets()
     const [horsePassport, setHorsePassport] = useState<Partial<HorsePassport>>({})
     const [errors, setErrors] = useState<Partial<Record<keyof HorsePassport, boolean>>>({})
-    const [photoUri, setPhotoUri] = useState<string | null>(null)
-    const [photoSource, setPhotoSource] = useState<'camera' | 'gallery' | null>(null)
     const { wallet } = useWallet()
     const [isLoading, setIsLoading] = useState(false)
 
@@ -47,60 +44,91 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
         return Object.keys(newErrors).length === 0
     }
 
-    const encryptPhoto = async ({ photoUri }: { photoUri: string}): Promise<Buffer> => {
-        const base64 = await FileSystem.readAsStringAsync(photoUri, { encoding: FileSystem.EncodingType.Base64 })
-        const rootKeyHex = await SecureStore.getItemAsync('rootKeyHex') 
-        const privateKey = PrivateKey.fromString(rootKeyHex!)
-        const publicKey = privateKey.toPublicKey()
-        const photoBuffer = Buffer.from(base64, 'base64')
-        const encrypted = ECIES.electrumEncrypt(Array.from(photoBuffer), publicKey)
-        return Buffer.from(encrypted)
-    }
+    // const createToken = async ({ horse }: { horse: HorsePassport }): Promise<void> =>{
+    //     if (!wallet) throw new Error('Wallet not initialized') 
+    //     const authFetch = new AuthFetch(wallet)
+        
+    //     const identityKey = wallet.identityKey
 
-    const createToken = async ({ photoUri, horse }: { photoUri: string | null, horse: HorsePassport }): Promise<void> =>{
-        let base64body
-        if (photoUri) {
-            const encryptedBuffer = await encryptPhoto({ photoUri })
-            base64body = encryptedBuffer.toString('base64')
-        }
-        if (!wallet) throw new Error('Wallet not initialized') 
+    //     const response = await authFetch.fetch(`${TOKEN_SERVER_URL}/identity/passport/create`, {
+    //         method: 'POST',
+    //         body: JSON.stringify({ horse, identityKey }),
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         }
+    //     })
+
+    //     const { tx: txBase64, txid, outputIndex } = await response.json()
+    //     const tx = Array.from(Buffer.from(txBase64, 'base64'))
+
+    //     await wallet.internalizeAction({
+    //         tx,
+    //         outputs: [{
+    //             outputIndex: outputIndex,
+    //             protocol: 'basket insertion',
+    //             insertionRemittance: {
+    //                 basket: `equusv-${horse.ueln}`,
+    //                 customInstructions: JSON.stringify({ type: 'horse-passport'}),
+    //                 tags: ['passport']
+    //             }
+    //         }],
+    //         description: 'Internalize horse passport'
+    //     })
+
+    //     const stored = await SecureStore.getItemAsync('horseUelns')
+    //     const uelns: string[] = stored ? JSON.parse(stored) : []
+    //     if (!uelns.includes(horse.ueln)) {
+    //         uelns.push(horse.ueln)
+    //         await SecureStore.setItemAsync('horseUelns', JSON.stringify(uelns))
+    //     }
+
+    //     await SecureStore.setItemAsync(`passportTxid-${horse.ueln}`, txid)
+    // }
+
+    const savePassportDraft = async (): Promise<HorsePassportDraft> => {
+        if (!wallet) throw new Error('Wallet not initialized.')
+
         const authFetch = new AuthFetch(wallet)
         
-        const identityKey = wallet.identityKey
-
-        const response = await authFetch.fetch(`${TOKEN_SERVER_URL}/identity/passport/create`, {
-            method: 'POST',
-            body: JSON.stringify({ base64body, horse, identityKey }),
-            headers: {
-                'Content-Type': 'application/json'
+        const createPassportDraft = () => {
+            const draft = {
+                horse: horsePassport,
+                status: 'draft',
+                createdAt: new Date().toISOString()
             }
-        })
 
-        const { tx: txBase64, txid, outputIndex } = await response.json()
-        const tx = Array.from(Buffer.from(txBase64, 'base64'))
-
-        await wallet.internalizeAction({
-            tx,
-            outputs: [{
-                outputIndex: outputIndex,
-                protocol: 'basket insertion',
-                insertionRemittance: {
-                    basket: `equusv-${horse.ueln}`,
-                    customInstructions: JSON.stringify({ type: 'horse-passport'}),
-                    tags: ['passport']
-                }
-            }],
-            description: 'Internalize horse passport'
-        })
-
-        const stored = await SecureStore.getItemAsync('horseUelns')
-        const uelns: string[] = stored ? JSON.parse(stored) : []
-        if (!uelns.includes(horse.ueln)) {
-            uelns.push(horse.ueln)
-            await SecureStore.setItemAsync('horseUelns', JSON.stringify(uelns))
+            return draft
         }
 
-        await SecureStore.setItemAsync(`passportTxid-${horse.ueln}`, txid)
+        const draft = createPassportDraft()
+
+        const savePassportDraftToSecureStore = async ({ draft }: { draft: HorsePassportDraft}) => {
+            await SecureStore.setItemAsync(`passport-draft-${draft.horse.ueln}`, JSON.stringify(draft))
+        }
+
+        await savePassportDraftToSecureStore({ draft: draft as HorsePassportDraft })
+
+        const rootKeyHex = await SecureStore.getItemAsync('rootKeyHex')
+        const privateKey = PrivateKey.fromString(rootKeyHex!)
+        const publicKey = privateKey.toPublicKey()
+        const draftBuffer = Buffer.from(JSON.stringify(draft), 'utf-8')
+        const encryptedData = ECIES.electrumEncrypt(Array.from(draftBuffer), publicKey)
+
+        const response = await authFetch.fetch(`${TOKEN_SERVER_URL}/draft`, {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                tokenType: 'identity/passport',
+                encryptedData: Buffer.from(encryptedData).toString('base64'),
+                identityKey: wallet.identityKey,
+                status: 'draft',
+                ueln: draft.horse.ueln
+            })
+        })
+
+        return draft as HorsePassportDraft
     }
 
         const handleSave = async () => {
@@ -111,7 +139,7 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
             }
             
             try {
-                await createToken({ photoUri, horse: horsePassport as HorsePassport })
+                await savePassportDraft()
                 onSaved()
                 handleOnClose()
                 setIsLoading(false)
@@ -149,14 +177,6 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
                             </TouchableOpacity>
                         </View>
                         <View style={styles.container}>
-                            <PhotoPicker
-                                photoUri={photoUri ?? ''}
-                                onPhotoSelected={(uri, source) => {
-                                    setPhotoUri(uri)
-                                    setPhotoSource(source)
-                                }} 
-                            
-                            />
                             <Section>
                                 <SectionHeading fontSize={18}>Häst</SectionHeading>
                                 <SectionRowInput

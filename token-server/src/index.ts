@@ -5,7 +5,9 @@
     import { createAuthMiddleware } from '@bsv/auth-express-middleware'
     import passportRouter from './routes/identity/passport.js'
     import horseOwnerCertificate from './routes/certify/horse-owner.js'
+    import horseBreederCertificate from './routes/certify/breeding-organisation.js'
     import identityKey from './routes/utils/identityKey.js'
+    import connectDB from './db.js'
 
     dotenv.config()
     const app = express()
@@ -63,14 +65,18 @@
             allowUnauthenticated: false
         })
 
+        await connectDB()
+
         app.use(corsMiddleware)
         app.use(authMiddleware)
 
        app.use('/', passportRouter(wallet))
 
        app.use('/', horseOwnerCertificate(wallet))
-
+       app.use('/', horseBreederCertificate(wallet))
+    
        app.use('/', identityKey(wallet))
+       
         
         app.listen(PORT, () => {
             console.log(`token-server is running on port ${PORT}`)

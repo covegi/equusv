@@ -1,10 +1,12 @@
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native'
-import { useState, useEffect } from 'react'
+import { StyleSheet, Text, View, TouchableOpacity, FlatList, ActivityIndicator, Animated } from 'react-native'
+import { useState, useEffect, useRef } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import AntDesign from '@expo/vector-icons/AntDesign'
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 import { useWallet } from '@/context/WalletContext'
 import { PushDrop, LockingScript } from '@bsv/sdk'
 import * as SecureStore from 'expo-secure-store'
+import { useRouter } from 'expo-router'
 
 import HorseModal from '@/components/modal/HorseModal'
 import Heading from '@/components/text/Heading'
@@ -19,6 +21,9 @@ export default function MyHorsesScreen() {
     const { wallet } = useWallet()
     const [refresh, setRefresh] = useState(0)
     const [isLoading, setIsLoading] = useState(false)
+    const [menuVisible, setMenuVisible] = useState(false)
+    const slideAnim = useRef(new Animated.Value(300)).current
+    const router = useRouter()
 
     useEffect(() => {
        const fetchHorses = async () => {
@@ -85,6 +90,27 @@ export default function MyHorsesScreen() {
     }, [wallet, refresh])
 
     if (!wallet) return null
+
+    const openMenu = () => {
+        setMenuVisible(true)
+        Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 350,
+            useNativeDriver: true
+        }).start()
+    }
+
+    const closeMenu = () => {
+        Animated.timing(slideAnim, {
+            toValue: 500,
+            duration: 350,
+            useNativeDriver: true
+        }).start(() => setMenuVisible(false))
+    }
+
+    const menyItems = [
+        { label: 'Hästpass', onPress: () => router.push('/passport') }
+    ]
     
     return (
         <View style={styles.outerContainer}>
@@ -93,10 +119,38 @@ export default function MyHorsesScreen() {
                 onClose={() => setVisible(false)}
                 onSaved={() => setRefresh(r => r + 1)}
             />
-            <View style={[styles.headerContainer, { top: insets.top + 36 }]}>
-                <Heading>Mina hästar</Heading>
+            {menuVisible && 
+                <Animated.View style={[styles.menuContainer, { transform: [{ translateX: slideAnim }]}]}>
+                    <View style={styles.closeIconContainer}>
+                        <TouchableOpacity
+                            onPress={closeMenu}
+                            style={[styles.closeIcon]}>
+                            <AntDesign name="close" size={24} color="#1a1a1a" />
+                        </TouchableOpacity>
+                        <Text style={styles.menuText}>Aktiviteter</Text>
+                    </View>
+                    {menyItems.map(item => (
+                        <TouchableOpacity onPress={item.onPress} key={item.label}>
+                            <View style={styles.listItemContainer}>
+                                <FontAwesome6 name="passport" size={30} color="#1a1a1a" />
+                                {<Text style={styles.listItemText}>{item.label}</Text>}
+                            </View>
+                        </TouchableOpacity>
+                    ))}
+                </Animated.View>
+            }
+            
+            <View style={styles.mainHeaderContainer}>
+                <View style={[styles.headerContainer, { top: insets.top + 36 }]}>
+                    <Heading>Mina hästar</Heading>
+                </View>
+                <TouchableOpacity onPress={openMenu}>
+                    <View style={[styles.hamburgerContainer, { top: insets.top + 12 }]}>
+                        <AntDesign name="menu" size={24} color="#f7f2f2" />
+                    </View>
+                </TouchableOpacity>
             </View>
-            <View style={styles.centerContainer}>
+            <View style={[styles.centerContainer, { top: insets.top }]}>
               {isLoading 
                 ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 }}>
                     <ActivityIndicator color='#C8963E' size="large" />
@@ -128,6 +182,37 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#1a1a1a',
     },
+    menuContainer: {
+        height: '100%',
+        width: '100%',
+        position: 'absolute',
+        backgroundColor: '#f7f2f2',
+        zIndex: 15
+    },
+    closeIconContainer: {
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    closeIcon: {
+        justifyContent: 'flex-start',
+        paddingLeft: 25,
+        paddingTop: 60,
+        marginBottom: 20
+    },
+    menuText: {
+        color: '#1a1a1a',
+        fontFamily: 'Inter_600SemiBold',
+        fontSize: 24,
+        paddingTop: 40,
+        paddingLeft: 10
+    },
+    mainHeaderContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+    },
+    hamburgerContainer: {
+        marginRight: 25
+    },
     headerContainer: {
         height: 120,
         marginLeft: 15,
@@ -150,8 +235,19 @@ const styles = StyleSheet.create({
         gap: 8
     },
     iconText: {
-        fontFamily: 'Inter_400Regular',
+        fontFamily: 'Inter_300Light',
         fontSize: 12,
         color: '#f7f2f2'
     },
+    listItemContainer: {
+        height: 60,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingLeft: 25
+    },
+    listItemText: {
+        fontFamily: 'Inter_400Regular',
+        fontSize: 18,
+        paddingLeft: 20
+    }
 })

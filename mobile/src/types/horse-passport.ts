@@ -12,5 +12,4 @@ export type HorsePassport = {
     organisation: string
     issuedDate: string
     foodChainStatus: boolean
-    photoUhrp?: string
 }
