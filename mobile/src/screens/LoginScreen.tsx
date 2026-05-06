@@ -59,7 +59,7 @@ export default function LoginScreen() {
     }
 
      const handleDeleteSecureStore = async () => {
-            await SecureStore.deleteItemAsync('rootKeyHex')
+            await SecureStore.deleteItemAsync('horseUelns')
             router.replace('/')
         }
 

@@ -102,11 +102,20 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
 
         const draft = createPassportDraft()
 
+        if (!draft.horse.ueln) throw new Error('UELN is required')
+
         const savePassportDraftToSecureStore = async ({ draft }: { draft: HorsePassportDraft}) => {
             await SecureStore.setItemAsync(`passport-draft-${draft.horse.ueln}`, JSON.stringify(draft))
         }
 
         await savePassportDraftToSecureStore({ draft: draft as HorsePassportDraft })
+
+        const stored = await SecureStore.getItemAsync('horseUelns')
+        const uelns: string[] = stored ? JSON.parse(stored) : []
+        if (!uelns.includes(draft.horse.ueln)) {
+            uelns.push(draft.horse.ueln)
+            await SecureStore.setItemAsync('horseUelns', JSON.stringify(uelns))
+        }
 
         const rootKeyHex = await SecureStore.getItemAsync('rootKeyHex')
         const privateKey = PrivateKey.fromString(rootKeyHex!)

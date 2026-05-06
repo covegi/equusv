@@ -28,7 +28,17 @@ export default function RootLayout() {
 
   return  (
       <WalletProvider>
-         <Stack screenOptions={{ headerShown: false }}/>
+         <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen
+            name='passport'
+            options={{ 
+              headerShown: true,
+              title: 'Hästpass',
+              headerStyle: { backgroundColor: '#1a1a1a'},
+              headerTintColor: '#f7f2f2',
+              headerBackTitle: 'Tillbaka'
+            }} />
+         </Stack>
       </WalletProvider>
     )
 }

@@ -1,11 +1,61 @@
-import { View, Text } from 'react-native'
+import { StyleSheet, View, FlatList } from 'react-native'
+import { useState, useEffect } from 'react'
+import { useWallet } from '@/context/WalletContext'
+import * as SecureStore from 'expo-secure-store'
 
-import type { HorsePassportDraft } from '@/types/horse-passport-draft'
+import PassportCard from '@/components/passport/PassportCard'
+import { HorsePassportDraft } from '@/types/horse-passport-draft'
+import { HorsePassport } from '@/types/horse-passport'
 
 export default function PassportScreen() {
+    const [drafts, setDrafts] = useState<HorsePassportDraft[]>([])
+    const [passports, setPassports] = useState<HorsePassport[]>([])
+    const [isLoading, setIsLoading] = useState(false)
+
+    useEffect(() => {
+        const fetchDrafts = async () => {
+
+            try {
+                const storedUelns = await SecureStore.getItemAsync('horseUelns')
+                console.log('storedUelns:', storedUelns)
+                const uelns: string[] = storedUelns ? JSON.parse(storedUelns) : []
+                console.log('uelns:', uelns)
+                
+                const fetchedDrafts = await Promise.all(
+                uelns.map(async (ueln) => {
+                    const stored = await SecureStore.getItemAsync(`passport-draft-${ueln}`)
+                    console.log(`passport-draft-${ueln}:`, stored)
+                    return stored ? JSON.parse(stored) as HorsePassportDraft : null
+                    })
+                )
+                console.log('validDrafts:', fetchedDrafts)
+                const validDrafts = fetchedDrafts.filter(draft => draft !== null) as HorsePassportDraft[]
+                setDrafts(validDrafts)
+            } catch (error) {
+                console.error(error)
+            }
+        } 
+        fetchDrafts()
+    }, [])
+
+
     return (
-        <View>
-            <Text>PassportScreen</Text>
+        <View style={styles.container}>
+            <FlatList
+                data={drafts}
+                keyExtractor={(item) => item.horse.ueln}
+                renderItem={({ item }) => (
+                    <PassportCard horse={item.horse} status={item.status} />
+                )}
+            />
         </View>
     )
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#1a1a1a',
+    },
+    
+})
