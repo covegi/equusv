@@ -16,7 +16,7 @@ import type { HorsePassport } from '@/types/horse-passport'
 import type { HorsePassportDraft } from '@/types/horse-passport-draft'
 import PrimaryButton from '../buttons/PrimaryButton'
 
-export default function HorseModal({ visible, onClose, onSaved }: {visible: boolean, onClose: () => void, onSaved: () => void }) {
+export default function PassportModal({ visible, onClose, onSaved }: {visible: boolean, onClose: () => void, onSaved: () => void }) {
     const insets = useSafeAreaInsets()
     const [horsePassport, setHorsePassport] = useState<Partial<HorsePassport>>({})
     const [errors, setErrors] = useState<Partial<Record<keyof HorsePassport, boolean>>>({})
@@ -179,7 +179,7 @@ export default function HorseModal({ visible, onClose, onSaved }: {visible: bool
                     <ScrollView>
                         <View style={[styles.headerContainer, { top: insets.top + 26 }]}>
                             <View>
-                                <Heading color='#1a1a1a'>Ny häst</Heading>
+                                <Heading color='#1a1a1a'>Nytt hästpass</Heading>
                             </View>
                             <TouchableOpacity onPress={handleOnClose}>
                                 <Ionicons name="close" size={30} color="#1a1a1a" />

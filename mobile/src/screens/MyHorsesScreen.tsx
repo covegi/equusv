@@ -8,7 +8,7 @@ import { PushDrop, LockingScript } from '@bsv/sdk'
 import * as SecureStore from 'expo-secure-store'
 import { useRouter } from 'expo-router'
 
-import HorseModal from '@/components/modal/HorseModal'
+import PassportModal from '@/components/modal/PassportModal'
 import Heading from '@/components/text/Heading'
 import HorseJournal from '@/components/journal/HorseJournal'
 
@@ -19,7 +19,6 @@ export default function MyHorsesScreen() {
     const insets = useSafeAreaInsets()
     const [horse, setHorse] = useState<HorsePassport[]>([])
     const { wallet } = useWallet()
-    const [refresh, setRefresh] = useState(0)
     const [isLoading, setIsLoading] = useState(false)
     const [menuVisible, setMenuVisible] = useState(false)
     const slideAnim = useRef(new Animated.Value(300)).current
@@ -87,7 +86,7 @@ export default function MyHorsesScreen() {
         setIsLoading(false)
        }
        fetchHorses()
-    }, [wallet, refresh])
+    }, [wallet])
 
     if (!wallet) return null
 
@@ -114,7 +113,7 @@ export default function MyHorsesScreen() {
     
     return (
         <View style={styles.outerContainer}>
-            <HorseModal 
+            <PassportModal 
                 visible={visible} 
                 onClose={() => setVisible(false)}
                 onSaved={() => setRefresh(r => r + 1)}

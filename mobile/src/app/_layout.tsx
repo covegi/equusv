@@ -4,11 +4,14 @@ import { useState, useEffect } from 'react'
 import { useFonts, Inter_300Light, Inter_400Regular, Inter_600SemiBold } from '@expo-google-fonts/inter'
 import * as SecureStore from 'expo-secure-store'
 import { WalletProvider } from '@/context/WalletContext'
+import { PassportModalProvider } from '@/context/PassportModalContext'
+import PassportHeaderRight from '@/components/passport/PassportHeaderRight'
 
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({Inter_300Light, Inter_400Regular, Inter_600SemiBold})
   const [checked, setChecked] = useState(false)
+
   const router = useRouter()
 
 
@@ -28,6 +31,7 @@ export default function RootLayout() {
 
   return  (
       <WalletProvider>
+        <PassportModalProvider>
          <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen
             name='passport'
@@ -36,9 +40,11 @@ export default function RootLayout() {
               title: 'Hästpass',
               headerStyle: { backgroundColor: '#1a1a1a'},
               headerTintColor: '#f7f2f2',
-              headerBackTitle: 'Tillbaka'
+              headerBackTitle: 'Tillbaka',
+              headerRight: () => <PassportHeaderRight />
             }} />
          </Stack>
+         </PassportModalProvider>
       </WalletProvider>
     )
 }

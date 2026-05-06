@@ -6,15 +6,18 @@ import * as SecureStore from 'expo-secure-store'
 import PassportCard from '@/components/passport/PassportCard'
 import { HorsePassportDraft } from '@/types/horse-passport-draft'
 import { HorsePassport } from '@/types/horse-passport'
+import { usePassportModal } from '@/context/PassportModalContext'
+import PassportModal from '@/components/modal/PassportModal'
 
 export default function PassportScreen() {
     const [drafts, setDrafts] = useState<HorsePassportDraft[]>([])
     const [passports, setPassports] = useState<HorsePassport[]>([])
     const [isLoading, setIsLoading] = useState(false)
+    const [refresh, setRefresh] = useState(0)
+    const { visible, setVisible } = usePassportModal()
 
     useEffect(() => {
         const fetchDrafts = async () => {
-
             try {
                 const storedUelns = await SecureStore.getItemAsync('horseUelns')
                 console.log('storedUelns:', storedUelns)
@@ -36,11 +39,16 @@ export default function PassportScreen() {
             }
         } 
         fetchDrafts()
-    }, [])
+    }, [refresh])
 
 
     return (
         <View style={styles.container}>
+            <PassportModal
+                visible={visible}
+                onSaved={() => setRefresh(n => n + 1)}
+                onClose={() => setVisible(false)}
+            />
             <FlatList
                 data={drafts}
                 keyExtractor={(item) => item.horse.ueln}
