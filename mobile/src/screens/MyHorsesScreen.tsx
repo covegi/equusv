@@ -8,14 +8,12 @@ import { PushDrop, LockingScript } from '@bsv/sdk'
 import * as SecureStore from 'expo-secure-store'
 import { useRouter } from 'expo-router'
 
-import PassportModal from '@/components/modal/PassportModal'
 import Heading from '@/components/text/Heading'
 import HorseJournal from '@/components/journal/HorseJournal'
 
 import type { HorsePassport } from '@/types/horse-passport'
 
 export default function MyHorsesScreen() {
-    const [visible, setVisible] = useState(false)
     const insets = useSafeAreaInsets()
     const [horse, setHorse] = useState<HorsePassport[]>([])
     const { wallet } = useWallet()
@@ -113,11 +111,6 @@ export default function MyHorsesScreen() {
     
     return (
         <View style={styles.outerContainer}>
-            <PassportModal 
-                visible={visible} 
-                onClose={() => setVisible(false)}
-                onSaved={() => setRefresh(r => r + 1)}
-            />
             {menuVisible && 
                 <Animated.View style={[styles.menuContainer, { transform: [{ translateX: slideAnim }]}]}>
                     <View style={styles.closeIconContainer}>
@@ -163,14 +156,6 @@ export default function MyHorsesScreen() {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 50 }}
               />}
-            </View>
-            <View style={[styles.footerContainer, { bottom: insets.bottom }]}>
-                <TouchableOpacity onPress={() => setVisible(true)}>
-                    <View style={styles.iconContainer}>
-                        <AntDesign name="file-add" size={24} color="#f7f2f2" />
-                        <Text style={styles.iconText}>Ny häst</Text>
-                    </View>
-                </TouchableOpacity>
             </View>
         </View>
     )
@@ -220,18 +205,6 @@ const styles = StyleSheet.create({
         flex: 1,
         marginHorizontal: 15,
         justifyContent: 'flex-start',
-    },
-    footerContainer: {
-        height: 70,
-        backgroundColor: '#1a1a1a',
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-    },
-    iconContainer: {
-        marginTop: 20,
-        alignItems: 'center',
-        gap: 8
     },
     iconText: {
         fontFamily: 'Inter_300Light',
