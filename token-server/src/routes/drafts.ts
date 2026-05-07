@@ -36,5 +36,17 @@ export default (wallet: WalletInterface) => {
         }
     })
 
+    router.delete('/draft', async (req: Request, res: Response) => {
+        const { identityKey, ueln, tokenType } = req.body
+
+        try {
+            await Draft.deleteOne({ identityKey, ueln, tokenType })
+            return res.json({ success: true })
+        } catch (error) {
+            console.error(error)
+            return res.status(500).json({ error: 'Failed to delete draft' })
+        }
+    })
+
     return router
 }

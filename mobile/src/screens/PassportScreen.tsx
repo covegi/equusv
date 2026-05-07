@@ -2,6 +2,7 @@ import { StyleSheet, View, FlatList } from 'react-native'
 import { useState, useEffect } from 'react'
 import { useWallet } from '@/context/WalletContext'
 import * as SecureStore from 'expo-secure-store'
+import { AuthFetch } from '@bsv/sdk'
 
 import PassportCard from '@/components/passport/PassportCard'
 import { HorsePassportDraft } from '@/types/horse-passport-draft'
@@ -9,12 +10,15 @@ import { HorsePassport } from '@/types/horse-passport'
 import { usePassportModal } from '@/context/PassportModalContext'
 import PassportModal from '@/components/modal/PassportModal'
 
+const TOKEN_SERVER_URL = process.env.EXPO_PUBLIC_TOKEN_SERVER_URL
+
 export default function PassportScreen() {
     const [drafts, setDrafts] = useState<HorsePassportDraft[]>([])
     const [passports, setPassports] = useState<HorsePassport[]>([])
     const [isLoading, setIsLoading] = useState(false)
     const [refresh, setRefresh] = useState(0)
     const { visible, setVisible } = usePassportModal()
+    const { wallet } = useWallet()
 
     useEffect(() => {
         const fetchDrafts = async () => {
@@ -56,6 +60,26 @@ export default function PassportScreen() {
        
         } catch (error) {
             console.error('handleOnDelete error:', error)
+        }
+
+        if (!wallet) throw new Error('No wallet loaded')
+
+        try {
+            const authFetch = new AuthFetch(wallet)
+            const response = await authFetch.fetch(`${TOKEN_SERVER_URL}/draft`, {
+                method: 'DELETE',
+                headers: {
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    tokenType: 'identity/passport',
+                    identityKey: wallet.identityKey,
+                    ueln
+                })
+            })
+            return response.status
+        } catch (error) {
+            console.error('Not able to delete draft from server')
         }
     }
 
