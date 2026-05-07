@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react'
 import { useWallet } from '@/context/WalletContext'
 import * as SecureStore from 'expo-secure-store'
 import { AuthFetch } from '@bsv/sdk'
+import { MessageBoxClient } from '@bsv/message-box-client'
+
 
 import PassportCard from '@/components/passport/PassportCard'
 import { HorsePassportDraft } from '@/types/horse-passport-draft'
@@ -11,6 +13,7 @@ import { usePassportModal } from '@/context/PassportModalContext'
 import PassportModal from '@/components/modal/PassportModal'
 
 const TOKEN_SERVER_URL = process.env.EXPO_PUBLIC_TOKEN_SERVER_URL
+const EQUUSV_IDENTITY_KEY = process.env.EXPO_PUBLIC_EQUUSV_IDENTITY_KEY
 
 export default function PassportScreen() {
     const [drafts, setDrafts] = useState<HorsePassportDraft[]>([])
@@ -83,6 +86,21 @@ export default function PassportScreen() {
         }
     }
 
+    const handleOnCertify = async (ueln: string) => {
+        if (!wallet) throw new Error('No wallet loaded')
+        const client = new MessageBoxClient({ walletClient: wallet })
+
+        const draft = drafts.find(d => d.horse.ueln === ueln)
+
+        if (!EQUUSV_IDENTITY_KEY) throw new Error('EQUUSV_IDENTITY_KEY not set')
+
+        await client.sendMessage({
+            recipient: EQUUSV_IDENTITY_KEY,
+            messageBox: 'equusv-passport-certification',
+            body: JSON.stringify(draft)
+        })
+    }
+
 
     return (
         <View style={styles.container}>
@@ -99,6 +117,7 @@ export default function PassportScreen() {
                         horse={item.horse}
                         status={item.status}
                         onDelete={() => handleOnDelete(item.horse.ueln)}
+                        onCertify={() => handleOnCertify(item.horse.ueln)}
                     />
                 )}
             />

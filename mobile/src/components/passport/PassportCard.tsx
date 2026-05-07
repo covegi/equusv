@@ -5,7 +5,7 @@ import Heading from "../text/Heading"
 import CardButton from "../buttons/CardButton"
 
 
-export default function PassportCard({ horse, status='draft', onDelete }: { horse: HorsePassport, status: string, onDelete?: () => void }) {
+export default function PassportCard({ horse, status='draft', onDelete, onCertify }: { horse: HorsePassport, status: string, onDelete?: () => void, onCertify?: () => void }) {
 
     const statusLabel = {
         draft: 'Utkast',
@@ -38,7 +38,7 @@ export default function PassportCard({ horse, status='draft', onDelete }: { hors
     if (status === 'draft') {
         buttonBox = 
             <View style={styles.buttonBoxContainer}>
-                <CardButton variant='primary' onPress={() => {}}>Skicka för certifiering</CardButton>
+                <CardButton variant='primary' onPress={() => onCertify?.()}>Skicka för certifiering</CardButton>
                 <CardButton variant='danger' onPress={() => onDelete?.()}>Ta bort</CardButton>
             </View>
     } else if (status === 'pending') {
