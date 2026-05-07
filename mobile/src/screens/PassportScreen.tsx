@@ -99,6 +99,14 @@ export default function PassportScreen() {
             messageBox: 'equusv-passport-certification',
             body: JSON.stringify(draft)
         })
+
+        const draftInSecureStore = await SecureStore.getItemAsync(`passport-draft-${ueln}`)
+        if (!draftInSecureStore) throw new Error('No draft in SecureStore')
+        const updatedDraft: HorsePassportDraft = {...JSON.parse(draftInSecureStore), status: 'pending'}
+        await SecureStore.setItemAsync(`passport-draft-${ueln}`, JSON.stringify(updatedDraft))
+
+        setDrafts(prev => prev.map(d => d.horse.ueln === ueln ? { ...d, status: 'pending'} : d ))
+
     }
 
 
