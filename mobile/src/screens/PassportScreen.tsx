@@ -41,6 +41,24 @@ export default function PassportScreen() {
         fetchDrafts()
     }, [refresh])
 
+    const handleOnDelete = async (ueln: string) => {
+       try {
+        const storedUelns = await SecureStore.getItemAsync('horseUelns')
+        const uelns: string[] = storedUelns ? JSON.parse(storedUelns) : []
+        const updatedUelnsList = uelns.filter(item => item !== ueln)
+
+        await Promise.all([
+            SecureStore.setItemAsync('horseUelns', JSON.stringify(updatedUelnsList)),
+            SecureStore.deleteItemAsync(`passport-draft-${ueln}`)
+        ])
+        
+        setRefresh(n => n + 1)
+       
+        } catch (error) {
+            console.error('handleOnDelete error:', error)
+        }
+    }
+
 
     return (
         <View style={styles.container}>
@@ -53,7 +71,11 @@ export default function PassportScreen() {
                 data={drafts}
                 keyExtractor={(item) => item.horse.ueln}
                 renderItem={({ item }) => (
-                    <PassportCard horse={item.horse} status={item.status} />
+                    <PassportCard
+                        horse={item.horse}
+                        status={item.status}
+                        onDelete={() => handleOnDelete(item.horse.ueln)}
+                    />
                 )}
             />
         </View>
