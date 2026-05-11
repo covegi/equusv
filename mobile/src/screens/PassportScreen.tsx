@@ -2,7 +2,7 @@ import { StyleSheet, View, FlatList } from 'react-native'
 import { useState, useEffect } from 'react'
 import { useWallet } from '@/context/WalletContext'
 import * as SecureStore from 'expo-secure-store'
-import { AuthFetch } from '@bsv/sdk'
+import { AuthFetch, Hash } from '@bsv/sdk'
 import { MessageBoxClient } from '@bsv/message-box-client'
 
 
@@ -47,6 +47,55 @@ export default function PassportScreen() {
         } 
         fetchDrafts()
     }, [refresh])
+
+    useEffect(() => {
+        if (!wallet) return
+        const messageBox = async () => {
+            try {
+                const client = new MessageBoxClient({ walletClient: wallet })
+                await client.listenForLiveMessages({
+                    messageBox: 'equusv-passport-certification-response',
+                    onMessage: async (message) => {
+                        const { messageHash, signature } = typeof message.body === 'string'
+                        ? JSON.parse(message.body)
+                        : message.body
+
+                        if (messageHash && signature) {
+                            const hashedDrafts = drafts.map( (draft) => {
+                                const draftString = JSON.stringify(draft)
+                                const draftBytes = Array.from(Buffer.from(draftString, 'utf-8'))
+                                const hash = Hash.sha256(draftBytes)
+                                return hash
+                            })
+
+                            const messageHashArray = Array.from(Buffer.from(JSON.stringify(messageHash)))
+                            const matchingIndex = hashedDrafts.findIndex((h) => JSON.stringify(h) === JSON.stringify(messageHashArray))
+                        
+                            if (matchingIndex !== -1) {
+                                const ueln = drafts[matchingIndex].horse.ueln
+                                
+                                try {
+                                    const draftInSecureStore = await SecureStore.getItemAsync(`passport-draft-${ueln}`)
+                                    if (!draftInSecureStore) throw new Error('No draft in SecureStore')
+
+                                    const updatedDraft: HorsePassportDraft = {...JSON.parse(draftInSecureStore), status: 'approved'}
+                                    await SecureStore.setItemAsync(`passport-draft-${ueln}`, JSON.stringify(updatedDraft))
+                                    setDrafts(prev => prev.map(d => d.horse.ueln === ueln ? {...d, status: 'approved'}: d))
+                                } catch (error) {
+                                    console.error(error)
+                                }
+                            } 
+                        }
+                    }
+                })
+
+            } catch (error) {
+                console.error(error)
+            }
+        }
+       
+        
+    }, [])
 
     const handleOnDelete = async (ueln: string) => {
        try {
@@ -100,13 +149,17 @@ export default function PassportScreen() {
             body: JSON.stringify(draft)
         })
 
-        const draftInSecureStore = await SecureStore.getItemAsync(`passport-draft-${ueln}`)
-        if (!draftInSecureStore) throw new Error('No draft in SecureStore')
-        const updatedDraft: HorsePassportDraft = {...JSON.parse(draftInSecureStore), status: 'pending'}
-        await SecureStore.setItemAsync(`passport-draft-${ueln}`, JSON.stringify(updatedDraft))
+        try {
+            const draftInSecureStore = await SecureStore.getItemAsync(`passport-draft-${ueln}`)
+            if (!draftInSecureStore) throw new Error('No draft in SecureStore')
 
-        setDrafts(prev => prev.map(d => d.horse.ueln === ueln ? { ...d, status: 'pending'} : d ))
-
+            const updatedDraft: HorsePassportDraft = {...JSON.parse(draftInSecureStore), status: 'pending'}
+            await SecureStore.setItemAsync(`passport-draft-${ueln}`, JSON.stringify(updatedDraft))
+    
+            setRefresh(n => n + 1)
+        } catch (error) {
+            console.error('Error updating status:', error)
+        }
     }
 
 
