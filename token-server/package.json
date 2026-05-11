@@ -8,6 +8,7 @@
     },
     "dependencies": {
         "@bsv/auth-express-middleware": "^2.0.4",
+        "@bsv/message-box-client": "^2.1.1",
         "@bsv/sdk": "^2.0.13",
         "@bsv/wallet-toolbox": "^2.1.17",
         "cors": "^2.8.6",

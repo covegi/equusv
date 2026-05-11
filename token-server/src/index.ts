@@ -2,7 +2,9 @@
     import type { NextFunction, Request, Response } from 'express'
     import dotenv from 'dotenv'
     import { Setup } from '@bsv/wallet-toolbox'
+    import { PrivateKey, Hash } from '@bsv/sdk'
     import { createAuthMiddleware } from '@bsv/auth-express-middleware'
+    import { MessageBoxClient } from '@bsv/message-box-client'
     import passportRouter from './routes/identity/passport.js'
     import horseOwnerCertificate from './routes/certify/horse-owner.js'
     import horseBreederCertificate from './routes/certify/breeding-organisation.js'
@@ -21,6 +23,33 @@
         const wallet = await Setup.createWalletClientNoEnv({
             chain: 'main',
             rootKeyHex: EQUUS_ROOT_KEY!,
+        })
+
+        const client = new MessageBoxClient({ walletClient: wallet})
+        await client.listenForLiveMessages({
+            messageBox: 'equusv-passport-certification',
+            onMessage: async (message) => {
+                const draft = typeof message.body === 'string'
+                ? JSON.parse(message.body)
+                : message.body
+
+                await new Promise(resolve => setTimeout(resolve, 5000))
+
+                const draftString = JSON.stringify(draft)
+                const draftBytes = Array.from(Buffer.from(draftString, 'utf-8'))
+
+                const messageHash = Hash.sha256(draftBytes)
+
+                const privateKey = PrivateKey.fromString(EQUUS_ROOT_KEY!)
+                const signature = privateKey.sign(messageHash)
+
+                await client.sendMessage({
+                    recipient: message.sender,
+                    messageBox: 'equusv-passport-certification-response',
+                    body: JSON.stringify({ messageHash, signature })
+                })
+            }
+
         })
 
         const corsMiddleware = (req: Request, res: Response, next: NextFunction) => {
