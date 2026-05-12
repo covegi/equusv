@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
         color: '#1a1a1a',
     },
     labelGhost: {
-        color: '#555555',
+        color: '#777777',
     },
     labelDanger: {
         color: '#c05050',

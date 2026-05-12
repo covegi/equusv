@@ -25,32 +25,7 @@
             rootKeyHex: EQUUS_ROOT_KEY!,
         })
 
-        const client = new MessageBoxClient({ walletClient: wallet})
-        await client.listenForLiveMessages({
-            messageBox: 'equusv-passport-certification',
-            onMessage: async (message) => {
-                const draft = typeof message.body === 'string'
-                ? JSON.parse(message.body)
-                : message.body
-
-                await new Promise(resolve => setTimeout(resolve, 5000))
-
-                const draftString = JSON.stringify(draft)
-                const draftBytes = Array.from(Buffer.from(draftString, 'utf-8'))
-
-                const messageHash = Hash.sha256(draftBytes)
-
-                const privateKey = PrivateKey.fromString(EQUUS_ROOT_KEY!)
-                const signature = privateKey.sign(messageHash)
-
-                await client.sendMessage({
-                    recipient: message.sender,
-                    messageBox: 'equusv-passport-certification-response',
-                    body: JSON.stringify({ messageHash, signature })
-                })
-            }
-
-        })
+        console.log('Token-server identityKey:', wallet.identityKey)
 
         const corsMiddleware = (req: Request, res: Response, next: NextFunction) => {
             res.header('Access-Control-Allow-Origin', '*')
@@ -109,9 +84,68 @@
         app.use('/', identityKey(wallet))
        
         
-        app.listen(PORT, () => {
+        app.listen(PORT, async () => {
             console.log(`token-server is running on port ${PORT}`)
         })
+        
+        const client = new MessageBoxClient({
+                walletClient: wallet, 
+                host: 'https://messagebox.babbage.systems'
+        })
+
+        console.log('Startar lyssnare...')
+        try {
+            await client.anointHost('https://messagebox.babbage.systems')
+            console.log('Host anointed')
+        } catch (error) {
+            console.error('anointHost error:', error)
+        }
+
+    const pollMessages = async () => {
+        while (true) {
+            try {
+                const messages = await client.listMessages({
+                    messageBox: 'equusv-passport-certification'
+                })
+                for (const message of messages) {
+                    console.log('Inkommande passansökan från:', message.sender)
+                    
+                    const draft = typeof message.body === 'string'
+                    ? JSON.parse(message.body)
+                    : message.body
+
+                    await new Promise(resolve => setTimeout(resolve, 5000))
+
+                    const draftString = JSON.stringify(draft)
+                    const draftBytes = Array.from(Buffer.from(draftString, 'utf-8'))
+                    console.log('Hashar draft...')
+                    const messageHash = Hash.sha256(draftBytes)
+
+                    console.log('Signerar...')
+                    const privateKey = PrivateKey.fromString(EQUUS_ROOT_KEY!)
+                    const signature = privateKey.sign(messageHash)
+
+                    console.log('Skickar svar till:', message.sender)
+
+                    await Promise.all([
+                        client.sendMessage({
+                            recipient: message.sender,
+                            messageBox: 'equusv-passport-certification-response',
+                            body: JSON.stringify({ messageHash, signature, ueln: draft.horse.ueln })
+                        }),
+                        client.acknowledgeMessage({ messageIds: [message.messageId] })
+                    ])
+                    console.log('Svar skickat och acknowledged')
+                }
+            } catch (error) {
+                console.error(error)
+            }
+            await new Promise(resolve => setTimeout(resolve, 3000))
+        }
+    }
+    pollMessages()
+    console.log('Lyssnare aktiv')
+        
     }
 
     init()
