@@ -18,6 +18,7 @@
     export default function PassportScreen() {
         const [drafts, setDrafts] = useState<HorsePassportDraft[]>([])
         const [refresh, setRefresh] = useState(0)
+        const [editingDraft, setEditingDraft] = useState<HorsePassportDraft | null>(null)
         const { visible, setVisible } = usePassportModal()
         const { wallet } = useWallet()
 
@@ -185,10 +186,17 @@
             }
         }
 
+        const handleOnEdit = (ueln: string) => {
+            const draft = drafts.find(d => d.horse.ueln === ueln)
+            setEditingDraft(draft ?? null)
+            setVisible(true)
+        }
+
 
         return (
             <View style={styles.container}>
                 <PassportModal
+                    horse={editingDraft?.horse}
                     visible={visible}
                     onSaved={() => setRefresh(n => n + 1)}
                     onClose={() => setVisible(false)}
@@ -203,6 +211,7 @@
                             onDelete={() => handleOnDelete(item.horse.ueln)}
                             onCertify={() => handleOnCertify(item.horse.ueln)}
                             onRevoke={() => handleOnRevoke(item.horse.ueln)}
+                            onEdit={() => handleOnEdit(item.horse.ueln)}
                         />
                     )}
                 />

@@ -1,11 +1,12 @@
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, Text, View, TouchableOpacity } from "react-native"
+import Feather from '@expo/vector-icons/Feather'
 
 import type { HorsePassport } from "@/types/horse-passport"
 import Heading from "../text/Heading"
 import CardButton from "../buttons/CardButton"
 
 
-export default function PassportCard({ horse, status='draft', onDelete, onCertify, onRevoke }: { horse: HorsePassport, status: string, onDelete?: () => void, onCertify?: () => void, onRevoke?: () => void }) {
+export default function PassportCard({ horse, status='draft', onDelete, onCertify, onRevoke, onEdit }: { horse: HorsePassport, status: string, onDelete?: () => void, onCertify?: () => void, onRevoke?: () => void, onEdit?: () => void }) {
 
     const statusLabel = {
         draft: 'Utkast',
@@ -31,16 +32,17 @@ export default function PassportCard({ horse, status='draft', onDelete, onCertif
         active: styles.activeText
     }[status]
 
-
-
     let buttonBox
 
     if (status === 'draft') {
         buttonBox = 
-            <View style={styles.buttonBoxContainer}>
-                <CardButton variant='primary' onPress={() => onCertify?.()}>Skicka för certifiering</CardButton>
-                <CardButton variant='danger' onPress={() => onDelete?.()}>Ta bort</CardButton>
-            </View>
+            <TouchableOpacity onPress={() => onEdit?.()}>
+                <View style={styles.buttonBoxContainer}>
+                    <CardButton variant='primary' onPress={() => onCertify?.()}>Skicka för certifiering</CardButton>
+                    <CardButton variant='danger' onPress={() => onDelete?.()}>Ta bort</CardButton>
+                </View>
+            </TouchableOpacity>
+            
     } else if (status === 'pending') {
         buttonBox = 
             <View style={styles.buttonBoxContainer}>
@@ -56,7 +58,7 @@ export default function PassportCard({ horse, status='draft', onDelete, onCertif
     } else if (status === 'approved') {
         buttonBox = 
             <View style={styles.buttonBoxContainer}>
-                <CardButton variant='success' onPress={() => {}}>Bekräfta och betala</CardButton>
+                <CardButton variant='success' onPress={() => {}}>Bekräfta och betala</CardButton>   
             </View>
     } else if (status === 'active') {
         buttonBox = 
@@ -65,13 +67,28 @@ export default function PassportCard({ horse, status='draft', onDelete, onCertif
         </View>
     }
 
+    let statusButton
+
+    if (status === 'draft' || status === 'revision') {
+        statusButton = 
+            <TouchableOpacity onPress={() => onEdit?.()}>
+                <View style={styles.statusButtonContainer}>
+                    <Feather name="edit" size={12} color="#aaaaaa" />
+                    <Text style={[styles.statusText, statusText]}>{statusLabel}</Text>
+                </View>
+            </TouchableOpacity>
+       
+    } else {
+        statusButton = <Text style={[styles.statusText, statusText]}>{statusLabel}</Text>
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.headerContainer}>
                 <Heading>{horse.name}</Heading>
-                <View style={[styles.statusContainer, statusContainer]}>
-                    <Text style={[styles.statusText, statusText]}>{statusLabel}</Text>
-                </View>
+                    <View style={[styles.statusContainer, statusContainer]}>
+                        {statusButton}
+                    </View>
             </View>
             <View style={styles.uelnContainer}>
                 <Text style={styles.uelnText}>{horse.ueln}</Text>
@@ -101,6 +118,10 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
         borderRadius: 20,
         backgroundColor: '#444444'
+    },
+    statusButtonContainer: {
+        flexDirection: 'row',
+        gap: 8
     },
     statusText: {
         fontFamily: 'Inter_300Light',

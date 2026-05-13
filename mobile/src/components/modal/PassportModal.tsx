@@ -1,5 +1,5 @@
 import { StyleSheet, View, Text, Modal, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import * as SecureStore from 'expo-secure-store'
@@ -16,7 +16,7 @@ import type { HorsePassport } from '@/types/horse-passport'
 import type { HorsePassportDraft } from '@/types/horse-passport-draft'
 import PrimaryButton from '../buttons/PrimaryButton'
 
-export default function PassportModal({ visible, onClose, onSaved }: {visible: boolean, onClose: () => void, onSaved: () => void }) {
+export default function PassportModal({ horse, visible, onClose, onSaved }: {horse?: HorsePassport, visible: boolean, onClose: () => void, onSaved: () => void }) {
     const insets = useSafeAreaInsets()
     const [horsePassport, setHorsePassport] = useState<Partial<HorsePassport>>({})
     const [errors, setErrors] = useState<Partial<Record<keyof HorsePassport, boolean>>>({})
@@ -24,6 +24,18 @@ export default function PassportModal({ visible, onClose, onSaved }: {visible: b
     const [isLoading, setIsLoading] = useState(false)
 
     const TOKEN_SERVER_URL = process.env.EXPO_PUBLIC_TOKEN_SERVER_URL
+
+    useEffect(() => {
+        if (horse) {
+            setHorsePassport(horse)
+        }
+    }, [horse])
+
+    useEffect(() => {
+        if (!visible && !horse) {
+            setHorsePassport({})
+        }
+    }, [visible])
 
     const validate = (): boolean => {
         const newErrors: Partial<Record<keyof HorsePassport, boolean>> = {}
