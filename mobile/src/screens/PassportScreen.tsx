@@ -1,200 +1,219 @@
-import { StyleSheet, View, FlatList } from 'react-native'
-import { useState, useEffect } from 'react'
-import { useWallet } from '@/context/WalletContext'
-import * as SecureStore from 'expo-secure-store'
-import { AuthFetch, Hash } from '@bsv/sdk'
-import { MessageBoxClient } from '@bsv/message-box-client'
+    import { StyleSheet, View, FlatList } from 'react-native'
+    import { useState, useEffect } from 'react'
+    import { useWallet } from '@/context/WalletContext'
+    import * as SecureStore from 'expo-secure-store'
+    import { AuthFetch, Hash, WalletClient } from '@bsv/sdk'
+    import { MessageBoxClient } from '@bsv/message-box-client'
 
 
-import PassportCard from '@/components/passport/PassportCard'
-import { HorsePassportDraft } from '@/types/horse-passport-draft'
-import { HorsePassport } from '@/types/horse-passport'
-import { usePassportModal } from '@/context/PassportModalContext'
-import PassportModal from '@/components/modal/PassportModal'
+    import PassportCard from '@/components/passport/PassportCard'
+    import { HorsePassportDraft } from '@/types/horse-passport-draft'
+    import { HorsePassport } from '@/types/horse-passport'
+    import { usePassportModal } from '@/context/PassportModalContext'
+    import PassportModal from '@/components/modal/PassportModal'
 
-const TOKEN_SERVER_URL = process.env.EXPO_PUBLIC_TOKEN_SERVER_URL
-const EQUUSV_IDENTITY_KEY = process.env.EXPO_PUBLIC_EQUUSV_IDENTITY_KEY
+    const TOKEN_SERVER_URL = process.env.EXPO_PUBLIC_TOKEN_SERVER_URL
+    const EQUUSV_IDENTITY_KEY = process.env.EXPO_PUBLIC_EQUUSV_IDENTITY_KEY
 
-export default function PassportScreen() {
-    const [drafts, setDrafts] = useState<HorsePassportDraft[]>([])
-    const [refresh, setRefresh] = useState(0)
-    const { visible, setVisible } = usePassportModal()
-    const { wallet } = useWallet()
+    export default function PassportScreen() {
+        const [drafts, setDrafts] = useState<HorsePassportDraft[]>([])
+        const [refresh, setRefresh] = useState(0)
+        const { visible, setVisible } = usePassportModal()
+        const { wallet } = useWallet()
 
-    useEffect(() => {
-        const fetchDrafts = async () => {
-            try {
-                const storedUelns = await SecureStore.getItemAsync('horseUelns')
-                console.log('storedUelns:', storedUelns)
-                const uelns: string[] = storedUelns ? JSON.parse(storedUelns) : []
-                console.log('uelns:', uelns)
-                
-                const fetchedDrafts = await Promise.all(
-                uelns.map(async (ueln) => {
-                    const stored = await SecureStore.getItemAsync(`passport-draft-${ueln}`)
-                    console.log(`passport-draft-${ueln}:`, stored)
-                    return stored ? JSON.parse(stored) as HorsePassportDraft : null
-                    })
-                )
-                console.log('validDrafts:', fetchedDrafts)
-                const validDrafts = fetchedDrafts.filter(draft => draft !== null) as HorsePassportDraft[]
-                setDrafts(validDrafts)
+        useEffect(() => {
+            const fetchDrafts = async () => {
+                try {
+                    const storedUelns = await SecureStore.getItemAsync('horseUelns')
+                    console.log('storedUelns:', storedUelns)
+                    const uelns: string[] = storedUelns ? JSON.parse(storedUelns) : []
+                    console.log('uelns:', uelns)
+                    
+                    const fetchedDrafts = await Promise.all(
+                    uelns.map(async (ueln) => {
+                        const stored = await SecureStore.getItemAsync(`passport-draft-${ueln}`)
+                        console.log(`passport-draft-${ueln}:`, stored)
+                        return stored ? JSON.parse(stored) as HorsePassportDraft : null
+                        })
+                    )
+                    console.log('validDrafts:', fetchedDrafts)
+                    const validDrafts = fetchedDrafts.filter(draft => draft !== null) as HorsePassportDraft[]
+                    setDrafts(validDrafts)
+                } catch (error) {
+                    console.error(error)
+                }
+            } 
+            fetchDrafts()
+        }, [refresh])
+
+        useEffect(() => {
+            if (!wallet) return
+            const client = new MessageBoxClient(
+                {
+                    walletClient: wallet,
+                    host: 'https://messagebox.babbage.systems'
+                })
+
+                const pollResponse = async () => {
+                    while (true) {
+                        try {
+                            const messages = await client.listMessages({
+                                messageBox: 'equusv-passport-certification-response'
+                            })
+                            for (const message of messages) {
+                                console.log('Svar mottaget från breeding-organisation')
+                                const { messageHash, signature, ueln } = typeof message.body === 'string'
+                                ? JSON.parse(message.body)
+                                : message.body
+
+                                if (ueln && signature) {
+                                    const storedDraft = await SecureStore.getItemAsync(`passport-draft-${ueln}`)
+                                    console.log('ueln:', ueln)
+                                    console.log('storedDraft:', storedDraft)
+                                    if (storedDraft) {
+                                        const updatedDraft: HorsePassportDraft = {...JSON.parse(storedDraft), status: 'approved'}
+                                        await SecureStore.setItemAsync(`passport-draft-${ueln}`, JSON.stringify(updatedDraft))
+                                        setRefresh(n => n + 1)
+                                    }
+                                    await client.acknowledgeMessage({ messageIds: [message.messageId]})
+                                }
+                            }
+                            await new Promise(resolve => setTimeout(resolve, 3000))
+                        } catch (error) {
+                            console.error(error)           
+                        }
+                    }
+                }
+                pollResponse()
+        }, [])
+
+        const handleOnDelete = async (ueln: string) => {
+        try {
+            const storedUelns = await SecureStore.getItemAsync('horseUelns')
+            const uelns: string[] = storedUelns ? JSON.parse(storedUelns) : []
+            const updatedUelnsList = uelns.filter(item => item !== ueln)
+
+            await Promise.all([
+                SecureStore.setItemAsync('horseUelns', JSON.stringify(updatedUelnsList)),
+                SecureStore.deleteItemAsync(`passport-draft-${ueln}`)
+            ])
+            
+            setRefresh(n => n + 1)
+        
             } catch (error) {
-                console.error(error)
+                console.error('handleOnDelete error:', error)
             }
-        } 
-        fetchDrafts()
-    }, [refresh])
 
-    useEffect(() => {
-        if (!wallet) return
-        const client = new MessageBoxClient(
-            {
+            if (!wallet) throw new Error('No wallet loaded')
+
+            try {
+                const authFetch = new AuthFetch(wallet)
+                const response = await authFetch.fetch(`${TOKEN_SERVER_URL}/draft`, {
+                    method: 'DELETE',
+                    headers: {
+                        'content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        tokenType: 'identity/passport',
+                        identityKey: wallet.identityKey,
+                        ueln
+                    })
+                })
+                return response.status
+            } catch (error) {
+                console.error('Not able to delete draft from server')
+            }
+        }
+
+        const handleOnCertify = async (ueln: string) => {
+            if (!wallet) throw new Error('No wallet loaded')
+            const client = new MessageBoxClient(
+            { 
                 walletClient: wallet,
                 host: 'https://messagebox.babbage.systems'
             })
 
-            const pollResponse = async () => {
-                while (true) {
-                    try {
-                        const messages = await client.listMessages({
-                            messageBox: 'equusv-passport-certification-response'
-                        })
-                        for (const message of messages) {
-                            console.log('Svar mottaget från breeding-organisation')
-                            const { messageHash, signature, ueln } = typeof message.body === 'string'
-                            ? JSON.parse(message.body)
-                            : message.body
+            const draft = drafts.find(d => d.horse.ueln === ueln)
 
-                            if (ueln && signature) {
-                                const storedUelns = await SecureStore.getItemAsync('horseUelns')
-                                const uelns: string[] = storedUelns ? JSON.parse(storedUelns) : []
+            if (!EQUUSV_IDENTITY_KEY) throw new Error('EQUUSV_IDENTITY_KEY not set')
 
-                                for (const ueln of uelns) {
-                                    const stored = await SecureStore.getItemAsync(`passport-draft-${ueln}`)
-                                    if (!stored) continue
-                                    const draft = JSON.parse(stored)
+            console.log('Skickar certifieringsansökan för:', ueln)
 
-                                    const draftBytes = Array.from(Buffer.from(JSON.stringify(draft), 'utf-8'))
-                                    const hash = Hash.sha256(draftBytes)
+            await client.sendMessage({
+                recipient: EQUUSV_IDENTITY_KEY,
+                messageBox: 'equusv-passport-certification',
+                body: JSON.stringify(draft)
+            }, 'https://messagebox.babbage.systems')
 
-                                    const updatedDraft: HorsePassportDraft = {...draft, status: 'approved'}
-                                    await SecureStore.setItemAsync(`passport-draft-${ueln}`, JSON.stringify(updatedDraft))
-                                    setDrafts(prev => prev.map(d => d.horse.ueln === ueln ? {...d, status: 'approved'} : d ))
-                                    
-                                }
-                                await client.acknowledgeMessage({ messageIds: [message.messageId] })
-                            }
-                        }
-                        await new Promise(resolve => setTimeout(resolve, 3000))
-                    } catch (error) {
-                         console.error(error)           
-                    }
-                }
-            }
-            pollResponse()
-    }, [])
+            try {
+                const draftInSecureStore = await SecureStore.getItemAsync(`passport-draft-${ueln}`)
+                if (!draftInSecureStore) throw new Error('No draft in SecureStore')
 
-    const handleOnDelete = async (ueln: string) => {
-       try {
-        const storedUelns = await SecureStore.getItemAsync('horseUelns')
-        const uelns: string[] = storedUelns ? JSON.parse(storedUelns) : []
-        const updatedUelnsList = uelns.filter(item => item !== ueln)
-
-        await Promise.all([
-            SecureStore.setItemAsync('horseUelns', JSON.stringify(updatedUelnsList)),
-            SecureStore.deleteItemAsync(`passport-draft-${ueln}`)
-        ])
+                const updatedDraft: HorsePassportDraft = {...JSON.parse(draftInSecureStore), status: 'pending'}
+                await SecureStore.setItemAsync(`passport-draft-${ueln}`, JSON.stringify(updatedDraft))
         
-        setRefresh(n => n + 1)
-       
-        } catch (error) {
-            console.error('handleOnDelete error:', error)
+                setRefresh(n => n + 1)
+            } catch (error) {
+                console.error('Error updating status:', error)
+            }
+            console.log('Meddelande skickat')
         }
 
-        if (!wallet) throw new Error('No wallet loaded')
-
+        const handleOnRevoke = async (ueln: string) => {
         try {
-            const authFetch = new AuthFetch(wallet)
-            const response = await authFetch.fetch(`${TOKEN_SERVER_URL}/draft`, {
-                method: 'DELETE',
-                headers: {
-                    'content-type': 'application/json'
-                },
-                body: JSON.stringify({
-                    tokenType: 'identity/passport',
-                    identityKey: wallet.identityKey,
-                    ueln
-                })
-            })
-            return response.status
-        } catch (error) {
-            console.error('Not able to delete draft from server')
+                const storedDraft = await SecureStore.getItemAsync(`passport-draft-${ueln}`)
+                const draft = storedDraft ? JSON.parse(storedDraft) : ''
+
+                const updatedDraft = {...draft, status: 'draft'}
+                await SecureStore.setItemAsync(`passport-draft-${ueln}`, JSON.stringify(updatedDraft))
+                setRefresh(n => n + 1)
+
+                if (!wallet) throw new Error('No wallet loaded')
+                const client = new MessageBoxClient({
+                        walletClient: wallet,
+                        host: 'https://messagebox.babbage.systems'
+                    })
+
+                await client.sendMessage({
+                    recipient: EQUUSV_IDENTITY_KEY!,
+                    messageBox: 'equusv-passport-certification',
+                    body: JSON.stringify({ action: 'revoke', ueln})
+                }, 'https://messagebox.babbage.systems')
+            
+            } catch (error) {
+                console.error(error)
+            }
         }
+
+
+        return (
+            <View style={styles.container}>
+                <PassportModal
+                    visible={visible}
+                    onSaved={() => setRefresh(n => n + 1)}
+                    onClose={() => setVisible(false)}
+                />
+                <FlatList
+                    data={drafts}
+                    keyExtractor={(item) => item.horse.ueln}
+                    renderItem={({ item }) => (
+                        <PassportCard
+                            horse={item.horse}
+                            status={item.status}
+                            onDelete={() => handleOnDelete(item.horse.ueln)}
+                            onCertify={() => handleOnCertify(item.horse.ueln)}
+                            onRevoke={() => handleOnRevoke(item.horse.ueln)}
+                        />
+                    )}
+                />
+            </View>
+        )
     }
 
-    const handleOnCertify = async (ueln: string) => {
-        if (!wallet) throw new Error('No wallet loaded')
-        const client = new MessageBoxClient(
-        { 
-            walletClient: wallet,
-            host: 'https://messagebox.babbage.systems'
-        })
-
-        const draft = drafts.find(d => d.horse.ueln === ueln)
-
-        if (!EQUUSV_IDENTITY_KEY) throw new Error('EQUUSV_IDENTITY_KEY not set')
-
-        console.log('Skickar certifieringsansökan för:', ueln)
-
-        await client.sendMessage({
-            recipient: EQUUSV_IDENTITY_KEY,
-            messageBox: 'equusv-passport-certification',
-            body: JSON.stringify(draft)
-        }, 'https://messagebox.babbage.systems')
-
-        try {
-            const draftInSecureStore = await SecureStore.getItemAsync(`passport-draft-${ueln}`)
-            if (!draftInSecureStore) throw new Error('No draft in SecureStore')
-
-            const updatedDraft: HorsePassportDraft = {...JSON.parse(draftInSecureStore), status: 'pending'}
-            await SecureStore.setItemAsync(`passport-draft-${ueln}`, JSON.stringify(updatedDraft))
-    
-            setRefresh(n => n + 1)
-        } catch (error) {
-            console.error('Error updating status:', error)
-        }
-        console.log('Meddelande skickat')
-    }
-
-
-    return (
-        <View style={styles.container}>
-            <PassportModal
-                visible={visible}
-                onSaved={() => setRefresh(n => n + 1)}
-                onClose={() => setVisible(false)}
-            />
-            <FlatList
-                data={drafts}
-                keyExtractor={(item) => item.horse.ueln}
-                renderItem={({ item }) => (
-                    <PassportCard
-                        horse={item.horse}
-                        status={item.status}
-                        onDelete={() => handleOnDelete(item.horse.ueln)}
-                        onCertify={() => handleOnCertify(item.horse.ueln)}
-                    />
-                )}
-            />
-        </View>
-    )
-}
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#1a1a1a',
-    },
-    
-})
+    const styles = StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: '#1a1a1a',
+        },
+        
+    })

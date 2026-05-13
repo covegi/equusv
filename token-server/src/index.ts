@@ -114,7 +114,27 @@
                     ? JSON.parse(message.body)
                     : message.body
 
+                    console.log('Draft mottagen:', JSON.stringify(draft))
+
+                    if (draft.action === 'revoke') {
+                        console.log('Återkallelse mottagen för:', draft.ueln)
+                        await client.acknowledgeMessage({ messageIds: [message.messageId]})
+                        continue
+                    }
+
                     await new Promise(resolve => setTimeout(resolve, 5000))
+
+                    const pending = await client.listMessages({ messageBox: 'equusv-passport-certification' })
+                    const revoked = pending.some(m => {
+                        const body = typeof m.body === 'string' ? JSON.parse(m.body) : m.body
+                        return body.action === 'revoke' && body.ueln === draft.horse.ueln
+                    }) 
+
+                    if (revoked) {
+                        console.log('Återkallad – skickar inte svar')
+                        await client.acknowledgeMessage({ messageIds: [message.messageId]})
+                        continue
+                    }
 
                     const draftString = JSON.stringify(draft)
                     const draftBytes = Array.from(Buffer.from(draftString, 'utf-8'))
