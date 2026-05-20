@@ -58,7 +58,7 @@ export default function ConfirmPinScreen() {
                         console.log('certificate acquired:', JSON.stringify(cert))
                         
                         setWallet(wallet)
-                        router.push('/horses')
+                        router.replace('/horses')
                         
                     } catch (error) {
                         // Alert.alert('Fel', 'Ingen internetanslutning. Försök igen.')

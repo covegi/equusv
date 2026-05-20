@@ -6,7 +6,7 @@ import Heading from "../text/Heading"
 import CardButton from "../buttons/CardButton"
 
 
-export default function PassportCard({ horse, status='draft', onDelete, onCertify, onRevoke, onEdit }: { horse: HorsePassport, status: string, onDelete?: () => void, onCertify?: () => void, onRevoke?: () => void, onEdit?: () => void }) {
+export default function PassportCard({ horse, status='draft', onDelete, onCertify, onRevoke, onEdit, onBroadcast }: { horse: HorsePassport, status: string, onDelete?: () => void, onCertify?: () => void, onRevoke?: () => void, onEdit?: () => void, onBroadcast?: () => void }) {
 
     const statusLabel = {
         draft: 'Utkast',
@@ -36,12 +36,10 @@ export default function PassportCard({ horse, status='draft', onDelete, onCertif
 
     if (status === 'draft') {
         buttonBox = 
-            <TouchableOpacity onPress={() => onEdit?.()}>
                 <View style={styles.buttonBoxContainer}>
                     <CardButton variant='primary' onPress={() => onCertify?.()}>Skicka för certifiering</CardButton>
                     <CardButton variant='danger' onPress={() => onDelete?.()}>Ta bort</CardButton>
                 </View>
-            </TouchableOpacity>
             
     } else if (status === 'pending') {
         buttonBox = 
@@ -58,7 +56,7 @@ export default function PassportCard({ horse, status='draft', onDelete, onCertif
     } else if (status === 'approved') {
         buttonBox = 
             <View style={styles.buttonBoxContainer}>
-                <CardButton variant='success' onPress={() => {}}>Bekräfta och betala</CardButton>   
+                <CardButton variant='success' onPress={() => onBroadcast?.()}>Bekräfta och betala</CardButton>   
             </View>
     } else if (status === 'active') {
         buttonBox = 

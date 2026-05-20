@@ -13,7 +13,7 @@ export default function StartScreen() {
         const check = async () => {
             const rootKeyHex = await SecureStore.getItemAsync('rootKeyHex')
             if (rootKeyHex) {
-                router.push('/login')
+                router.replace('/login')
             }
         }
         check()

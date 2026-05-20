@@ -10,8 +10,8 @@ export default function PassportHeaderRight() {
                 () => {
                     passportModal.setVisible(true)
                 }
-            }>
-                <AntDesign name='plus' size={20} color='#f7f2f2' /> 
+            } style={{ paddingRight: 10 }}>
+                <AntDesign name='plus' size={24} color='#f7f2f2' /> 
             </TouchableOpacity>
     )
 }

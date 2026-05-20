@@ -17,6 +17,8 @@ export default function HorseJournal({ horse }: { horse: HorsePassport }) {
           const fetchImage = async () => {
                setIsLoading(true)
 
+               console.log(horse.photoUhrp)
+
                if (!horse.photoUhrp) {
                     setIsLoading(false)
                     return

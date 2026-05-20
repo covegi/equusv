@@ -1,7 +1,7 @@
 import { StyleSheet, View, Text, Modal, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native'
 import { useState, useEffect } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import Ionicons from '@expo/vector-icons/Ionicons'
+import AntDesign from '@expo/vector-icons/AntDesign'
 import * as SecureStore from 'expo-secure-store'
 import { AuthFetch, PrivateKey, ECIES } from '@bsv/sdk'
 import { useWallet } from '@/context/WalletContext'
@@ -55,47 +55,6 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
-
-    // const createToken = async ({ horse }: { horse: HorsePassport }): Promise<void> =>{
-    //     if (!wallet) throw new Error('Wallet not initialized') 
-    //     const authFetch = new AuthFetch(wallet)
-        
-    //     const identityKey = wallet.identityKey
-
-    //     const response = await authFetch.fetch(`${TOKEN_SERVER_URL}/identity/passport/create`, {
-    //         method: 'POST',
-    //         body: JSON.stringify({ horse, identityKey }),
-    //         headers: {
-    //             'Content-Type': 'application/json'
-    //         }
-    //     })
-
-    //     const { tx: txBase64, txid, outputIndex } = await response.json()
-    //     const tx = Array.from(Buffer.from(txBase64, 'base64'))
-
-    //     await wallet.internalizeAction({
-    //         tx,
-    //         outputs: [{
-    //             outputIndex: outputIndex,
-    //             protocol: 'basket insertion',
-    //             insertionRemittance: {
-    //                 basket: `equusv-${horse.ueln}`,
-    //                 customInstructions: JSON.stringify({ type: 'horse-passport'}),
-    //                 tags: ['passport']
-    //             }
-    //         }],
-    //         description: 'Internalize horse passport'
-    //     })
-
-    //     const stored = await SecureStore.getItemAsync('horseUelns')
-    //     const uelns: string[] = stored ? JSON.parse(stored) : []
-    //     if (!uelns.includes(horse.ueln)) {
-    //         uelns.push(horse.ueln)
-    //         await SecureStore.setItemAsync('horseUelns', JSON.stringify(uelns))
-    //     }
-
-    //     await SecureStore.setItemAsync(`passportTxid-${horse.ueln}`, txid)
-    // }
 
     const savePassportDraft = async (): Promise<HorsePassportDraft> => {
         if (!wallet) throw new Error('Wallet not initialized.')
@@ -189,12 +148,12 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                         </View>
                     )}
                     <ScrollView>
-                        <View style={[styles.headerContainer, { top: insets.top + 26 }]}>
-                            <View>
+                        <View style={[styles.headerContainer]}>
+                            <View style={{ paddingTop: 60 }}>
                                 <Heading color='#1a1a1a'>Nytt hästpass</Heading>
                             </View>
                             <TouchableOpacity onPress={handleOnClose}>
-                                <Ionicons name="close" size={30} color="#1a1a1a" />
+                                <AntDesign name="close" size={26} color="#1a1a1a" style={{ paddingTop: 60 }}/>
                             </TouchableOpacity>
                         </View>
                         <View style={styles.container}>
@@ -335,13 +294,13 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        marginHorizontal: 15,
-        backgroundColor: '#f7f2f2'
+        backgroundColor: '#f7f2f2',
+        paddingHorizontal: 25,
     },
     headerContainer: {
         backgroundColor: '#f7f2f2',
-        height: 100,
-        marginHorizontal: 15,
+        height: 96,
+        paddingHorizontal: 25,
         flexDirection: 'row',
         justifyContent: 'space-between'
     },

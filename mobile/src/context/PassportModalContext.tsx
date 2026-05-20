@@ -1,11 +1,11 @@
-import { createContext, ReactNode, useContext, useState } from "react"
+import { createContext, useContext, useState } from "react"
 
 type PassportModalContextType = {
     visible: boolean,
-    setVisible: () => void
+    setVisible: (visible: boolean) => void
 }
 
-const PassportModalContext = createContext({
+const PassportModalContext = createContext<PassportModalContextType>({
     visible: false,
     setVisible: (visible: boolean) => {}
 })

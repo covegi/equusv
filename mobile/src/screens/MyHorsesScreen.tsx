@@ -1,26 +1,16 @@
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, ActivityIndicator, Animated } from 'react-native'
-import { useState, useEffect, useRef } from 'react'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import AntDesign from '@expo/vector-icons/AntDesign'
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
+import { StyleSheet, Text, View, FlatList, ActivityIndicator, Animated } from 'react-native'
+import { useState, useEffect } from 'react'
 import { useWallet } from '@/context/WalletContext'
 import { PushDrop, LockingScript } from '@bsv/sdk'
 import * as SecureStore from 'expo-secure-store'
-import { useRouter } from 'expo-router'
 
-import Heading from '@/components/text/Heading'
 import HorseJournal from '@/components/journal/HorseJournal'
-
 import type { HorsePassport } from '@/types/horse-passport'
 
 export default function MyHorsesScreen() {
-    const insets = useSafeAreaInsets()
     const [horse, setHorse] = useState<HorsePassport[]>([])
     const { wallet } = useWallet()
     const [isLoading, setIsLoading] = useState(false)
-    const [menuVisible, setMenuVisible] = useState(false)
-    const slideAnim = useRef(new Animated.Value(300)).current
-    const router = useRouter()
 
     useEffect(() => {
        const fetchHorses = async () => {
@@ -77,7 +67,6 @@ export default function MyHorsesScreen() {
                 organisation: decode(fields[10]),
                 issuedDate: decode(fields[11]),
                 foodChainStatus: decode(fields[12]) === 'true',
-                photoUhrp: decode(fields[13]),
             } as HorsePassport
         })
         setHorse(horses)
@@ -87,62 +76,10 @@ export default function MyHorsesScreen() {
     }, [wallet])
 
     if (!wallet) return null
-
-    const openMenu = () => {
-        setMenuVisible(true)
-        Animated.timing(slideAnim, {
-            toValue: 0,
-            duration: 350,
-            useNativeDriver: true
-        }).start()
-    }
-
-    const closeMenu = () => {
-        Animated.timing(slideAnim, {
-            toValue: 500,
-            duration: 350,
-            useNativeDriver: true
-        }).start(() => setMenuVisible(false))
-    }
-
-    const menyItems = [
-        { label: 'Hästpass', onPress: () => router.push('/passport') }
-    ]
     
     return (
-        <View style={styles.outerContainer}>
-            {menuVisible && 
-                <Animated.View style={[styles.menuContainer, { transform: [{ translateX: slideAnim }]}]}>
-                    <View style={styles.closeIconContainer}>
-                        <TouchableOpacity
-                            onPress={closeMenu}
-                            style={[styles.closeIcon]}>
-                            <AntDesign name="close" size={24} color="#1a1a1a" />
-                        </TouchableOpacity>
-                        <Text style={styles.menuText}>Aktiviteter</Text>
-                    </View>
-                    {menyItems.map(item => (
-                        <TouchableOpacity onPress={item.onPress} key={item.label}>
-                            <View style={styles.listItemContainer}>
-                                <FontAwesome6 name="passport" size={30} color="#1a1a1a" />
-                                {<Text style={styles.listItemText}>{item.label}</Text>}
-                            </View>
-                        </TouchableOpacity>
-                    ))}
-                </Animated.View>
-            }
-            
-            <View style={styles.mainHeaderContainer}>
-                <View style={[styles.headerContainer, { top: insets.top + 36 }]}>
-                    <Heading>Mina hästar</Heading>
-                </View>
-                <TouchableOpacity onPress={openMenu}>
-                    <View style={[styles.hamburgerContainer, { top: insets.top + 12 }]}>
-                        <AntDesign name="menu" size={24} color="#f7f2f2" />
-                    </View>
-                </TouchableOpacity>
-            </View>
-            <View style={[styles.centerContainer, { top: insets.top }]}>
+            <View style={styles.outerContainer}>
+            <View style={[styles.centerContainer]}>
               {isLoading 
                 ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 }}>
                     <ActivityIndicator color='#C8963E' size="large" />
@@ -154,7 +91,7 @@ export default function MyHorsesScreen() {
                 snapToInterval={590}
                 decelerationRate='fast'
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 50 }}
+                contentContainerStyle={{ paddingTop: 20, paddingBottom: 50 }}
               />}
             </View>
         </View>
@@ -165,34 +102,7 @@ const styles = StyleSheet.create({
     outerContainer: {
         flex: 1,
         backgroundColor: '#1a1a1a',
-    },
-    menuContainer: {
-        height: '100%',
-        width: '100%',
-        position: 'absolute',
-        backgroundColor: '#f7f2f2',
-        zIndex: 15
-    },
-    closeIconContainer: {
-        flexDirection: 'row',
-        alignItems: 'center'
-    },
-    closeIcon: {
-        justifyContent: 'flex-start',
-        paddingLeft: 25,
-        paddingTop: 60,
-        marginBottom: 20
-    },
-    menuText: {
-        color: '#1a1a1a',
-        fontFamily: 'Inter_600SemiBold',
-        fontSize: 24,
-        paddingTop: 40,
-        paddingLeft: 10
-    },
-    mainHeaderContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between'
+        position: 'relative'
     },
     hamburgerContainer: {
         marginRight: 25
@@ -203,23 +113,12 @@ const styles = StyleSheet.create({
     },
     centerContainer: {
         flex: 1,
-        marginHorizontal: 15,
+        paddingHorizontal: 25,
         justifyContent: 'flex-start',
     },
     iconText: {
         fontFamily: 'Inter_300Light',
         fontSize: 12,
         color: '#f7f2f2'
-    },
-    listItemContainer: {
-        height: 60,
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingLeft: 25
-    },
-    listItemText: {
-        fontFamily: 'Inter_400Regular',
-        fontSize: 18,
-        paddingLeft: 20
     }
 })
