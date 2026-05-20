@@ -4,7 +4,7 @@ import { useWallet } from '@/context/WalletContext'
 import { PushDrop, LockingScript } from '@bsv/sdk'
 import * as SecureStore from 'expo-secure-store'
 
-import HorseJournal from '@/components/journal/HorseJournal'
+import HorseListCard from '@/components/journal/HorseListCard'
 import type { HorsePassport } from '@/types/horse-passport'
 
 export default function MyHorsesScreen() {
@@ -35,14 +35,9 @@ export default function MyHorsesScreen() {
             include: 'locking scripts',
         }))
        )
-       console.log('allOutputs raw:', JSON.stringify(allOutputs))
-
-        console.log('All outputs:', allOutputs)
 
         const outputs = allOutputs.flatMap(r => r.outputs)
-        console.log('outputs[0]:', JSON.stringify(outputs[0]))
-        console.log('lockingScript type:', typeof outputs[0]?.lockingScript)
-        console.log('lockingScript value:', outputs[0]?.lockingScript)
+
 
         const horses: HorsePassport[] = outputs
             .filter(output => {
@@ -87,9 +82,7 @@ export default function MyHorsesScreen() {
                 </View>
                 : <FlatList 
                 data={horse}
-                renderItem={({ item }) => <HorseJournal horse={item} />}
-                snapToInterval={590}
-                decelerationRate='fast'
+                renderItem={({ item }) => <HorseListCard key={item.ueln} horse={item} />}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingTop: 20, paddingBottom: 50 }}
               />}
