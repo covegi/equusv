@@ -1,0 +1,23 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0
+}
+
+:root {
+    --color-rust: #913d00;
+    --color-rust-bright: #b65109;
+    --color-black: #1b1b1b;
+    --color-white-warm: #f9f9f9;
+    --color-white: #ffffff;
+    --color-gray-light: #f3f3f3;
+    --color-text-secondary: #574238;
+    --color-text-muted: #8a7267;
+  }
+
+body {
+    font-family: 'Inter', sans-serif;
+}
+

@@ -1,0 +1,10 @@
+main {
+    flex: 1;
+    background-color: var(--color-gray-light);
+}
+
+.outerContainer {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
