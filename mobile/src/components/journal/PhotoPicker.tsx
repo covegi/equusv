@@ -1,10 +1,11 @@
 import { StyleSheet, Pressable, Image, Alert, Linking } from 'react-native'
-import Ionicons from '@expo/vector-icons/Ionicons'
+import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import * as ImagePicker from 'expo-image-picker'
 
 export default function PhotoPicker({ photoUri, onPhotoSelected }: { photoUri: string, onPhotoSelected: (uri: string, source: 'camera' | 'gallery') => void }) {
 
     const handlePress = () => {
+        console.log('handlePress called, photoUri:', photoUri)
         Alert.alert('Foto', 'Välj alternativ', [
             {
                 text: 'Ta foto',
@@ -77,7 +78,7 @@ export default function PhotoPicker({ photoUri, onPhotoSelected }: { photoUri: s
         <Pressable onPress={handlePress} style={styles.container}>
             {photoUri
             ? <Image source={{ uri: photoUri }} style={styles.image} resizeMode='cover' />
-            : <Ionicons name="camera-outline" size={48} color="#1a1a1a" />
+            : <MaterialIcons name="add-photo-alternate" size={40} color="#aaaaaa" />
             }
         </Pressable>
     )
@@ -90,14 +91,10 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         justifyContent: 'center',
         alignItems: 'center',
-        borderTopLeftRadius: 10,
-        borderTopRightRadius: 10,
-        borderColor: '#1a1a1a',
-        borderWidth: 2,
-        marginTop: 15
+        marginTop: 15,
     },
     image: {
         height: '100%',
-        width: '100%'
+        width: '100%',
     }
 })

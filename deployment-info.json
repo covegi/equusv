@@ -2,11 +2,16 @@
     "schema": "bsv-app",
     "schemaVersion": "1.0",
     "topicManagers": {
-        "tm_horse_passport": "./src/topic-managers/identity/EquusVHorsePassportTopicManager.ts"
+        "tm_horse_passport": "./src/mod-passport.ts",
+        "tm_uhrp": "./src/mod-uhrp.ts"
     },
     "lookupServices": {
-        "ls_horse_passport": { 
-            "serviceFactory": "./src/lookup-services/identity/EquusVHorsePassportLookupServiceFactory.ts",
+        "ls_passport": { 
+            "serviceFactory": "./src/mod-passport.ts",
+            "hydrateWith": "mongo"
+        },
+        "ls_uhrp": {
+            "serviceFactory": "./src/mod-uhrp.ts",
             "hydrateWith": "mongo"
         }
     }, 

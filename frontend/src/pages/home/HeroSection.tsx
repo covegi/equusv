@@ -21,7 +21,6 @@ export default function HeroSection() {
                 <div className={styles.imageBlock}>   
                     <img src={example} alt="EquusV Journal" className={styles.heroImg}/>
                 </div>
-                
             </div>
         </div>
     )

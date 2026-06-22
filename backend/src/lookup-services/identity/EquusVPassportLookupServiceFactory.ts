@@ -1,16 +1,16 @@
 import type { AdmissionMode, LookupService, OutputAdmittedByTopic, OutputSpent, SpendNotificationMode } from "@bsv/overlay"
 import { PushDrop, Utils, LockingScript } from '@bsv/sdk'
-import type { EquusVHorsePassportRecord, UTXOReference } from "../../types/identity/horse-passport.js"
-import equusVHorsePassportLookupServiceDocsMd from "../../docs/identity/EquusVHorsePassportLookupServiceDocs.md.js"
+import type { EquusVPassportRecord, UTXOReference } from "../../types/identity/passport.js"
+import equusVHorsePassportLookupServiceDocsMd from "../../docs/identity/EquusVPassportLookupServiceDocs.md.js"
 import { Db, Collection } from 'mongodb'
 
 class EquusVHorsePassportLookupService implements LookupService {
     readonly admissionMode: AdmissionMode = 'locking-script'
     readonly spendNotificationMode: SpendNotificationMode = 'txid'
-    records: Collection<EquusVHorsePassportRecord>
+    records: Collection<EquusVPassportRecord>
 
     constructor(db: Db) {
-        this.records = db.collection<EquusVHorsePassportRecord>('horse_passport_records')
+        this.records = db.collection<EquusVPassportRecord>('horse_passport_records')
     }
 
     async getDocumentation(): Promise<string> {

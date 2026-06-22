@@ -4,8 +4,9 @@
     import { Setup } from '@bsv/wallet-toolbox'
     import { PrivateKey, Hash } from '@bsv/sdk'
     import { createAuthMiddleware } from '@bsv/auth-express-middleware'
-    import { MessageBoxClient } from '@bsv/message-box-client'
+    import { PeerPayClient } from '@bsv/message-box-client'
     import passportRouter from './routes/identity/passport.js'
+    import uhrpRouter from './routes/identity/uhrp.js'
     import horseOwnerCertificate from './routes/certify/horse-owner.js'
     import horseBreederCertificate from './routes/certify/breeding-organisation.js'
     import identityKey from './routes/utils/identityKey.js'
@@ -77,6 +78,7 @@
 
         app.use('/', draftRouter(wallet))
         app.use('/', passportRouter(wallet))
+        app.use('/', uhrpRouter(wallet))
 
         app.use('/', horseOwnerCertificate(wallet))
         app.use('/', horseBreederCertificate(wallet))
@@ -88,18 +90,10 @@
             console.log(`token-server is running on port ${PORT}`)
         })
         
-        const client = new MessageBoxClient({
+        const client = new PeerPayClient({
                 walletClient: wallet, 
-                host: 'https://messagebox.babbage.systems'
+                messageBoxHost: 'https://messagebox.babbage.systems'
         })
-
-        console.log('Startar lyssnare...')
-        try {
-            await client.anointHost('https://messagebox.babbage.systems')
-            console.log('Host anointed')
-        } catch (error) {
-            console.error('anointHost error:', error)
-        }
 
     const pollMessages = async () => {
         while (true) {

@@ -1,10 +1,10 @@
 import type { AdmittanceInstructions, TopicManager } from '@bsv/overlay'
 import { Transaction, PushDrop } from '@bsv/sdk'
-import equusVHorsePassportTopicDocsMd from '../../docs/identity/EquusVHorsePassportTopicDocs.md.js'
+import equusVPassportTopicDocsMd from '../../docs/identity/EquusVPassportTopicDocs.md.js'
 
 export default class EquusVHorsePassportTopicManager implements TopicManager {
     async getDocumentation(): Promise<string> {
-        return equusVHorsePassportTopicDocsMd
+        return equusVPassportTopicDocsMd
     }
 
     async getMetaData(): Promise<{ name: string, shortDescription: string, iconURL?: string, version?: string, informationURL?: string}> {

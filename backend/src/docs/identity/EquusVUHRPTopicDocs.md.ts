@@ -1,0 +1,2 @@
+export default `# EquusV UHRP Topic Manager
+Validates UHRP file tokens for the tm_uhrp topic. Checks PushDrop fields: version, UELN, UHRP URL, token type, MIME type, description, created at timestamp and parent transaction ID.`

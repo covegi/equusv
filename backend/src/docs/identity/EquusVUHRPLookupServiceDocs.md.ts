@@ -1,0 +1,2 @@
+export default `# EquusV UHRP Lookup Service
+Provides lookup functionality for UHRP file tokens in the EquusV overlay. Supports querying by UELN, token type and parent transaction ID to retrieve media asset token references.`

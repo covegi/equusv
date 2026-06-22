@@ -1,4 +1,4 @@
-export interface EquusVHorsePassportRecord {
+export interface EquusVPassportRecord {
     version: string,
     name: string
     breed: string
