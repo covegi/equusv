@@ -1,14 +1,15 @@
-    import { StyleSheet, Text, View, Image, ActivityIndicator } from 'react-native'
+    import { StyleSheet, Text, View, Image, ActivityIndicator, Pressable } from 'react-native'
     import { useState, useMemo } from 'react'
     import { Utils, AuthFetch, PublicKey, ECIES } from '@bsv/sdk'
     import { File } from 'expo-file-system'
     import { useWallet } from '@/context/WalletContext' 
     import type { HorsePassport } from '@/types/horse-passport'
     import PhotoPicker from './PhotoPicker'
+    import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
 
     const TOKEN_SERVER = process.env.EXPO_PUBLIC_TOKEN_SERVER_URL
 
-    export default function HorseListCard({ horse, horseImage, onPhotoUploaded, isLoadingImage }: { horse: HorsePassport, horseImage: string | null, onPhotoUploaded: (ueln: string, dataUri: string) => void, isLoadingImage: boolean }) {
+    export default function HorseListCard({ horse, horseImage, onPhotoUploaded, isLoadingImage, onPress }: { horse: HorsePassport, horseImage: string | null, onPhotoUploaded: (ueln: string, dataUri: string) => void, isLoadingImage: boolean, onPress: (horse: HorsePassport) => void }) {
         const [uhrpUrl, setUhrpUrl] = useState<string | null>(null)
         const [isUploadingImage, setIsUploadingImage] = useState(false)
         const { wallet } = useWallet()
@@ -86,15 +87,18 @@
         console.log('horseImage prop:', horseImage?.substring(0, 50))
 
         return (
-            <View style={styles.outerContainer}>
-                <View>
-                {content}
-                    <View style={styles.textContainer}>
-                        <Text style={styles.name}>{horse.name}</Text>
-                        <Text style={styles.ueln}>{horse.ueln}</Text>
+            <Pressable onPress={() => onPress(horse)}>
+                <View style={styles.outerContainer}>
+                    <View>  
+                    {content}
+                        <View style={styles.textContainer}>
+                            <Text style={styles.name}>{horse.name}</Text>
+                            <Text style={styles.ueln}>{horse.ueln}</Text>
+                        </View>
                     </View>
                 </View>
-            </View>
+            </Pressable>
+            
         )
     }
 

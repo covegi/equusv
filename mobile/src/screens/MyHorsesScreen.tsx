@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, FlatList, ActivityIndicator } from 'react-native'
+import { StyleSheet, Text, View, FlatList, ActivityIndicator, Modal } from 'react-native'
 import { useState, useEffect } from 'react'
 import { useWallet } from '@/context/WalletContext'
 import { PushDrop, LockingScript, LookupResolver, Transaction } from '@bsv/sdk'
@@ -7,6 +7,7 @@ import * as SecureStore from 'expo-secure-store'
 import HorseListCard from '@/components/journal/HorseListCard'
 import type { HorsePassport } from '@/types/horse-passport'
 import { fetchFromUhrp } from '@/utils/uhrp'
+import HorseJournal from '@/components/journal/HorseJournal'
 
 export default function MyHorsesScreen() {
     const [horse, setHorse] = useState<HorsePassport[]>([])
@@ -14,6 +15,7 @@ export default function MyHorsesScreen() {
     const [isLoading, setIsLoading] = useState(false)
     const [isLoadingImage, setIsLoadingImage] = useState<Record<string, boolean>>({})
     const [horseImage, setHorseImage] = useState<Record<string, string>>({})
+    const [selectedHorse, setSelectedHorse] = useState<HorsePassport | null>(null)
 
     useEffect(() => {
         if (horse.length === 0) return
@@ -144,29 +146,37 @@ export default function MyHorsesScreen() {
     
     return (
             <View style={styles.outerContainer}>
-            <View style={[styles.centerContainer]}>
-              {isLoading 
-                ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 }}>
-                    <ActivityIndicator color='#C8963E' size="large" />
-                    <Text style={styles.iconText}>Hämtar dina hästar... </Text>
-                </View>
-                : <FlatList 
-                data={horse}
-                extraData={horseImage}
-                renderItem={({ item }) => 
-                    <HorseListCard 
-                        horse={item}
-                        horseImage={horseImage[item.ueln] ?? null}
-                        onPhotoUploaded={handlePhotoUploaded}
-                        isLoadingImage={isLoadingImage[item.ueln] ?? false}    
-                    />
-                        
-                }
-                showsVerticalScrollIndicator={false}
+                <View style={[styles.centerContainer]}>
+                {isLoading 
+                    ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 }}>
+                        <ActivityIndicator color='#C8963E' size="large" />
+                        <Text style={styles.iconText}>Hämtar dina hästar... </Text>
+                    </View>
+                    : <FlatList 
+                    data={horse}
+                    extraData={horseImage}
+                    renderItem={({ item }) => 
+                        <HorseListCard 
+                            horse={item}
+                            horseImage={horseImage[item.ueln] ?? null}
+                            onPhotoUploaded={handlePhotoUploaded}
+                            isLoadingImage={isLoadingImage[item.ueln] ?? false}
+                            onPress={() => setSelectedHorse(null)}    
+                        />
+                            
+                    }
+                    showsVerticalScrollIndicator={false}
 
-                contentContainerStyle={{ paddingTop: 20, paddingBottom: 50 }}
-              />}
-            </View>
+                    contentContainerStyle={{ paddingTop: 20, paddingBottom: 50 }}
+                />}
+                </View>
+                <Modal visible={!!selectedHorse} animationType='slide' presentationStyle='pageSheet'>
+                    <HorseJournal 
+                        horse={selectedHorse}
+                        horseImage={horseImage[selectedHorse?.ueln ?? '']}
+                        onClose={() => setSelectedHorse(null)}
+                    />
+                </Modal>
         </View>
     )
 }
