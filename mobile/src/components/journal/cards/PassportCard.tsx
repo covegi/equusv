@@ -1,80 +1,88 @@
-import { StyleSheet, View, Text } from "react-native"
-import Entypo from '@expo/vector-icons/Entypo';
+import { StyleSheet, View, Text, Pressable } from "react-native"
+import { useState } from "react"
 import type { HorsePassport } from "@/types/horse-passport"
 
 export default function PassportCard({ horse }: { horse: HorsePassport}) {
+    const [expanded, setExpanded] = useState(false)
 
     return (
         <View style={styles.outerContainer}>
-            <View style={styles.headerRow}>
-                <Text style={styles.category}>IDENTITET</Text>
-                <View style={styles.verfiedContainer}>
-                    <Text style={styles.verfiedText}>Ej verifierad</Text>
-                    <View style={styles.dot}/>
-                </View>
-            </View>
-            <View style={styles.secondRow}>
-                <Text style={styles.secondRowText}>Hästpass</Text>
-            </View>
-            <View style={styles.divider} />
-            <View style={styles.dataRow}>
-                <View style={styles.dataColumn}>
-                    <Text style={styles.label}>Namn</Text>
-                    <Text style={styles.value}>{horse.name}</Text>
-                </View>
-                <View style={styles.dataColumn}>
-                    <Text style={styles.label}>UELN</Text>
-                    <Text style={styles.value}>{horse.ueln}</Text>
-                </View>
-            </View>
-            <View style={styles.dataRow}>
-                <View style={styles.dataColumn}>
-                    <Text style={styles.label}>Ras</Text>
-                    <Text style={styles.value}>{horse.breed}</Text>
-                </View>
-                <View style={styles.dataColumn}>
-                    <Text style={styles.label}>Kön</Text>
-                    <Text style={styles.value}>{horse.sex}</Text>
-                </View>
-            </View>
-            <View style={styles.dataRow}>
-                <View style={styles.dataColumn}>
-                    <Text style={styles.label}>Födelsedatum</Text>
-                    <Text style={styles.value}>{horse.birthDate}</Text>
-                </View>
-                <View style={styles.dataColumn}>
-                    <Text style={styles.label}>Färg</Text>
-                    <Text style={styles.value}>{horse.color}</Text>
-                </View>
-            </View>
-            <View style={styles.dataRow}>
-                <View style={styles.dataColumn}>
-                    <Text style={styles.label}>Chipnr</Text>
-                    <Text style={styles.value}>{horse.chip}</Text>
-                </View>
-                <View style={styles.dataColumn}>
-                    <Text style={styles.label}>Plats</Text>
-                    <Text style={styles.value}>{horse.location}</Text>
-                </View>
-            </View>
-            <View style={[styles.dataRow, { alignItems: 'center' }]}>
-                <View style={styles.dataColumn}>
-                    <Text style={styles.label}>Livsmedelskedjan</Text>
-                </View>
-                <View style={styles.dataColumn}>
-                    <View style={[styles.foodChainBadge && horse.foodChainStatus && styles.foodChainBadgeActive]}>
-                        <Text style={[styles.foodChainText, horse.foodChainStatus && styles.foodChainTextActive]}>
-                            {horse.foodChainStatus ? 'Ingår' : 'Ingår ej'}
-                        </Text>
+            <Pressable onPress={() => setExpanded(!expanded)}>
+                <View style={styles.headerRow}>
+                    <Text style={styles.category}>IDENTITET</Text>
+                    <View style={styles.verfiedContainer}>
+                        <Text style={styles.verfiedText}>Ej verifierad</Text>
+                        <View style={styles.dot}/>
                     </View>
                 </View>
+                <View style={styles.secondRow}>
+                    <Text style={styles.secondRowText}>Hästpass</Text>
+                    </View>
+            </Pressable>
+            
+            {expanded && (
+                <>
+                    <View style={styles.divider} />
+                    <View style={styles.dataRow}>
+                        <View style={styles.dataColumn}>
+                            <Text style={styles.label}>Namn</Text>
+                            <Text style={styles.value}>{horse.name}</Text>
+                        </View>
+                        <View style={styles.dataColumn}>
+                            <Text style={styles.label}>UELN</Text>
+                            <Text style={styles.value}>{horse.ueln}</Text>
+                        </View>
+                    </View>
+                    <View style={styles.dataRow}>
+                        <View style={styles.dataColumn}>
+                            <Text style={styles.label}>Ras</Text>
+                            <Text style={styles.value}>{horse.breed}</Text>
+                        </View>
+                        <View style={styles.dataColumn}>
+                            <Text style={styles.label}>Kön</Text>
+                            <Text style={styles.value}>{horse.sex}</Text>
+                        </View>
+                    </View>
+                    <View style={styles.dataRow}>
+                        <View style={styles.dataColumn}>
+                            <Text style={styles.label}>Födelsedatum</Text>
+                            <Text style={styles.value}>{horse.birthDate}</Text>
+                        </View>
+                        <View style={styles.dataColumn}>
+                            <Text style={styles.label}>Färg</Text>
+                            <Text style={styles.value}>{horse.color}</Text>
+                        </View>
+                    </View>
+                    <View style={styles.dataRow}>
+                        <View style={styles.dataColumn}>
+                            <Text style={styles.label}>Chipnr</Text>
+                            <Text style={styles.value}>{horse.chip}</Text>
+                        </View>
+                        <View style={styles.dataColumn}>
+                            <Text style={styles.label}>Plats</Text>
+                            <Text style={styles.value}>{horse.location}</Text>
+                        </View>
+                    </View>
+                    <View style={[styles.dataRow, { alignItems: 'center' }]}>
+                        <View style={styles.dataColumn}>
+                            <Text style={styles.label}>Livsmedelskedjan</Text>
+                        </View>
+                        <View style={styles.dataColumn}>
+                            <View style={[styles.foodChainBadge && horse.foodChainStatus && styles.foodChainBadgeActive]}>
+                                <Text style={[styles.foodChainText, horse.foodChainStatus && styles.foodChainTextActive]}>
+                                    {horse.foodChainStatus ? 'Ingår' : 'Ingår ej'}
+                                </Text>
+                            </View>
+                        </View>
+                    </View>
+                    <View style={styles.divider} />
+                    <View style={styles.footerRow}>
+                        <Text style={styles.verifier}>Registrerat av hästägare</Text>
+                        <Text style={styles.signLink}>Skicka för verifiering</Text>
+                    </View>
+                </>
+            )}
             </View>
-            <View style={styles.divider} />
-            <View style={styles.footerRow}>
-                <Text style={styles.verifier}>Registrerat av hästägare</Text>
-                <Text style={styles.signLink}>Skicka för verifiering</Text>
-            </View>
-        </View>
     )
 }
 
