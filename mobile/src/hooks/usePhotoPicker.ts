@@ -2,7 +2,7 @@ import { Alert, Linking } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 
 export default function usePhotoPicker(onPhotoSelected: (uri: string, source: 'camera' | 'gallery') => void)  {
-    
+
     const handleCamera = async () => {
         const permission = await ImagePicker.requestCameraPermissionsAsync()
         if (!permission.granted) {
@@ -70,4 +70,5 @@ export default function usePhotoPicker(onPhotoSelected: (uri: string, source: 'c
             }
         ])
     }
+    return { showPicker: handlePicker }
 }

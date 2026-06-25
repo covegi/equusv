@@ -161,7 +161,7 @@ export default function MyHorsesScreen() {
                             horseImage={horseImage[item.ueln] ?? null}
                             onPhotoUploaded={handlePhotoUploaded}
                             isLoadingImage={isLoadingImage[item.ueln] ?? false}
-                            onPress={() => setSelectedHorse(null)}    
+                            onPress={(horse) => setSelectedHorse(horse)}    
                         />
                             
                     }
