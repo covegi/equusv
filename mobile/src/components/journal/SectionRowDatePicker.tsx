@@ -3,7 +3,7 @@ import { useState } from "react"
 import { Calendar } from 'react-native-calendars'
 import Ionicons from "@expo/vector-icons/Ionicons"
 
-export default function SectionRowDatePicker({ label, value, onSelect, hasError, placeholder }: { label: string, value: string, onSelect: (value: string) => void, hasError: boolean | undefined, placeholder: string }) {
+export default function SectionRowDatePicker({ label, value, onSelect, hasError, placeholder, errorMessage }: { label: string, value: string, onSelect: (value: string) => void, hasError: boolean | undefined, placeholder: string, errorMessage?: string }) {
     const [showCalendar, setShowCalendar] = useState(false)
 
     return (
@@ -16,6 +16,9 @@ export default function SectionRowDatePicker({ label, value, onSelect, hasError,
                     <Ionicons name={showCalendar ? "chevron-up" : "chevron-down"} size={16} color="#8a7267" />
                 </View>
             </Pressable>
+            {hasError && errorMessage && (
+                    <Text style={styles.errorText}>{errorMessage}</Text>
+                )}
             {showCalendar && (
                 <Calendar 
                     theme={{
@@ -66,5 +69,11 @@ const styles = StyleSheet.create({
     },
     placeholder: {
         color: '#8a7267',
+    },
+    errorText: {
+        fontFamily: 'Inter_400Regular',
+        fontSize: 12,
+        color: '#A13232',
+        marginTop: 4,
     },
 })

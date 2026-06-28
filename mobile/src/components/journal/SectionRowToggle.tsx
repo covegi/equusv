@@ -6,7 +6,6 @@ export default function SectionRowToggle({ label, value, onValueChange }: { labe
         <View style={styles.container}>
             <Text style={styles.labelText}>{label}:</Text>
             <Switch
-                label={label}
                 value={value}
                 onValueChange={onValueChange}
                 trackColor={{ false: '#E8E0D8', true: '#2E7D32' }}

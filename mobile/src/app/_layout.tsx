@@ -50,7 +50,7 @@ export default function RootLayout() {
                       headerTintColor: '#1b1b1b',
                       headerBackVisible: false,
                       headerShadowVisible: false,
-                      headerLeft: hamburgerHeaaderLeft
+                      headerLeft: hamburgerHeaaderLeft,
                     }}
                   >
                   </Stack.Screen>

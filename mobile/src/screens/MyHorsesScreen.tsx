@@ -8,6 +8,7 @@ import HorseListCard from '@/components/journal/HorseListCard'
 import type { HorsePassport } from '@/types/horse-passport'
 import { fetchFromUhrp } from '@/utils/uhrp'
 import HorseJournal from '@/components/journal/HorseJournal'
+import AntDesign from '@expo/vector-icons/AntDesign'
 
 export default function MyHorsesScreen() {
     const [horse, setHorse] = useState<HorsePassport[]>([])
@@ -16,6 +17,7 @@ export default function MyHorsesScreen() {
     const [isLoadingImage, setIsLoadingImage] = useState<Record<string, boolean>>({})
     const [horseImage, setHorseImage] = useState<Record<string, string>>({})
     const [selectedHorse, setSelectedHorse] = useState<HorsePassport | null>(null)
+    const [showCreateNewPassport, setCreateNewPassport] = useState(false)
 
     useEffect(() => {
         if (horse.length === 0) return
@@ -203,5 +205,5 @@ const styles = StyleSheet.create({
         fontFamily: 'Inter_300Light',
         fontSize: 12,
         color: '#f7f2f2'
-    }
+    },
 })

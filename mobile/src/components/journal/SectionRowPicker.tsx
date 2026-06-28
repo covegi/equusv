@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, Pressable, ActionSheetIOS, Platform } from "react-native"
 import Ionicons from "@expo/vector-icons/Ionicons"
 
-export default function SectionRowPicker({ label, value, selection, onSelect, hasError, placeholder }: { label: string, value: string, selection: string[], onSelect: (value: string) => void, hasError?: boolean, placeholder: string }) {
+export default function SectionRowPicker({ label, value, selection, onSelect, hasError, placeholder, errorMessage }: { label: string, value: string, selection: string[], onSelect: (value: string) => void, hasError?: boolean, placeholder: string, errorMessage?: string }) {
 
     const handlePress = () => {
         ActionSheetIOS.showActionSheetWithOptions(
@@ -26,6 +26,9 @@ export default function SectionRowPicker({ label, value, selection, onSelect, ha
                 </Text>
                 <Ionicons name="chevron-down" size={18} color="#8a7267" />
             </Pressable>
+            {hasError && errorMessage && (
+                <Text style={styles.errorText}>{errorMessage}</Text>
+            )}
         </View>
     )
 }
@@ -55,5 +58,11 @@ const styles = StyleSheet.create({
     },
     placeholder: {
         color: '#8a7267',
+    },
+    errorText: {
+        fontFamily: 'Inter_400Regular',
+        fontSize: 12,
+        color: '#A13232',
+        marginTop: 4,
     },
 })

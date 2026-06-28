@@ -1,12 +1,12 @@
 import { StyleSheet, Text, TextInput, View } from "react-native"
 import Ionicons from "@expo/vector-icons/Ionicons"
 
-export default function SectionRowInput({ label, value, onChangeText, hasError, placeholder, prefix }: { label: string, value: string, onChangeText: (text: string) => void, hasError?: boolean, placeholder: string, prefix?: string | '' }) {
+export default function SectionRowInput({ label, value, onChangeText, hasError, placeholder, prefix, errorMessage, disabled }: { label: string, value: string, onChangeText: (text: string) => void, hasError?: boolean, placeholder: string, prefix?: string | '', errorMessage?: string, disabled?: boolean }) {
     return (
         <View style={styles.container}>
             <Text style={styles.labelText}>{label}</Text>
             { prefix ? (
-                <View style={styles.prefixRow}>
+                <View style={[styles.prefixRow, hasError && { borderBottomColor: '#A13232' }]}>
                     <Text style={styles.prefixText}>{prefix}</Text>
                     <TextInput 
                         value={value}
@@ -15,21 +15,20 @@ export default function SectionRowInput({ label, value, onChangeText, hasError, 
                         placeholder={placeholder}
                         placeholderTextColor='#8a7267'
                         keyboardType='number-pad'
+                        editable={!disabled}
                     />
                 </View>
             ):  <TextInput 
             value={value}
             onChangeText={(text) => onChangeText(text)}
-            style={styles.valueText}
+            style={[styles.valueText, hasError && { borderBottomColor: '#A13232' }]}
             placeholder={placeholder}
             placeholderTextColor='#8a7267'
+            editable={!disabled}
             />}
-            {value.length > 0
-                    ? <Ionicons name='checkmark' size={18} color='green' />
-                    : hasError 
-                        ? <Ionicons name='close' size={18} color='red' />
-                        : null
-            }
+            {hasError && errorMessage && (
+                        <Text style={styles.errorText}>{errorMessage}</Text>
+                    )}
         </View>
     )
 }
@@ -72,5 +71,11 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#1b1b1b',
         padding: 0,
+    },
+    errorText: {
+        fontFamily: 'Inter_400Regular',
+        fontSize: 12,
+        color: '#A13232',
+        marginTop: 4,
     },
 })

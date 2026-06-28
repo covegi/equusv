@@ -49,13 +49,10 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
         if (!horsePassport.birthDate) newErrors.birthDate = true
         if (!horsePassport.sex) newErrors.sex = true
         if (!horsePassport.color) newErrors.color = true
-        if (!horsePassport.ueln) newErrors.ueln = true
-        if (!horsePassport.chip) newErrors.chip = true
+        if (!horsePassport.ueln || !/^\d{13}$/.test(horsePassport.ueln)) newErrors.ueln = true
+        if (!horsePassport.chip || !/^\d{12}$/.test(horsePassport.chip)) newErrors.chip = true
         if (!horsePassport.ownerAtRegistration) newErrors.ownerAtRegistration = true
         if (!horsePassport.location) newErrors.location = true
-        if (!horsePassport.organisation) newErrors.organisation = true
-        if (!horsePassport.issuedDate) newErrors.issuedDate = true
-        if (!horsePassport.foodChainStatus) newErrors.foodChainStatus = true
 
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
@@ -117,7 +114,10 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
     }
 
         const handleSave = async () => {
+            console.log('HandleSave triggered')
             setIsLoading(true)
+            const isValid = validate()
+            console.log('isValid', isValid, 'errors', errors)
             if (!validate()) {
                 setIsLoading(false)
                 return
@@ -173,6 +173,7 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                                     }}
                                     hasError={errors.name}
                                     placeholder='Hästens namnn'
+                                    errorMessage='Namn måste anges'
                                 />
                                 
                                 <View style={styles.twoColumnsRow}>
@@ -187,6 +188,7 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                                             }}
                                             hasError={errors.breed}
                                             placeholder='Välj ras'
+                                            errorMessage='Ras måste väljas'
                                         />
                                     </View>
                                     <View style={styles.twoColumnsColumn}>
@@ -199,7 +201,8 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                                                 setErrors({ ...errors, sex: false})
                                             }}
                                             hasError={errors.sex}
-                                            placeholder='Välj'
+                                            placeholder='Välj kön'
+                                            errorMessage='Kön måste väljas'
                                         />
                                     </View>
                                 </View>
@@ -212,6 +215,7 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                                     }}
                                     hasError={errors.birthDate}
                                     placeholder='Välj datum'
+                                    errorMessage='Datum måste väljas'
                                 />
                                 <SectionRowInput 
                                     label='Färg'
@@ -222,6 +226,7 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                                     }}
                                     hasError={errors.color}
                                     placeholder='t.ex. Brun, Svart'
+                                    errorMessage='Färg måste anges'
                                 />
                                 <SectionRowInput 
                                     label='UELN'
@@ -233,6 +238,11 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                                     hasError={errors.ueln}
                                     placeholder='0000000000000'
                                     prefix='SE-'
+                                    errorMessage={
+                                        !horsePassport.ueln?.trim()
+                                        ? 'UELN måste anges'
+                                        : 'UELN måste ha 13 siffror'
+                                    }
                                 />
                                 <SectionRowInput 
                                     label='Chipnr'
@@ -244,6 +254,11 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                                     hasError={errors.chip}
                                     placeholder='000000000000'
                                     prefix='752'
+                                    errorMessage={
+                                        !horsePassport.chip?.trim()
+                                        ? 'Chipnr måste anges'
+                                        : 'Ange 12 sifffor efter 752'
+                                    }
                                 />
                             </Section>
                             <Section>
@@ -257,7 +272,8 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                                             setErrors({ ...errors, ownerAtRegistration: false })
                                         }}
                                         hasError={errors.ownerAtRegistration}
-                                        placeholder='Ditt namn'    
+                                        placeholder='Ditt namn'
+                                        errorMessage='Namn måste anges'    
                                     />
                                     <SectionRowInput 
                                         label='Ort'
@@ -268,6 +284,7 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                                         }}
                                         hasError={errors.location}
                                         placeholder='t.ex. Flyinge'
+                                        errorMessage='Ort måste anges'
                                     />
                                 </View>
                             </Section>
@@ -282,17 +299,19 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                                             setErrors({ ...errors, organisation: false })
                                         }}
                                         hasError={errors.organisation}
-                                        placeholder='Svensk avelsorganisation'    
+                                        placeholder='Svensk avelsorganisation'
+                                        disabled
                                     />
-                                    <SectionRowDatePicker 
+                                    <SectionRowInput
                                         label='Utfärdat'
                                         value={horsePassport.issuedDate ?? ''}
-                                        onSelect={(text) => {
+                                        onChangeText={(text) => {
                                             setHorsePassport({ ...horsePassport, issuedDate: text })
                                             setErrors({ ...errors, issuedDate: false})
                                         }}
                                         hasError={errors.issuedDate}
-                                        placeholder='Välj datum'
+                                        placeholder='Datum'
+                                        disabled
                                     />
                                 </View>
                             </Section>
