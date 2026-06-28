@@ -1,6 +1,7 @@
 import { StyleSheet, View, Text, Pressable } from "react-native"
 import { useState } from "react"
 import type { HorsePassport } from "@/types/horse-passport"
+import Ionicons from "@expo/vector-icons/Ionicons"
 
 export default function PassportCard({ horse }: { horse: HorsePassport}) {
     const [expanded, setExpanded] = useState(false)
@@ -13,13 +14,14 @@ export default function PassportCard({ horse }: { horse: HorsePassport}) {
                     <View style={styles.verfiedContainer}>
                         <Text style={styles.verfiedText}>Ej verifierad</Text>
                         <View style={styles.dot}/>
+                        <Ionicons name="link" size={16} color="#8a7267" style={{ opacity: 0.4 }}/>
                     </View>
                 </View>
                 <View style={styles.secondRow}>
                     <Text style={styles.secondRowText}>Hästpass</Text>
                     </View>
             </Pressable>
-            
+
             {expanded && (
                 <>
                     <View style={styles.divider} />

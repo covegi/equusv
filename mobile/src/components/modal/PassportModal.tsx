@@ -10,15 +10,20 @@ import Heading from '../text/Heading'
 import Section from '../journal/Section'
 import SectionHeading from '../journal/SectionHeading'
 import SectionRowInput from '../journal/SectionRowInput'
-import SectionRowDateInput from '../journal/SectionRowDateInput'
-import SectionRowCheckbox from '../journal/SectionRowCheckbox'
+import SectionRowToggle from '../journal/SectionRowToggle'
 import type { HorsePassport } from '@/types/horse-passport'
 import type { HorsePassportDraft } from '@/types/horse-passport-draft'
 import PrimaryButton from '../buttons/PrimaryButton'
+import SectionRowPicker from '../journal/SectionRowPicker'
+import SectionRowDatePicker from '../journal/SectionRowDatePicker'
+import { BREEDS } from '../../constants/breeds'
+import { SEX } from '../../constants/sex'
 
 export default function PassportModal({ horse, visible, onClose, onSaved }: {horse?: HorsePassport, visible: boolean, onClose: () => void, onSaved: () => void }) {
     const insets = useSafeAreaInsets()
-    const [horsePassport, setHorsePassport] = useState<Partial<HorsePassport>>({})
+    const [horsePassport, setHorsePassport] = useState<Partial<HorsePassport>>({
+        foodChainStatus: false
+    })
     const [errors, setErrors] = useState<Partial<Record<keyof HorsePassport, boolean>>>({})
     const { wallet } = useWallet()
     const [isLoading, setIsLoading] = useState(false)
@@ -139,7 +144,7 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
             <Modal visible={visible} animationType='slide'>
                 <KeyboardAvoidingView
                     behavior={Platform.OS === 'ios' ? 'padding': 'height'}
-                    style={{ flex: 1, backgroundColor: '#f7f2f2' }}
+                    style={{ flex: 1, backgroundColor: '#F5F0EB' }}
                 >
                     {isLoading && (
                         <View style={styles.loadingOverlay}>
@@ -150,15 +155,15 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                     <ScrollView>
                         <View style={[styles.headerContainer]}>
                             <View style={{ paddingTop: 60 }}>
-                                <Heading color='#1a1a1a'>Nytt hästpass</Heading>
+                                <Heading color='#1b1b1b'>Nytt hästpass</Heading>
                             </View>
                             <TouchableOpacity onPress={handleOnClose}>
-                                <AntDesign name="close" size={26} color="#1a1a1a" style={{ paddingTop: 60 }}/>
+                                <AntDesign name="close" size={22} color="#574238" style={{ paddingTop: 62 }}/>
                             </TouchableOpacity>
                         </View>
                         <View style={styles.container}>
                             <Section>
-                                <SectionHeading fontSize={18}>Häst</SectionHeading>
+                                <SectionHeading fontSize={11}>HÄST</SectionHeading>
                                 <SectionRowInput
                                     label='Namn'
                                     value={horsePassport.name ?? ''}
@@ -167,33 +172,46 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                                         setErrors({ ...errors, name: false })
                                     }}
                                     hasError={errors.name}
+                                    placeholder='Hästens namnn'
                                 />
-                                <SectionRowInput 
-                                    label='Ras'
-                                    value={horsePassport.breed ?? ''}
-                                    onChangeText={(text) => {
-                                        setHorsePassport({ ...horsePassport, breed: text })
-                                        setErrors({ ...errors, breed: false })
-                                    }}
-                                    hasError={errors.breed}
-                                />
-                                <SectionRowDateInput
+                                
+                                <View style={styles.twoColumnsRow}>
+                                    <View style={styles.twoColumnsColumn}>
+                                        <SectionRowPicker
+                                            label='Ras'
+                                            value={horsePassport.breed ?? ''}
+                                            selection={BREEDS}
+                                            onSelect={(text) => {
+                                                setHorsePassport({ ...horsePassport, breed: text })
+                                                setErrors({ ...errors, breed: false})
+                                            }}
+                                            hasError={errors.breed}
+                                            placeholder='Välj ras'
+                                        />
+                                    </View>
+                                    <View style={styles.twoColumnsColumn}>
+                                        <SectionRowPicker
+                                            label='Kön'
+                                            value={horsePassport.sex ?? ''}
+                                            selection={SEX}
+                                            onSelect={(text) => {
+                                                setHorsePassport({ ...horsePassport, sex: text })
+                                                setErrors({ ...errors, sex: false})
+                                            }}
+                                            hasError={errors.sex}
+                                            placeholder='Välj'
+                                        />
+                                    </View>
+                                </View>
+                                <SectionRowDatePicker 
                                     label='Född'
                                     value={horsePassport.birthDate ?? ''}
-                                    onChangeText={(text) => {
+                                    onSelect={(text) => {
                                         setHorsePassport({ ...horsePassport, birthDate: text })
                                         setErrors({ ...errors, birthDate: false })
                                     }}
                                     hasError={errors.birthDate}
-                                />
-                                <SectionRowInput 
-                                    label='Kön'
-                                    value={horsePassport.sex ?? ''}
-                                    onChangeText={(text) => {
-                                        setHorsePassport({ ...horsePassport, sex: text })
-                                        setErrors({ ...errors, sex: false })
-                                    }}
-                                    hasError={errors.sex}
+                                    placeholder='Välj datum'
                                 />
                                 <SectionRowInput 
                                     label='Färg'
@@ -203,6 +221,7 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                                         setErrors({ ...errors, color: false })
                                     }}
                                     hasError={errors.color}
+                                    placeholder='t.ex. Brun, Svart'
                                 />
                                 <SectionRowInput 
                                     label='UELN'
@@ -212,20 +231,24 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                                         setErrors({ ...errors, ueln: false })
                                     }}
                                     hasError={errors.ueln}
+                                    placeholder='0000000000000'
+                                    prefix='SE-'
                                 />
                                 <SectionRowInput 
-                                    label='Chip'
+                                    label='Chipnr'
                                     value={horsePassport.chip ?? ''}
                                     onChangeText={(text) => {
                                         setHorsePassport({ ...horsePassport, chip: text})
                                         setErrors({ ...errors, chip: false})
                                     }}
                                     hasError={errors.chip}
+                                    placeholder='000000000000'
+                                    prefix='752'
                                 />
                             </Section>
                             <Section>
-                                <View style={styles.sectionStyle}>
-                                    <SectionHeading fontSize={18}>Ägare</SectionHeading>
+                                <View >
+                                    <SectionHeading fontSize={11}>ÄGARE</SectionHeading>
                                     <SectionRowInput
                                         label='Ägare'
                                         value={horsePassport.ownerAtRegistration ?? ''}
@@ -233,7 +256,8 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                                             setHorsePassport({ ...horsePassport, ownerAtRegistration: text })
                                             setErrors({ ...errors, ownerAtRegistration: false })
                                         }}
-                                        hasError={errors.ownerAtRegistration}    
+                                        hasError={errors.ownerAtRegistration}
+                                        placeholder='Ditt namn'    
                                     />
                                     <SectionRowInput 
                                         label='Ort'
@@ -243,12 +267,13 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                                             setErrors({ ...errors, location: false })
                                         }}
                                         hasError={errors.location}
+                                        placeholder='t.ex. Flyinge'
                                     />
                                 </View>
                             </Section>
                             <Section>
-                                <View style={styles.sectionStyle}>
-                                    <SectionHeading fontSize={18}>Utfärdare</SectionHeading>
+                                <View>
+                                    <SectionHeading fontSize={11}>UTFÄRDARE</SectionHeading>
                                     <SectionRowInput
                                         label='Organisation'
                                         value={horsePassport.organisation ?? ''}
@@ -256,27 +281,29 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                                             setHorsePassport({ ...horsePassport, organisation: text })
                                             setErrors({ ...errors, organisation: false })
                                         }}
-                                        hasError={errors.organisation}    
+                                        hasError={errors.organisation}
+                                        placeholder='Svensk avelsorganisation'    
                                     />
-                                    <SectionRowDateInput
-                                    label='Utfärdat'
-                                    value={horsePassport.issuedDate ?? ''}
-                                    onChangeText={(text) => {
-                                        setHorsePassport({ ...horsePassport, issuedDate: text })
-                                        setErrors({ ...errors, issuedDate: false })
-                                    }}
-                                    hasError={errors.issuedDate}
-                                />
+                                    <SectionRowDatePicker 
+                                        label='Utfärdat'
+                                        value={horsePassport.issuedDate ?? ''}
+                                        onSelect={(text) => {
+                                            setHorsePassport({ ...horsePassport, issuedDate: text })
+                                            setErrors({ ...errors, issuedDate: false})
+                                        }}
+                                        hasError={errors.issuedDate}
+                                        placeholder='Välj datum'
+                                    />
                                 </View>
                             </Section>
                             <Section>
-                                <View style={styles.sectionStyle}>
-                                    <SectionHeading fontSize={18}>Livsmedelskedjan</SectionHeading>
-                                    <SectionRowCheckbox 
-                                        label='Status'
-                                        value={horsePassport.foodChainStatus ? 'Ingår' : 'Ingår ej'}
-                                        onValueChange={(option) => {
-                                            setHorsePassport({ ...horsePassport, foodChainStatus: option === 'Ingår'})
+                                <View>
+                                    <SectionHeading fontSize={11}>LIVSMEDELSKEDJAN</SectionHeading>
+                                    <SectionRowToggle 
+                                        label='Ingår i livsmedelskedjan'
+                                        value={horsePassport.foodChainStatus!}
+                                        onValueChange={(checked: boolean) => {
+                                            setHorsePassport({ ...horsePassport, foodChainStatus: checked })
                                         }}
                                     />
                                 </View>
@@ -294,21 +321,18 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f7f2f2',
-        paddingHorizontal: 25,
+        backgroundColor: '#F5F0EB',
     },
     headerContainer: {
-        backgroundColor: '#f7f2f2',
+        backgroundColor: '#F5F0EB',
         height: 96,
-        paddingHorizontal: 25,
+        paddingHorizontal: 16,
+        marginBottom: 6,
         flexDirection: 'row',
         justifyContent: 'space-between'
     },
-    sectionStyle: {
-        marginTop: 12
-    },
     submitButton: {
-        marginTop: 40
+        marginHorizontal: 16,
     },
     loadingOverlay: {
         position: 'absolute',
@@ -327,4 +351,11 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#f7f2f2'
     },
+    twoColumnsColumn: {
+        flex: 1
+    },
+    twoColumnsRow: {
+        flexDirection: 'row',
+        gap: 16,
+    }
 })

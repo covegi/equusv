@@ -10,20 +10,15 @@ export default function PrimaryButton({ children, onPress }: { children: string,
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#d06212',
-        borderRadius: 8,
-        shadowColor: '#1a1a1a',
-        shadowOffset: { width: 0, height: 2},
-        shadowOpacity: 0.5,
-        shadowRadius: 8,
-        paddingVertical: 10,
-        paddingHorizontal: 18,
-        alignSelf: 'center'
+        alignItems: 'center',
+        backgroundColor: '#574238',
+        borderRadius: 12,
+        padding: 16,
+
     },
     label: {
         fontFamily: 'Inter_600SemiBold',
-        fontSize: 18,
-        color: '#f7f2f2',
-        letterSpacing: 0.2
+        fontSize: 16,
+        color: '#fff',
     }
 })

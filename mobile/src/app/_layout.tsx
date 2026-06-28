@@ -45,9 +45,11 @@ export default function RootLayout() {
                     options={{
                       headerShown: true,
                       title:'Mina hästar',
-                      headerStyle: { backgroundColor: '#1a1a1a'},
-                      headerTintColor: '#f7f2f2',
+                      headerTitleStyle: { fontSize: 22},
+                      headerStyle: { backgroundColor: '#F5F0EB'},
+                      headerTintColor: '#1b1b1b',
                       headerBackVisible: false,
+                      headerShadowVisible: false,
                       headerLeft: hamburgerHeaaderLeft
                     }}
                   >

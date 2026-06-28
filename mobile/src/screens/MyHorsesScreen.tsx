@@ -58,8 +58,8 @@ export default function MyHorsesScreen() {
                         }
                         if (!foundDecoded) return  // ingen output med cdnUrl
 
-                        const cdnUrl = Buffer.from(Array.from(foundDecoded.fields[8])).toString('utf-8')
-                        const mimeType = Buffer.from(Array.from(foundDecoded.fields[4])).toString('utf-8')
+                        const cdnUrl = Buffer.from(Array.from(foundDecoded.fields[8]) as number[]).toString('utf-8')
+                        const mimeType = Buffer.from(Array.from(foundDecoded.fields[4]) as number[]).toString('utf-8')
                         // const tx = Transaction.fromBEEF(beef)
                         // const { fields } = PushDrop.decode(tx.outputs[outputIndex].lockingScript)
                         // const cdnUrl = Buffer.from(fields[8]).toString('utf-8')
@@ -149,7 +149,7 @@ export default function MyHorsesScreen() {
                 <View style={[styles.centerContainer]}>
                 {isLoading 
                     ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 }}>
-                        <ActivityIndicator color='#C8963E' size="large" />
+                        <ActivityIndicator color='#8a7267' size="large" />
                         <Text style={styles.iconText}>Hämtar dina hästar... </Text>
                     </View>
                     : <FlatList 
@@ -184,7 +184,7 @@ export default function MyHorsesScreen() {
 const styles = StyleSheet.create({
     outerContainer: {
         flex: 1,
-        backgroundColor: '#1a1a1a',
+        backgroundColor: '#F5F0EB',
         position: 'relative'
     },
     hamburgerContainer: {

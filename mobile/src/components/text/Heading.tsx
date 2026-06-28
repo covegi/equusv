@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native'
 
-export default function Heading( { children, fontSize=24, color='#f7f2f2' }: { children: string | undefined, fontSize?: number, color?: string }) {
+export default function Heading( { children, fontSize=22, color='#1b1b1b' }: { children: string | undefined, fontSize?: number, color?: string }) {
     return (
         <View>
             <Text style={[styles.text, { fontSize, color }]}>{children}</Text>
@@ -11,6 +11,5 @@ export default function Heading( { children, fontSize=24, color='#f7f2f2' }: { c
 const styles = StyleSheet.create({
     text: {
         fontFamily: 'Inter_600SemiBold',
-        letterSpacing: 0.2,
     }
 })

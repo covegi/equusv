@@ -61,8 +61,8 @@
 
         if (isLoadingImage || isUploadingImage) {
             content = <View style={styles.placeholder}>
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 }}>
-                    <ActivityIndicator color='#C8963E' size="small" />
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 28, gap: 12 }}>
+                    <ActivityIndicator color='#8a7267' size="large" />
                     <Text style={styles.iconText}>{isLoadingImage ? 'Hämtar bild...' : 'Sparar bild...'}</Text>
                 </View>
             </View>
@@ -100,7 +100,7 @@
         outerContainer: {
             width: '100%',
             height: 230,
-            backgroundColor: '#1a1a1a',
+            backgroundColor: '#fff',
             borderRadius: 10,
             justifyContent: 'center',
             alignItems: 'center',
@@ -110,7 +110,7 @@
             height: 165,
             aspectRatio: 16/9,
             resizeMode: 'contain',
-            backgroundColor: '#2a2a2a',
+            backgroundColor: '#F5F0EB',
             justifyContent: 'center',
             alignItems: 'center',
             borderRadius: 10,
@@ -129,13 +129,13 @@
         },
         name: {
             fontFamily: 'Inter_600SemiBold',
-            color: '#f7f2f2',
+            color: '#1b1b1b',
             fontSize: 20,
             paddingBottom: 2
         },
         ueln: {
             fontFamily: 'Inter_300Light',
-            color: '#f7f2f2',
+            color: '#8a7267',
             fontSize: 12
         },
         iconText: {

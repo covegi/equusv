@@ -14,7 +14,7 @@ export default function HamburgerHeaderLeft() {
                     setMenuVisible(true)
                 }
             } style={{ paddingLeft: 10 }}>
-                <AntDesign name="menu" size={24} color="#f7f2f2" />
+                <AntDesign name="menu" size={22} color="#574238" />
             </Pressable>
     )
 }

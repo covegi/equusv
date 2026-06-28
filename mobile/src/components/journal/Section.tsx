@@ -11,7 +11,11 @@ export default function Section({ children }: { children: React.ReactNode }) {
 
 const styles = StyleSheet.create({
     container: {
-        width: '100%',
-        marginTop: 8,
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 20,
+        marginHorizontal: 16,
+        marginBottom: 16
+        
     }
 })
