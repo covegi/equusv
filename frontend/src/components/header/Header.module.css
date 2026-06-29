@@ -55,6 +55,16 @@
     font-size: 24px;
 }
 
+.verifiedBadge {
+    position: absolute;
+    top: 23px;
+    right: 873px;
+    width: 16px;
+    height: 16px;
+    color: var(--color-rust-bright);
+    flex-shrink: 0;
+  }
+
 /* Tablet & Desktop */
 
 @media (min-width: 1024px) {

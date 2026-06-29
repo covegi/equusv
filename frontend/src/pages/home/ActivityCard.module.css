@@ -1,0 +1,164 @@
+.card {
+    position:relative;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-white);
+    border-radius: 14px;
+    border: 1px solid var(--color-border-light);
+    border-left: 3px solid var(--color-rust-bright);
+    padding: 22px 24px 20px;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.card:hover {
+    box-shadow: 0 4px 20px rgba(27, 27, 27, 0.08);
+    transform: translateY(-2px);
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(245, 240, 235, 0.55);
+    border-radius: 14px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding: 16px 20px;
+    z-index: 1;
+  }
+  
+  .overlayText {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-white);
+    background-color: var(--color-black);
+    padding: 4px 14px;
+    border-radius: 20px;
+    letter-spacing: 0.03em;
+  }
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.categoryLabel {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-rust-bright);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.mandatory {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    background-color: var(--color-gray-light);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-black);
+    margin-top: 6px;
+}
+  
+.description {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    margin-top: 8px;
+}
+  
+.divider {
+    height: 1px;
+    background-color: var(--color-border-light);
+    margin: 16px 0 14px;
+}
+
+.fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.fieldTag {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background-color: var(--color-gray-light);
+    padding: 3px 10px;
+    border-radius: 6px;
+}
+
+.verifiedBadge {
+    width: 14px;
+    height: 14px;
+    color: var(--color-rust-bright);
+    flex-shrink: 0;
+}
+
+.selfDeclaredDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--color-text-muted);
+    flex-shrink: 0;
+}
+
+.related {
+    display: flex;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 24px;
+}
+
+.relatedValues {
+    display: flex;
+    gap: 14px;
+    
+}
+
+.relatedLabel {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin-right: 6px;
+}
+
+.relatedValue {
+    font-weight: 600;
+    color: var(--color-black);
+    font-size: 12px;
+}
+
+.rolesContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 0;
+}
+
+.roleRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.roleLabel {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin-right: 6px;
+}
+
+.roleValue {
+    font-weight: 600;
+    color: var(--color-black);
+    font-size: 12px;
+}

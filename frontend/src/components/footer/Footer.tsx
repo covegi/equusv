@@ -15,6 +15,18 @@ export default function Footer() {
                 </div>
                 <div className={styles.column}>
                     <div>
+                        <p className={`${styles.text} ${styles.columnHeading}`}>UNDER HUVEN</p>
+                    </div>
+                    <div className={styles.linkColumn}>
+                        <a href="#" className={styles.linkItem}>Tokenisering</a>
+                        <a href="#" className={styles.linkItem}>Arkiv</a>
+                        <a href="#" className={styles.linkItem}>Verifierad</a>
+                        <a href="#" className={styles.linkItem}>Direktmeddelanden</a>
+                        <a href="#" className={styles.linkItem}>Kryptering</a>
+                    </div>
+                </div>
+                <div className={styles.column}>
+                    <div>
                         <p className={`${styles.text} ${styles.columnHeading}`}>ALLA RUNT HÄSTEN</p>
                     </div>
                     <div className={styles.linkColumn}>
@@ -27,11 +39,10 @@ export default function Footer() {
                 </div>
                 <div className={styles.column}>
                     <div>
-                        <p className={`${styles.text} ${styles.columnHeading}`}>EQUUSV</p>
+                        <p className={`${styles.text} ${styles.columnHeading}`}>ÖVRIGT</p>
                     </div>
                     <div className={styles.linkColumn}>
                         <a href="#" className={styles.linkItem}>Om oss</a>
-                        <a href="#" className={styles.linkItem}>Under huven</a>
                         <a href="#" className={styles.linkItem}>Kontakt</a>
                         <a href="#" className={styles.linkItem}>Användarvillkor</a>
                         <a href="#" className={styles.linkItem}>Integritetpolicy</a>

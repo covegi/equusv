@@ -6,13 +6,13 @@ import SecondaryBtn from '../../components/buttons/SecondaryBtn'
 
 export default function HeroSection() {
     return (
-        <div className={styles.outerContainer}>
+        <section className={styles.outerContainer}>
             <div className={styles.innerContainer}>
                 <div className={styles.textBlock}>
                     <img src={logo} className={styles.logo}/>
                     <p className={styles.tagline}>SANNINGEN OM DIN HÄST</p>
                     <p className={styles.slogan}>Hela hästens liv i en journal</p>
-                    <p className={styles.punchline}>Enkel, privat och verifierbar</p>
+                    <p className={styles.punchline}>All historik – spårbar, delbar och verifierad</p>
                     <div className={styles.btnContainer}>
                         <PrimaryBtn>Skapa nytt arkiv</PrimaryBtn>
                         <SecondaryBtn>Så funkar det</SecondaryBtn>
@@ -22,6 +22,6 @@ export default function HeroSection() {
                     <img src={example} alt="EquusV Journal" className={styles.heroImg}/>
                 </div>
             </div>
-        </div>
+        </section>
     )
 }
