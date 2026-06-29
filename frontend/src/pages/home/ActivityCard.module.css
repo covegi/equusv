@@ -118,6 +118,7 @@
     align-items: center;
     margin-top: auto;
     padding-top: 24px;
+    gap: 6px;
 }
 
 .relatedValues {
@@ -129,7 +130,6 @@
 .relatedLabel {
     font-size: 12px;
     color: var(--color-text-muted);
-    margin-right: 6px;
 }
 
 .relatedValue {
@@ -154,7 +154,6 @@
 .roleLabel {
     font-size: 12px;
     color: var(--color-text-muted);
-    margin-right: 6px;
 }
 
 .roleValue {
