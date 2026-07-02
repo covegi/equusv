@@ -6,7 +6,7 @@ import JournalHeader from "./JournalHeader"
 import FilterButton from "../buttons/FilterButton"
 import PassportCard from "./cards/PassportCard"
 
-export default function HorseJournal({ horse, horseImage, onClose }: { horse: HorsePassport | null, horseImage: string, onClose: () => void }) {
+export default function HorseJournal({ horse, horseImage, onClose }: { horse: Partial<HorsePassport> | null, horseImage: string, onClose: () => void }) {
      const [isActive, setIsActive] = useState('Alla')
 
      if (!horse) return null
@@ -35,7 +35,7 @@ export default function HorseJournal({ horse, horseImage, onClose }: { horse: Ho
                          </FilterButton>
                     ))}
                </View>
-               <PassportCard horse={horse}/>
+               <PassportCard horse={horse} />
          </View>
      )
 }

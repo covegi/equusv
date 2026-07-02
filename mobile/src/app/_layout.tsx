@@ -42,16 +42,7 @@ export default function RootLayout() {
                 <Stack screenOptions={{ headerShown: false }}>
                   <Stack.Screen
                     name='horses'
-                    options={{
-                      headerShown: true,
-                      title:'Mina hästar',
-                      headerTitleStyle: { fontSize: 22},
-                      headerStyle: { backgroundColor: '#F5F0EB'},
-                      headerTintColor: '#1b1b1b',
-                      headerBackVisible: false,
-                      headerShadowVisible: false,
-                      headerLeft: hamburgerHeaaderLeft,
-                    }}
+                    options={{ headerShown: false }}
                   >
                   </Stack.Screen>
                   <Stack.Screen

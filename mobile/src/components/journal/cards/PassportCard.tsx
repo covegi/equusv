@@ -3,8 +3,18 @@ import { useState } from "react"
 import type { HorsePassport } from "@/types/horse-passport"
 import Ionicons from "@expo/vector-icons/Ionicons"
 
-export default function PassportCard({ horse }: { horse: HorsePassport}) {
+export default function PassportCard({ horse, status='draft' }: { horse: Partial<HorsePassport>, status?: string }) {
     const [expanded, setExpanded] = useState(false)
+
+    const statusColors: Record<string, { bg: string, text: string, label: string, dot: string, verifiedText: string, checkmark: boolean }> = {
+        draft:    { bg: '#F5F0EB', text: '#8a7267', label: 'Utkast',   dot: '#c6c6c7', verifiedText: 'Ej verifierat',          checkmark: false },
+        pending:  { bg: '#FFF3E0', text: '#B65109', label: 'Skickat',  dot: '#d4a843', verifiedText: 'Väntar på verifiering',  checkmark: false },
+        revision: { bg: '#FCEAEA', text: '#A13232', label: 'Revision', dot: '#A13232', verifiedText: 'Återsänd',               checkmark: false },
+        approved: { bg: '#E8F5E9', text: '#2E7D32', label: 'Godkänt',  dot: '#2E7D32', verifiedText: 'Godkänt',                checkmark: false },
+        active:   { bg: '#E3F2FD', text: '#1565C0', label: 'Aktivt',   dot: '#b65109', verifiedText: 'Verifierat',             checkmark: true },
+    }
+
+    const current = statusColors[status] ?? statusColors.draft
 
     return (
         <View style={styles.outerContainer}>
@@ -12,14 +22,27 @@ export default function PassportCard({ horse }: { horse: HorsePassport}) {
                 <View style={styles.headerRow}>
                     <Text style={styles.category}>IDENTITET</Text>
                     <View style={styles.verfiedContainer}>
-                        <Text style={styles.verfiedText}>Ej verifierad</Text>
-                        <View style={styles.dot}/>
-                        <Ionicons name="link" size={16} color="#8a7267" style={{ opacity: 0.4 }}/>
+                        <Text style={styles.verfiedText}>{current.verifiedText}</Text>
+                        {current.checkmark 
+                            ? <Ionicons name="checkmark-circle" size={14} color={current.dot} />
+                            : <View style={[styles.dot, { backgroundColor: current.dot }]} />
+                        }
                     </View>
                 </View>
-                <View style={styles.secondRow}>
-                    <Text style={styles.secondRowText}>Hästpass</Text>
-                    </View>
+                <View style={styles.titleRow}>
+                        <Text style={styles.titleText}>Hästpass</Text>
+                        <View style={[styles.statusBadge, { backgroundColor: current.bg }]}>
+                            <Text style={[styles.statusText, { color: current.text }]} >
+                                {current.label}
+                            </Text>
+                        </View>
+                </View>
+                {status === 'revision' ?
+                <View style={styles.revisionBanner}>
+                      <Text style={styles.revisionText}>Avelsorganisation har skickat tillbaka ansökan. Vänligen kontrollera och komplettera uppgifterna.</Text>  
+                </View> 
+                : ''
+                }
             </Pressable>
 
             {expanded && (
@@ -79,8 +102,23 @@ export default function PassportCard({ horse }: { horse: HorsePassport}) {
                     </View>
                     <View style={styles.divider} />
                     <View style={styles.footerRow}>
-                        <Text style={styles.verifier}>Registrerat av hästägare</Text>
-                        <Text style={styles.signLink}>Skicka för verifiering</Text>
+                        <Text style={styles.verifier}>Skapat av hästägare</Text>
+                        {status === 'draft' && (
+                            <View style={styles.draftBtns}>
+                                <Text style={[styles.signLink, { color: '#8a7267'}]}>Redigera</Text>
+                                <Text style={[styles.signLink, { color: '#1b1b1b'}]}>Skicka</Text>
+                            </View>
+
+                        )}
+                        {status === 'pending' && (
+                            <Text style={[styles.signLink, { color: '#93000a' }]}>Återkalla</Text>
+                        )}
+                        {status === 'revision' && (
+                            <View style={styles.draftBtns}>
+                                <Text style={[styles.signLink, { color: '#8a7267'}]}>Redigera</Text>
+                                <Text style={[styles.signLink, { color: '#1b1b1b'}]}>Skicka igen</Text>
+                            </View>
+                        )}
                     </View>
                 </>
             )}
@@ -115,15 +153,40 @@ const styles = StyleSheet.create({
         fontSize: 12
     },
     dot: {
-        width: 10,
-        height: 10,
-        backgroundColor: '#8a7267',
-        borderRadius: 5
+        width: 8,
+        height: 8,
+        borderRadius: 4,
     },
-    secondRow: {
-        flexDirection: 'row'
+    revisionBanner: {
+        backgroundColor: '#FCEAEA',
+        borderWidth: 1,
+        borderColor: '#e8b4b4',
+        borderRadius: 8,
+        padding: 12,
+        marginTop: 12,
+        marginBottom: 12
     },
-    secondRowText: {
+    revisionText: {
+        fontSize: 11,
+        color: '#A13232',
+        lineHeight: 16,
+    },
+    titleRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 4
+    },
+    statusBadge: {
+        paddingVertical: 3,
+        paddingHorizontal: 10,
+        borderRadius: 10,
+    },
+    statusText: {
+        fontSize: 11,
+        fontWeight: '600',
+    },
+    titleText: {
         fontSize: 18,
         fontWeight: 600,
         color: '#1b1b1b',
@@ -192,6 +255,11 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#1b1b1b',
         fontWeight: '500',
+    },
+    draftBtns: {
+        flexDirection: 'row',
+        gap: 12
     }
+
 })
 

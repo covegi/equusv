@@ -9,7 +9,7 @@
 
     const TOKEN_SERVER = process.env.EXPO_PUBLIC_TOKEN_SERVER_URL
 
-    export default function HorseListCard({ horse, horseImage, onPhotoUploaded, isLoadingImage, onPress }: { horse: HorsePassport, horseImage: string | null, onPhotoUploaded: (ueln: string, dataUri: string) => void, isLoadingImage: boolean, onPress: (horse: HorsePassport) => void }) {
+    export default function HorseListCard({ horse, horseImage, onPhotoUploaded, isLoadingImage, onPress, onSpend }: { horse: Partial<HorsePassport>, horseImage: string | null, onPhotoUploaded: (ueln: string, dataUri: string) => void, isLoadingImage: boolean, onPress: (horse: Partial<HorsePassport>) => void, onSpend: () => void }) {
         const [uhrpUrl, setUhrpUrl] = useState<string | null>(null)
         const [isUploadingImage, setIsUploadingImage] = useState(false)
         const { wallet } = useWallet()
@@ -44,7 +44,7 @@
                 )
             })
             const { uhrpUrl } = await response?.json()
-            onPhotoUploaded(horse.ueln, uri)
+            onPhotoUploaded(horse.id, uri)
             console.log('onPhotoUploaded called with:', horse.ueln, uri)
             console.log('UHRPURL:', uhrpUrl)
             setUhrpUrl(uhrpUrl)
@@ -89,6 +89,7 @@
                             <Text style={styles.name}>{horse.name}</Text>
                             <Text style={styles.ueln}>{horse.ueln}</Text>
                         </View>
+                        
                     </View>
                 </View>
             </Pressable>

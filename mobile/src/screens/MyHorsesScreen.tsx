@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, FlatList, ActivityIndicator, Modal } from 'react-native'
+import { StyleSheet, Text, View, FlatList, ActivityIndicator, Modal, Alert } from 'react-native'
 import { useState, useEffect } from 'react'
 import { useWallet } from '@/context/WalletContext'
 import { PushDrop, LockingScript, LookupResolver, Transaction } from '@bsv/sdk'
@@ -8,15 +8,17 @@ import HorseListCard from '@/components/journal/HorseListCard'
 import type { HorsePassport } from '@/types/horse-passport'
 import { fetchFromUhrp } from '@/utils/uhrp'
 import HorseJournal from '@/components/journal/HorseJournal'
-import AntDesign from '@expo/vector-icons/AntDesign'
+import Header from '@/components/header/header'
+import { HorsePassportDraft } from '@/types/horse-passport-draft'
 
 export default function MyHorsesScreen() {
     const [horse, setHorse] = useState<HorsePassport[]>([])
+    const [horseDraft, setHorseDraft] = useState<HorsePassportDraft[]>([])
     const { wallet } = useWallet()
     const [isLoading, setIsLoading] = useState(false)
     const [isLoadingImage, setIsLoadingImage] = useState<Record<string, boolean>>({})
     const [horseImage, setHorseImage] = useState<Record<string, string>>({})
-    const [selectedHorse, setSelectedHorse] = useState<HorsePassport | null>(null)
+    const [selectedHorse, setSelectedHorse] = useState<Partial<HorsePassport> | null>(null)
     const [showCreateNewPassport, setCreateNewPassport] = useState(false)
 
     useEffect(() => {
@@ -27,7 +29,7 @@ export default function MyHorsesScreen() {
         const fetchImages = async () => {
             await Promise.all(horse.map( async (h) => {
                 if (cancelled || !h.ueln) return
-                setIsLoadingImage(prev => ({...prev, [h.ueln]: true})) 
+                setIsLoadingImage(prev => ({...prev, [h.id]: true})) 
                 try {
                     const resolver = new LookupResolver({
                         hostOverrides: {
@@ -68,13 +70,13 @@ export default function MyHorsesScreen() {
                         // const mimeType = Buffer.from(fields[4]).toString('utf-8')
                         const dataUri = await fetchFromUhrp({ cdnUrl, mimeType })
                         console.log('dataUri:', dataUri)
-                        if (!cancelled && dataUri) setHorseImage(prev => ({...prev, [h.ueln]: dataUri}))
+                        if (!cancelled && dataUri) setHorseImage(prev => ({...prev, [h.id]: dataUri}))
                         console.log('horseImage:', horseImage)
                     }
                 } catch (error) {
                     console.error(error)
                 } finally {
-                    setIsLoadingImage(prev => ({...prev, [h.ueln]: false}))
+                    setIsLoadingImage(prev => ({...prev, [h.id]: false}))
                 }
             }))
         }
@@ -88,52 +90,63 @@ export default function MyHorsesScreen() {
         if (!wallet) {
             setIsLoading(false)
             return
-        }   
+        }
+
+        // Local data from SecureStore
+
+        const stored = await SecureStore.getItemAsync('draftIds')
+        const ids = stored ? JSON.parse(stored) : []
+        const drafts: HorsePassportDraft[] = []
+        for (const id of ids) {
+            const raw = await SecureStore.getItemAsync(`passport-draft-${id}`)
+            if (raw) drafts.push(JSON.parse(raw))
+        }
         
-       const uelns: string[] = JSON.parse(await SecureStore.getItemAsync('horseUelns') ?? '[]')
+    //    const uelns: string[] = JSON.parse(await SecureStore.getItemAsync('horseUelns') ?? '[]')
 
-       if (uelns.length === 0) {
-            setIsLoading(false)
-            return
-       }
+    //    if (uelns.length === 0) {
+    //         setIsLoading(false)
+    //         return
+    //    }
 
-       console.log('uelns:', uelns)
+    //    console.log('uelns:', uelns)
 
-       const allOutputs = await Promise.all(
-        uelns.map(ueln => wallet.listOutputs({
-            basket: `equusv-${ueln}`,
-            include: 'locking scripts',
-        }))
-       )
+    //    const allOutputs = await Promise.all(
+    //     uelns.map(ueln => wallet.listOutputs({
+    //         basket: `equusv-${ueln}`,
+    //         include: 'locking scripts',
+    //     }))
+    //    )
 
-        const outputs = allOutputs.flatMap(r => r.outputs)
+    //     const outputs = allOutputs.flatMap(r => r.outputs)
 
-        const horses: HorsePassport[] = outputs
-            .filter(output => {
-                return output.lockingScript && !output.lockingScript.startsWith('76a914')
-            })
-            .map(output => {
-            const script = LockingScript.fromHex(output.lockingScript!)
-            const { fields } = PushDrop.decode(script)
+    //     const horses: HorsePassport[] = outputs
+    //         .filter(output => {
+    //             return output.lockingScript && !output.lockingScript.startsWith('76a914')
+    //         })
+    //         .map(output => {
+    //         const script = LockingScript.fromHex(output.lockingScript!)
+    //         const { fields } = PushDrop.decode(script)
 
-            const decode = (field: number[]) => Buffer.from(field).toString('utf-8')
+    //         const decode = (field: number[]) => Buffer.from(field).toString('utf-8')
 
-            return {
-                name: decode(fields[1]),
-                breed: decode(fields[2]),
-                birthDate: decode(fields[3]),
-                sex: decode(fields[4]),
-                color: decode(fields[5]),
-                ueln: decode(fields[6]),
-                chip: decode(fields[7]),
-                ownerAtRegistration: decode(fields[8]),
-                location: decode(fields[9]),
-                organisation: decode(fields[10]),
-                issuedDate: decode(fields[11]),
-                foodChainStatus: decode(fields[12]) === 'true',
-            } as HorsePassport
-        })
-        setHorse(horses)
+        //     return {
+        //         name: decode(fields[1]),
+        //         breed: decode(fields[2]),
+        //         birthDate: decode(fields[3]),
+        //         sex: decode(fields[4]),
+        //         color: decode(fields[5]),
+        //         ueln: decode(fields[6]),
+        //         chip: decode(fields[7]),
+        //         ownerAtRegistration: decode(fields[8]),
+        //         location: decode(fields[9]),
+        //         organisation: decode(fields[10]),
+        //         issuedDate: decode(fields[11]),
+        //         foodChainStatus: decode(fields[12]) === 'true',
+        //     } as HorsePassport
+        // })
+        setHorseDraft(drafts)
+        console.log('Loaded drafts:', drafts.length, JSON.stringify(drafts))
         setIsLoading(false)
        }
        fetchHorses()
@@ -145,9 +158,22 @@ export default function MyHorsesScreen() {
         console.log('handlePhotoUploaded called:', ueln, dataUri.substring(0, 50))
         setHorseImage(prev => ({ ...prev, [ueln]: dataUri }))
     }
+
+    const clearAll = async () => {
+        const stored = await SecureStore.getItemAsync('horseUelns')
+        const uelns: string[] = stored ? JSON.parse(stored) : []
+        
+        for (const ueln of uelns) {
+            await SecureStore.deleteItemAsync(`passport-draft-${ueln}`)
+        }
+        
+        await SecureStore.deleteItemAsync('horseUelns')
+        Alert.alert('Rensat', 'All lokal data borttagen')
+    }
     
     return (
             <View style={styles.outerContainer}>
+                <Header>Hästägare</Header>
                 <View style={[styles.centerContainer]}>
                 {isLoading 
                     ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 }}>
@@ -155,15 +181,16 @@ export default function MyHorsesScreen() {
                         <Text style={styles.iconText}>Hämtar dina hästar... </Text>
                     </View>
                     : <FlatList 
-                    data={horse}
+                    data={horseDraft}
                     extraData={horseImage}
                     renderItem={({ item }) => 
                         <HorseListCard 
-                            horse={item}
-                            horseImage={horseImage[item.ueln] ?? null}
+                            horse={item.horse}
+                            onSpend={() => clearAll()}
+                            horseImage={item.horse.id ? horseImage[item.horse.id] : null}
                             onPhotoUploaded={handlePhotoUploaded}
-                            isLoadingImage={isLoadingImage[item.ueln] ?? false}
-                            onPress={(horse) => setSelectedHorse(horse)}    
+                            isLoadingImage={item.horse.id ? isLoadingImage[item.horse.id] : false}
+                            onPress={() => setSelectedHorse(item.horse)}    
                         />
                             
                     }

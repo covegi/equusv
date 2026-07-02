@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import AntDesign from '@expo/vector-icons/AntDesign'
 import * as SecureStore from 'expo-secure-store'
-import { AuthFetch, PrivateKey, ECIES } from '@bsv/sdk'
+import { v4 as uuid4 } from 'uuid'
 import { useWallet } from '@/context/WalletContext'
 
 import Heading from '../text/Heading'
@@ -28,8 +28,6 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
     const { wallet } = useWallet()
     const [isLoading, setIsLoading] = useState(false)
 
-    const TOKEN_SERVER_URL = process.env.EXPO_PUBLIC_TOKEN_SERVER_URL
-
     useEffect(() => {
         if (horse) {
             setHorsePassport(horse)
@@ -49,8 +47,6 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
         if (!horsePassport.birthDate) newErrors.birthDate = true
         if (!horsePassport.sex) newErrors.sex = true
         if (!horsePassport.color) newErrors.color = true
-        if (!horsePassport.ueln || !/^\d{13}$/.test(horsePassport.ueln)) newErrors.ueln = true
-        if (!horsePassport.chip || !/^\d{12}$/.test(horsePassport.chip)) newErrors.chip = true
         if (!horsePassport.ownerAtRegistration) newErrors.ownerAtRegistration = true
         if (!horsePassport.location) newErrors.location = true
 
@@ -59,58 +55,24 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
     }
 
     const savePassportDraft = async (): Promise<HorsePassportDraft> => {
-        if (!wallet) throw new Error('Wallet not initialized.')
-
-        const authFetch = new AuthFetch(wallet)
+        const draftId = horsePassport?.id ?? uuid4()
         
-        const createPassportDraft = () => {
-            const draft = {
+        const draft: HorsePassportDraft = {
                 horse: horsePassport,
                 status: 'draft',
                 createdAt: new Date().toISOString()
             }
 
-            return draft
+        await SecureStore.setItemAsync(`passport-draft-${draftId}`, JSON.stringify(draft))
+
+        const stored = await SecureStore.getItemAsync('draftIds')
+        const ids: string[] = stored ? JSON.parse(stored) : []
+        if (!ids.includes(draftId)) {
+            ids.push(draftId)
+            await SecureStore.setItemAsync('draftIds', JSON.stringify(ids))
         }
 
-        const draft = createPassportDraft()
-
-        if (!draft.horse.ueln) throw new Error('UELN is required')
-
-        const savePassportDraftToSecureStore = async ({ draft }: { draft: HorsePassportDraft}) => {
-            await SecureStore.setItemAsync(`passport-draft-${draft.horse.ueln}`, JSON.stringify(draft))
-        }
-
-        await savePassportDraftToSecureStore({ draft: draft as HorsePassportDraft })
-
-        const stored = await SecureStore.getItemAsync('horseUelns')
-        const uelns: string[] = stored ? JSON.parse(stored) : []
-        if (!uelns.includes(draft.horse.ueln)) {
-            uelns.push(draft.horse.ueln)
-            await SecureStore.setItemAsync('horseUelns', JSON.stringify(uelns))
-        }
-
-        const rootKeyHex = await SecureStore.getItemAsync('rootKeyHex')
-        const privateKey = PrivateKey.fromString(rootKeyHex!)
-        const publicKey = privateKey.toPublicKey()
-        const draftBuffer = Buffer.from(JSON.stringify(draft), 'utf-8')
-        const encryptedData = ECIES.electrumEncrypt(Array.from(draftBuffer), publicKey)
-
-        const response = await authFetch.fetch(`${TOKEN_SERVER_URL}/draft`, {
-            method: 'PUT',
-            headers: {
-                'content-type': 'application/json'
-            },
-            body: JSON.stringify({
-                tokenType: 'identity/passport',
-                encryptedData: Buffer.from(encryptedData).toString('base64'),
-                identityKey: wallet.identityKey,
-                status: 'draft',
-                ueln: draft.horse.ueln
-            })
-        })
-
-        return draft as HorsePassportDraft
+        return draft
     }
 
         const handleSave = async () => {
@@ -228,38 +190,6 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                                     placeholder='t.ex. Brun, Svart'
                                     errorMessage='Färg måste anges'
                                 />
-                                <SectionRowInput 
-                                    label='UELN'
-                                    value={horsePassport.ueln ?? ''}
-                                    onChangeText={(text) => {
-                                        setHorsePassport({ ...horsePassport, ueln: text })
-                                        setErrors({ ...errors, ueln: false })
-                                    }}
-                                    hasError={errors.ueln}
-                                    placeholder='0000000000000'
-                                    prefix='SE-'
-                                    errorMessage={
-                                        !horsePassport.ueln?.trim()
-                                        ? 'UELN måste anges'
-                                        : 'UELN måste ha 13 siffror'
-                                    }
-                                />
-                                <SectionRowInput 
-                                    label='Chipnr'
-                                    value={horsePassport.chip ?? ''}
-                                    onChangeText={(text) => {
-                                        setHorsePassport({ ...horsePassport, chip: text})
-                                        setErrors({ ...errors, chip: false})
-                                    }}
-                                    hasError={errors.chip}
-                                    placeholder='000000000000'
-                                    prefix='752'
-                                    errorMessage={
-                                        !horsePassport.chip?.trim()
-                                        ? 'Chipnr måste anges'
-                                        : 'Ange 12 sifffor efter 752'
-                                    }
-                                />
                             </Section>
                             <Section>
                                 <View >
@@ -290,7 +220,58 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                             </Section>
                             <Section>
                                 <View>
-                                    <SectionHeading fontSize={11}>UTFÄRDARE</SectionHeading>
+                                    <SectionHeading fontSize={11}>LIVSMEDELSKEDJAN</SectionHeading>
+                                    <SectionRowToggle 
+                                        label='Ingår i livsmedelskedjan'
+                                        value={horsePassport.foodChainStatus!}
+                                        onValueChange={(checked: boolean) => {
+                                            setHorsePassport({ ...horsePassport, foodChainStatus: checked })
+                                        }}
+                                    />
+                                </View>
+                            </Section>
+                            <Section>
+                                <View style={styles.sectionOverlay}>
+                                    <SectionHeading fontSize={13} color='#8a7267'>TILLDELAS AV EXTERN PART</SectionHeading>
+                                    <View style={styles.subText}>
+                                        <Text style={styles.subTextValue}>Dessa uppgifter fylls i av avelsorganisation, veterinär eller id-kontrollant</Text>
+                                    </View>
+                                    
+
+                                    <SectionRowInput 
+                                    label='UELN'
+                                    value={horsePassport.ueln ?? ''}
+                                    onChangeText={(text) => {
+                                        setHorsePassport({ ...horsePassport, ueln: text })
+                                        setErrors({ ...errors, ueln: false })
+                                    }}
+                                    hasError={errors.ueln}
+                                    placeholder='0000000000000'
+                                    prefix='SE-'
+                                    errorMessage={
+                                        !horsePassport.ueln?.trim()
+                                        ? 'UELN måste anges'
+                                        : 'UELN måste ha 13 siffror'
+                                    }
+                                    disabled
+                                />
+                                <SectionRowInput 
+                                    label='Chipnr'
+                                    value={horsePassport.chip ?? ''}
+                                    onChangeText={(text) => {
+                                        setHorsePassport({ ...horsePassport, chip: text})
+                                        setErrors({ ...errors, chip: false})
+                                    }}
+                                    hasError={errors.chip}
+                                    placeholder='000000000000'
+                                    prefix='752'
+                                    errorMessage={
+                                        !horsePassport.chip?.trim()
+                                        ? 'Chipnr måste anges'
+                                        : 'Ange 12 sifffor efter 752'
+                                    }
+                                    disabled
+                                />
                                     <SectionRowInput
                                         label='Organisation'
                                         value={horsePassport.organisation ?? ''}
@@ -315,18 +296,7 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                                     />
                                 </View>
                             </Section>
-                            <Section>
-                                <View>
-                                    <SectionHeading fontSize={11}>LIVSMEDELSKEDJAN</SectionHeading>
-                                    <SectionRowToggle 
-                                        label='Ingår i livsmedelskedjan'
-                                        value={horsePassport.foodChainStatus!}
-                                        onValueChange={(checked: boolean) => {
-                                            setHorsePassport({ ...horsePassport, foodChainStatus: checked })
-                                        }}
-                                    />
-                                </View>
-                            </Section>
+                           
                             <View style={[styles.submitButton, { paddingBottom: insets.bottom }]}>
                                 <PrimaryButton onPress={handleSave}>Skapa draft</PrimaryButton>
                             </View>
@@ -376,5 +346,20 @@ const styles = StyleSheet.create({
     twoColumnsRow: {
         flexDirection: 'row',
         gap: 16,
+    },
+    sectionOverlay: {
+        opacity: 0.5
+    },
+    subText: {
+            alignItems: 'center',
+            borderBottomWidth: 1.5,
+            borderBottomColor: '#E8E0D8',
+            paddingBottom: 10,
+            marginBottom: 16
+    },
+    subTextValue: {
+        color: '#8a7267',
+        fontStyle: 'italic',
+        fontSize: 11 
     }
 })

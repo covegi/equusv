@@ -30,8 +30,13 @@ export default function LoginScreen() {
                     } else {
                         Alert.alert('Fel', 'Kunde inte ladda arkivet.')
                         }
-                    } catch (error) {
-                        Alert.alert('Fel', 'Ingen internetanslutning. Försök igen.')
+                    } catch (error: any) {
+                        console.log('Wallet load error', error.message, error.code)
+                        if (error.message?.includes('Network request failed') || error.message?.includes('fetch')) {
+                            Alert.alert('Fel', 'Ingen internetanslutning. Försök igen.')
+                        } else {
+                            Alert.alert('Fel', `Oväntat fel: ${error.message}`)
+                        } 
                     }
                     return
                 }

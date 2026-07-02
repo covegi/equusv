@@ -2,7 +2,7 @@ import { StyleSheet, View, Text, Image } from "react-native"
 import type { HorsePassport } from "@/types/horse-passport"
 import Entypo from '@expo/vector-icons/Entypo';
 
-export default function JournalHeader({ horse, horseImage }: {horse: HorsePassport, horseImage: string}) {
+export default function JournalHeader({ horse, horseImage }: {horse: Partial<HorsePassport>, horseImage: string}) {
 
     return (
         <View style={styles.outerContainer}>
@@ -11,7 +11,7 @@ export default function JournalHeader({ horse, horseImage }: {horse: HorsePasspo
                 <Text style={styles.name}>{horse.name}</Text>
                 <Text style={styles.ueln}>{horse.ueln}</Text>
                 <View style={styles.firstInnerRow}>
-                    <Text style={styles.firstInnerRowText}>Född {horse.birthDate.split(' ').pop()}</Text>
+                    <Text style={styles.firstInnerRowText}>Född {horse.birthDate?.split(' ').pop() ?? '_'}</Text>
                     <Entypo name="dot-single" size={14} color="#8a7267" style={styles.dot} />
                     <Text style={styles.firstInnerRowText}>{horse.sex}</Text>
                     <Entypo name="dot-single" size={14} color="#8a7267" style={styles.dot} />

@@ -1,12 +1,13 @@
 import { StyleSheet, Text, TextInput, View } from "react-native"
-import Ionicons from "@expo/vector-icons/Ionicons"
 
 export default function SectionRowInput({ label, value, onChangeText, hasError, placeholder, prefix, errorMessage, disabled }: { label: string, value: string, onChangeText: (text: string) => void, hasError?: boolean, placeholder: string, prefix?: string | '', errorMessage?: string, disabled?: boolean }) {
     return (
         <View style={styles.container}>
-            <Text style={styles.labelText}>{label}</Text>
+            <Text style={styles.labelText}>
+                {label}
+            </Text>
             { prefix ? (
-                <View style={[styles.prefixRow, hasError && { borderBottomColor: '#A13232' }]}>
+                <View style={[styles.valueText, styles.prefixRow, hasError && { borderBottomColor: '#A13232' }]}>
                     <Text style={styles.prefixText}>{prefix}</Text>
                     <TextInput 
                         value={value}
@@ -61,9 +62,9 @@ const styles = StyleSheet.create({
         paddingBottom: 10,
     },
     prefixText: {
-        fontFamily: 'Inter_400Regular',
+        fontFamily: 'Inter_300Light',
         fontSize: 14,
-        color: '#1b1b1b',
+        color: '#8a7267',
     },
     valueInput: {
         flex: 1,

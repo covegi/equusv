@@ -10,7 +10,7 @@
     import { usePassportModal } from '@/context/PassportModalContext'
     import PassportModal from '@/components/modal/PassportModal'
     import { HorsePassport } from '@/types/horse-passport'
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
+    import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 
     const TOKEN_SERVER_URL = process.env.EXPO_PUBLIC_TOKEN_SERVER_URL
 
