@@ -4,10 +4,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Feather from "@expo/vector-icons/Feather"
 import PassportModal from "../modal/PassportModal"
 
-export default function Header({ children }: { children: ReactNode }) {
+export default function Header({ children, onHorseCreated }: { children: ReactNode, onHorseCreated?: () => void }) {
     const [newPassportVisible, setNewPassportVisible] = useState(false)
-    const [refreshKey, setRefreshKey] = useState(0)
-
     const insets = useSafeAreaInsets()
 
     return (
@@ -22,7 +20,10 @@ export default function Header({ children }: { children: ReactNode }) {
             <PassportModal
                 visible={newPassportVisible}
                 onClose={() => setNewPassportVisible(false)}
-                onSaved={() => setRefreshKey(prev => prev + 1)}
+                onSaved={() => {
+                    setNewPassportVisible(false)
+                    onHorseCreated?.()
+                }}
             />
         </View>
     )

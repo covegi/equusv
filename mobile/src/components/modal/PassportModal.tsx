@@ -19,7 +19,7 @@ import SectionRowDatePicker from '../journal/SectionRowDatePicker'
 import { BREEDS } from '../../constants/breeds'
 import { SEX } from '../../constants/sex'
 
-export default function PassportModal({ horse, visible, onClose, onSaved }: {horse?: Partial<HorsePassport>, visible: boolean, onClose: () => void, onSaved: () => void }) {
+export default function PassportModal({ horse, visible, onClose, onSaved }: {horse?: Partial<HorsePassport>, visible: boolean, onClose: () => void, onSaved: (draft: HorsePassportRecord) => void }) {
     const insets = useSafeAreaInsets()
     const [horsePassport, setHorsePassport] = useState<Partial<HorsePassport>>({
         foodChainStatus: false
@@ -56,7 +56,7 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
         const draftId = horsePassport?.id ?? uuid4()
         
         const draft: HorsePassportRecord = {
-                horse: horsePassport,
+                horse: {...horsePassport, id: draftId },
                 status: 'draft',
                 createdAt: new Date().toISOString()
             }
@@ -84,8 +84,8 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
             }
             
             try {
-                await savePassportDraft()
-                onSaved()
+                const savedDraft = await savePassportDraft()
+                onSaved(savedDraft)
                 handleOnClose()
                 setIsLoading(false)
             } catch (error) {
@@ -296,7 +296,8 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                             </Section>
                            
                             <View style={[styles.submitButton, { paddingBottom: insets.bottom }]}>
-                                <PrimaryButton onPress={handleSave}>Skapa draft</PrimaryButton>
+                                <PrimaryButton onPress={handleSave}>
+                                    {horse?.id ? 'Spara ändringar' : 'Skapa draft'}</PrimaryButton>
                             </View>
                         </View>
                     </ScrollView>

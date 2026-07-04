@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, FlatList, ActivityIndicator, Modal, Alert } from 'react-native'
+import { StyleSheet, Text, View, FlatList, ActivityIndicator, Modal, Alert, Pressable } from 'react-native'
 import { useState, useEffect } from 'react'
 import { useWallet } from '@/context/WalletContext'
 import { PushDrop, LockingScript, LookupResolver, Transaction } from '@bsv/sdk'
@@ -20,6 +20,7 @@ export default function MyHorsesScreen() {
     const [horseImage, setHorseImage] = useState<Record<string, string>>({})
     const [selectedRecord, setSelectedRecord] = useState<HorsePassportRecord | null>(null)
     const [showCreateNewPassport, setCreateNewPassport] = useState(false)
+    const [refreshKey, setRefreshKey] = useState(0)
 
     useEffect(() => {
         if (horse.length === 0) return
@@ -150,7 +151,7 @@ export default function MyHorsesScreen() {
         setIsLoading(false)
        }
        fetchHorses()
-    }, [wallet])
+    }, [wallet, refreshKey])
 
     if (!wallet) return null
 
@@ -170,10 +171,22 @@ export default function MyHorsesScreen() {
         await SecureStore.deleteItemAsync('horseUelns')
         Alert.alert('Rensat', 'All lokal data borttagen')
     }
+
+    const deleteRecord = async (id: string) => {
+        console.log('deleteRecord called with id:', id)
+        await SecureStore.deleteItemAsync(`passport-draft-${id}`)
+
+        const stored = await SecureStore.getItemAsync('draftIds')
+        const ids: string[] = stored ? JSON.parse(stored) : []
+        await SecureStore.setItemAsync('draftIds', JSON.stringify(ids.filter(i => i !== id)))
+
+        setSelectedRecord(null)
+        setRefreshKey(prev => prev + 1)
+    }
     
     return (
             <View style={styles.outerContainer}>
-                <Header>Hästägare</Header>
+                <Header onHorseCreated={() => setRefreshKey(prev => prev + 1)}>Hästägare</Header>
                 <View style={[styles.centerContainer]}>
                 {isLoading 
                     ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 }}>
@@ -203,6 +216,7 @@ export default function MyHorsesScreen() {
                         record={selectedRecord}
                         horseImage={horseImage[selectedRecord?.horse?.id ?? '']}
                         onClose={() => setSelectedRecord(null)}
+                        onDelete={deleteRecord}
                     />
                 </Modal>
         </View>

@@ -4,7 +4,7 @@ import type { HorsePassport } from "@/types/horse-passport"
 import Ionicons from "@expo/vector-icons/Ionicons"
 import PassportModal from "@/components/modal/PassportModal"
 
-export default function PassportCard({ horse, status='draft', onEdit }: { horse: Partial<HorsePassport>, status?: string, onEdit: () => void }) {
+export default function PassportCard({ horse, status='draft', onEdit, onDelete }: { horse: Partial<HorsePassport>, status?: string, onEdit: () => void, onDelete: () => void }) {
     const [expanded, setExpanded] = useState(false)
 
     const statusColors: Record<string, { bg: string, text: string, label: string, dot: string, verifiedText: string, checkmark: boolean }> = {
@@ -94,8 +94,8 @@ export default function PassportCard({ horse, status='draft', onEdit }: { horse:
                             <Text style={styles.label}>Livsmedelskedjan</Text>
                         </View>
                         <View style={styles.dataColumn}>
-                            <View style={[styles.foodChainBadge && horse.foodChainStatus && styles.foodChainBadgeActive]}>
-                                <Text style={[styles.foodChainText, horse.foodChainStatus && styles.foodChainTextActive]}>
+                            <View style={[styles.foodChainBadge, horse.foodChainStatus ? styles.foodChainActive : styles.foodChainInactive]}>
+                                <Text style={horse.foodChainStatus ? styles.foodChainTextActive: styles.foodChainTextInactive}>
                                     {horse.foodChainStatus ? 'Ingår' : 'Ingår ej'}
                                 </Text>
                             </View>
@@ -107,7 +107,13 @@ export default function PassportCard({ horse, status='draft', onEdit }: { horse:
                         {status === 'draft' && (
                             <View style={styles.draftBtns}>
                                 <Pressable
-                                    onPress={() => {onEdit()}}
+                                    onPress={() => onDelete()}
+                                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                                >
+                                    <Text style={[styles.signLink, { color: '#93000a' }]}>Radera</Text>
+                                </Pressable>
+                                <Pressable
+                                    onPress={() => onEdit()}
                                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                                 >
                                     <Text style={[styles.signLink, { color: '#8a7267'}]}>Redigera</Text>
@@ -232,27 +238,28 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 14
     },
-    foodChainBadge: {
-        alignSelf: 'flex-start',
-        paddingVertical: 4,
-        paddingHorizontal: 10,
-        borderRadius: 12,
-        backgroundColor: '#F5F0EB',
-    },
     foodChainText: {
         fontSize: 13,
         fontWeight: '500',
         color: '#574238',
     },
-    foodChainBadgeActive: {
+    foodChainTextActive: {
+        color: '#2E7D32',
+    },
+    foodChainBadge: {
         alignSelf: 'flex-start',
         paddingVertical: 4,
         paddingHorizontal: 10,
         borderRadius: 12,
+    },
+    foodChainActive: {
         backgroundColor: '#E8F5E9',
     },
-    foodChainTextActive: {
-        color: '#2E7D32',
+    foodChainInactive: {
+        backgroundColor: '#F5F0EB',
+    },
+    foodChainTextInactive: {
+        color: '#8a7267',
     },
     footerRow: {
         flexDirection: 'row',
