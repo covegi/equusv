@@ -6,7 +6,7 @@
     import { useRouter } from 'expo-router'
 
     import PassportCard from '@/components/passport/PassportCard'
-    import { HorsePassportDraft } from '@/types/horse-passport-draft'
+    import { HorsePassportDraft } from '@/types/horse-passport-record'
     import { usePassportModal } from '@/context/PassportModalContext'
     import PassportModal from '@/components/modal/PassportModal'
     import { HorsePassport } from '@/types/horse-passport'

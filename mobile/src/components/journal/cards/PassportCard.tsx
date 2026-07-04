@@ -2,8 +2,9 @@ import { StyleSheet, View, Text, Pressable } from "react-native"
 import { useState } from "react"
 import type { HorsePassport } from "@/types/horse-passport"
 import Ionicons from "@expo/vector-icons/Ionicons"
+import PassportModal from "@/components/modal/PassportModal"
 
-export default function PassportCard({ horse, status='draft' }: { horse: Partial<HorsePassport>, status?: string }) {
+export default function PassportCard({ horse, status='draft', onEdit }: { horse: Partial<HorsePassport>, status?: string, onEdit: () => void }) {
     const [expanded, setExpanded] = useState(false)
 
     const statusColors: Record<string, { bg: string, text: string, label: string, dot: string, verifiedText: string, checkmark: boolean }> = {
@@ -105,8 +106,15 @@ export default function PassportCard({ horse, status='draft' }: { horse: Partial
                         <Text style={styles.verifier}>Skapat av hästägare</Text>
                         {status === 'draft' && (
                             <View style={styles.draftBtns}>
-                                <Text style={[styles.signLink, { color: '#8a7267'}]}>Redigera</Text>
-                                <Text style={[styles.signLink, { color: '#1b1b1b'}]}>Skicka</Text>
+                                <Pressable
+                                    onPress={() => {onEdit()}}
+                                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                                >
+                                    <Text style={[styles.signLink, { color: '#8a7267'}]}>Redigera</Text>
+                                </Pressable>
+                                <Pressable>
+                                    <Text style={[styles.signLink, { color: '#1b1b1b'}]}>Skicka</Text>
+                                </Pressable>
                             </View>
 
                         )}
@@ -258,7 +266,7 @@ const styles = StyleSheet.create({
     },
     draftBtns: {
         flexDirection: 'row',
-        gap: 12
+        gap: 12,
     }
 
 })

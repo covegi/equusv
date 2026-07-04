@@ -9,16 +9,16 @@ import type { HorsePassport } from '@/types/horse-passport'
 import { fetchFromUhrp } from '@/utils/uhrp'
 import HorseJournal from '@/components/journal/HorseJournal'
 import Header from '@/components/header/header'
-import { HorsePassportDraft } from '@/types/horse-passport-draft'
+import { HorsePassportRecord } from '@/types/horse-passport-record'
 
 export default function MyHorsesScreen() {
     const [horse, setHorse] = useState<HorsePassport[]>([])
-    const [horseDraft, setHorseDraft] = useState<HorsePassportDraft[]>([])
+    const [horseDraft, setHorseDraft] = useState<HorsePassportRecord[]>([])
     const { wallet } = useWallet()
     const [isLoading, setIsLoading] = useState(false)
     const [isLoadingImage, setIsLoadingImage] = useState<Record<string, boolean>>({})
     const [horseImage, setHorseImage] = useState<Record<string, string>>({})
-    const [selectedHorse, setSelectedHorse] = useState<Partial<HorsePassport> | null>(null)
+    const [selectedRecord, setSelectedRecord] = useState<HorsePassportRecord | null>(null)
     const [showCreateNewPassport, setCreateNewPassport] = useState(false)
 
     useEffect(() => {
@@ -96,7 +96,7 @@ export default function MyHorsesScreen() {
 
         const stored = await SecureStore.getItemAsync('draftIds')
         const ids = stored ? JSON.parse(stored) : []
-        const drafts: HorsePassportDraft[] = []
+        const drafts: HorsePassportRecord[] = []
         for (const id of ids) {
             const raw = await SecureStore.getItemAsync(`passport-draft-${id}`)
             if (raw) drafts.push(JSON.parse(raw))
@@ -190,20 +190,19 @@ export default function MyHorsesScreen() {
                             horseImage={item.horse.id ? horseImage[item.horse.id] : null}
                             onPhotoUploaded={handlePhotoUploaded}
                             isLoadingImage={item.horse.id ? isLoadingImage[item.horse.id] : false}
-                            onPress={() => setSelectedHorse(item.horse)}    
+                            onPress={() => setSelectedRecord(item)}    
                         />
-                            
                     }
                     showsVerticalScrollIndicator={false}
 
                     contentContainerStyle={{ paddingTop: 20, paddingBottom: 50 }}
                 />}
                 </View>
-                <Modal visible={!!selectedHorse} animationType='slide' presentationStyle='pageSheet'>
+                <Modal visible={!!selectedRecord} animationType='slide' presentationStyle='pageSheet'>
                     <HorseJournal 
-                        horse={selectedHorse}
-                        horseImage={horseImage[selectedHorse?.ueln ?? '']}
-                        onClose={() => setSelectedHorse(null)}
+                        record={selectedRecord}
+                        horseImage={horseImage[selectedRecord?.horse?.id ?? '']}
+                        onClose={() => setSelectedRecord(null)}
                     />
                 </Modal>
         </View>

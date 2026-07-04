@@ -1,15 +1,17 @@
 import { StyleSheet, View, Text, Pressable } from "react-native"
 import { useState } from "react"
-import type { HorsePassport } from "@/types/horse-passport"
+import type { HorsePassportRecord } from "@/types/horse-passport-record"
 import FontAwesome from "@expo/vector-icons/FontAwesome"
 import JournalHeader from "./JournalHeader"
 import FilterButton from "../buttons/FilterButton"
 import PassportCard from "./cards/PassportCard"
+import PassportModal from "../modal/PassportModal"
 
-export default function HorseJournal({ horse, horseImage, onClose }: { horse: Partial<HorsePassport> | null, horseImage: string, onClose: () => void }) {
+export default function HorseJournal({ record, horseImage, onClose }: { record: HorsePassportRecord | null, horseImage: string, onClose: () => void }) {
      const [isActive, setIsActive] = useState('Alla')
+     const [showEdit, setShowEdit] = useState(false)
 
-     if (!horse) return null
+     if (!record) return null
 
      const filterBtns = [
           { title: 'Alla', disabled: false },
@@ -23,7 +25,7 @@ export default function HorseJournal({ horse, horseImage, onClose }: { horse: Pa
                <Pressable onPress={onClose} style={styles.closeBtn}>
                     <FontAwesome name='angle-down' size={40} color='#574238' />
                </Pressable>
-               <JournalHeader horse={horse} horseImage={horseImage} />
+               <JournalHeader horse={record.horse} horseImage={horseImage} />
                <View style={styles.filterButtonContainer}>
                     {filterBtns.map((btn) => (
                          <FilterButton
@@ -35,7 +37,17 @@ export default function HorseJournal({ horse, horseImage, onClose }: { horse: Pa
                          </FilterButton>
                     ))}
                </View>
-               <PassportCard horse={horse} />
+               <PassportCard
+                    horse={record.horse}
+                    status={record.status}
+                    onEdit={() => setShowEdit(true)}
+               />
+               <PassportModal
+                    horse={record.horse}
+                    visible={showEdit}
+                    onClose={() => setShowEdit(false)}
+                    onSaved={() => setShowEdit(false)}
+                    />
          </View>
      )
 }

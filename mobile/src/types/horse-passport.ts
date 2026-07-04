@@ -9,7 +9,7 @@ export type HorsePassport = {
     ownerAtRegistration: string
     location: string
     foodChainStatus: boolean
-    // Externa fält
+    // external fields
     ueln?: string
     chip?: string
     organisation?: string

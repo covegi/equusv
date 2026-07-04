@@ -6,7 +6,7 @@ import Heading from "../text/Heading"
 import CardButton from "../buttons/CardButton"
 
 
-export default function PassportCard({ horse, status='draft', onDelete, onCertify, onRevoke, onEdit, onBroadcast }: { horse: HorsePassport, status: string, onDelete?: () => void, onCertify?: () => void, onRevoke?: () => void, onEdit?: () => void, onBroadcast?: () => void }) {
+export default function PassportCard({ horse, horseStatus='draft', onDelete, onCertify, onRevoke, onEdit, onBroadcast }: { horse: HorsePassport, horseStatus: string, onDelete?: () => void, onCertify?: () => void, onRevoke?: () => void, onEdit?: () => void, onBroadcast?: () => void }) {
 
     const statusLabel = {
         draft: 'Utkast',

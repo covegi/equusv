@@ -12,14 +12,14 @@ import SectionHeading from '../journal/SectionHeading'
 import SectionRowInput from '../journal/SectionRowInput'
 import SectionRowToggle from '../journal/SectionRowToggle'
 import type { HorsePassport } from '@/types/horse-passport'
-import type { HorsePassportDraft } from '@/types/horse-passport-draft'
+import type { HorsePassportRecord } from '@/types/horse-passport-record'
 import PrimaryButton from '../buttons/PrimaryButton'
 import SectionRowPicker from '../journal/SectionRowPicker'
 import SectionRowDatePicker from '../journal/SectionRowDatePicker'
 import { BREEDS } from '../../constants/breeds'
 import { SEX } from '../../constants/sex'
 
-export default function PassportModal({ horse, visible, onClose, onSaved }: {horse?: HorsePassport, visible: boolean, onClose: () => void, onSaved: () => void }) {
+export default function PassportModal({ horse, visible, onClose, onSaved }: {horse?: Partial<HorsePassport>, visible: boolean, onClose: () => void, onSaved: () => void }) {
     const insets = useSafeAreaInsets()
     const [horsePassport, setHorsePassport] = useState<Partial<HorsePassport>>({
         foodChainStatus: false
@@ -29,16 +29,14 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
     const [isLoading, setIsLoading] = useState(false)
 
     useEffect(() => {
-        if (horse) {
+        if (visible && horse) {
             setHorsePassport(horse)
         }
-    }, [horse])
-
-    useEffect(() => {
-        if (!visible && !horse) {
+        if (!visible) {
             setHorsePassport({})
         }
     }, [visible])
+
 
     const validate = (): boolean => {
         const newErrors: Partial<Record<keyof HorsePassport, boolean>> = {}
@@ -54,10 +52,10 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
         return Object.keys(newErrors).length === 0
     }
 
-    const savePassportDraft = async (): Promise<HorsePassportDraft> => {
+    const savePassportDraft = async (): Promise<HorsePassportRecord> => {
         const draftId = horsePassport?.id ?? uuid4()
         
-        const draft: HorsePassportDraft = {
+        const draft: HorsePassportRecord = {
                 horse: horsePassport,
                 status: 'draft',
                 createdAt: new Date().toISOString()
