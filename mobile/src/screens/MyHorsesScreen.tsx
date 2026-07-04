@@ -183,6 +183,10 @@ export default function MyHorsesScreen() {
         setSelectedRecord(null)
         setRefreshKey(prev => prev + 1)
     }
+
+    const sendToBreedingOrg = async () => {
+        
+    }
     
     return (
             <View style={styles.outerContainer}>
@@ -217,6 +221,7 @@ export default function MyHorsesScreen() {
                         horseImage={horseImage[selectedRecord?.horse?.id ?? '']}
                         onClose={() => setSelectedRecord(null)}
                         onDelete={deleteRecord}
+                        onSend={sendToBreedingOrg}
                     />
                 </Modal>
         </View>

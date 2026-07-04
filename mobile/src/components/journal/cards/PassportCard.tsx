@@ -4,7 +4,7 @@ import type { HorsePassport } from "@/types/horse-passport"
 import Ionicons from "@expo/vector-icons/Ionicons"
 import PassportModal from "@/components/modal/PassportModal"
 
-export default function PassportCard({ horse, status='draft', onEdit, onDelete }: { horse: Partial<HorsePassport>, status?: string, onEdit: () => void, onDelete: () => void }) {
+export default function PassportCard({ horse, status='draft', onEdit, onDelete, onSend }: { horse: Partial<HorsePassport>, status?: string, onEdit: () => void, onDelete: () => void, onSend: () => void }) {
     const [expanded, setExpanded] = useState(false)
 
     const statusColors: Record<string, { bg: string, text: string, label: string, dot: string, verifiedText: string, checkmark: boolean }> = {
@@ -118,7 +118,7 @@ export default function PassportCard({ horse, status='draft', onEdit, onDelete }
                                 >
                                     <Text style={[styles.signLink, { color: '#8a7267'}]}>Redigera</Text>
                                 </Pressable>
-                                <Pressable>
+                                <Pressable onPress={() => onSend()}>
                                     <Text style={[styles.signLink, { color: '#1b1b1b'}]}>Skicka</Text>
                                 </Pressable>
                             </View>

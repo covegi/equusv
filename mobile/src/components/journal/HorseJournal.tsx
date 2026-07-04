@@ -7,7 +7,7 @@ import FilterButton from "../buttons/FilterButton"
 import PassportCard from "./cards/PassportCard"
 import PassportModal from "../modal/PassportModal"
 
-export default function HorseJournal({ record, horseImage, onClose, onDelete }: { record: HorsePassportRecord | null, horseImage: string, onClose: () => void, onDelete: (id: string) => void }) {
+export default function HorseJournal({ record, horseImage, onClose, onDelete, onSend }: { record: HorsePassportRecord | null, horseImage: string, onClose: () => void, onDelete: (id: string) => void, onSend: (record: HorsePassportRecord) => void }) {
      const [isActive, setIsActive] = useState('Alla')
      const [showEdit, setShowEdit] = useState(false)
      const [currentRecord, setCurrentRecord] = useState(record)
@@ -27,6 +27,19 @@ export default function HorseJournal({ record, horseImage, onClose, onDelete }: 
                [
                     { text: 'Avbryt', style: 'cancel' },
                     { text: 'Radera', style: 'destructive', onPress: () => onDelete(currentRecord.horse.id!)}
+               ]
+          )
+     }
+
+     const handleSend = () => {
+          console.log('handleSendDraft called, id:', currentRecord.horse.id)
+          if (!currentRecord.horse.id) return
+          Alert.alert(
+               'Skicka till avelsorganisation',
+               `Vill du skicka ansökan för ${currentRecord.horse.name ?? 'denna häst'}?`,
+               [
+                    { text: 'Avbryt', style: 'cancel' },
+                    { text: 'Skicka', style: 'default', onPress: () => onSend(currentRecord) }
                ]
           )
      }
@@ -60,6 +73,7 @@ export default function HorseJournal({ record, horseImage, onClose, onDelete }: 
                     status={currentRecord!.status}
                     onEdit={() => setShowEdit(true)}
                     onDelete={handleDelete}
+                    onSend={handleSend}
                />
                <PassportModal
                     horse={currentRecord!.horse}
