@@ -1,23 +1,27 @@
-import { ReactNode, useState } from "react"
-import { StyleSheet, View, Text, Pressable, Modal } from "react-native"
+import { useState } from "react"
+import { StyleSheet, View, Text, Pressable } from "react-native"
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Feather from "@expo/vector-icons/Feather"
 import PassportModal from "../modal/PassportModal"
+import { useRole } from "@/context/RoleContext"
+import { ROLES } from '../../constants/certificates'
 
-export default function Header({ children, onHorseCreated }: { children: ReactNode, onHorseCreated?: () => void }) {
+export default function Header({ onHorseCreated, onMenuPress }: { onHorseCreated?: () => void, onMenuPress: () => void }) {
     const [newPassportVisible, setNewPassportVisible] = useState(false)
     const insets = useSafeAreaInsets()
+    const { activeRole } = useRole()
+    const roleLabel = ROLES.find(r => r.id === activeRole)?.label ?? ''
 
     return (
         <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
-            <Pressable>
+            <Pressable onPress={onMenuPress} hitSlop={10}>
                 <Feather name='menu' size={22} color='#574238' />
             </Pressable>
-            <Text style={styles.heading}>{children}</Text>
-            <Pressable onPress={() => setNewPassportVisible(true)}>
+            <Text style={styles.heading}>{roleLabel}</Text>
+            <Pressable onPress={() => setNewPassportVisible(true)} hitSlop={10}>
                 <Feather name='plus' size={22} color='#574238' />
             </Pressable>
-            <PassportModal
+            <PassportModal  
                 visible={newPassportVisible}
                 onClose={() => setNewPassportVisible(false)}
                 onSaved={() => {

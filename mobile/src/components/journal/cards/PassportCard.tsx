@@ -2,7 +2,6 @@ import { StyleSheet, View, Text, Pressable } from "react-native"
 import { useState } from "react"
 import type { HorsePassport } from "@/types/horse-passport"
 import Ionicons from "@expo/vector-icons/Ionicons"
-import PassportModal from "@/components/modal/PassportModal"
 
 export default function PassportCard({ horse, status='draft', onEdit, onDelete, onSend }: { horse: Partial<HorsePassport>, status?: string, onEdit: () => void, onDelete: () => void, onSend: () => void }) {
     const [expanded, setExpanded] = useState(false)
@@ -16,6 +15,10 @@ export default function PassportCard({ horse, status='draft', onEdit, onDelete, 
     }
 
     const current = statusColors[status] ?? statusColors.draft
+
+    const showInfo = () => {
+        console.log('Showing info modal')
+    }
 
     return (
         <View style={styles.outerContainer}>
@@ -31,7 +34,12 @@ export default function PassportCard({ horse, status='draft', onEdit, onDelete, 
                     </View>
                 </View>
                 <View style={styles.titleRow}>
-                        <Text style={styles.titleText}>Hästpass</Text>
+                        <View style={styles.titleInfo}>
+                            <Text style={styles.titleText}>Hästpass</Text>
+                            <Pressable onPress={showInfo} hitSlop={10}>
+                                <Ionicons name='information-circle-outline' size={18} color='#8a7267' style={{ marginTop: 4 }}/>
+                            </Pressable>
+                        </View>
                         <View style={[styles.statusBadge, { backgroundColor: current.bg }]}>
                             <Text style={[styles.statusText, { color: current.text }]} >
                                 {current.label}
@@ -108,17 +116,20 @@ export default function PassportCard({ horse, status='draft', onEdit, onDelete, 
                             <View style={styles.draftBtns}>
                                 <Pressable
                                     onPress={() => onDelete()}
-                                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                                    hitSlop={10}
                                 >
                                     <Text style={[styles.signLink, { color: '#93000a' }]}>Radera</Text>
                                 </Pressable>
                                 <Pressable
                                     onPress={() => onEdit()}
-                                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                                    hitSlop={10}
                                 >
                                     <Text style={[styles.signLink, { color: '#8a7267'}]}>Redigera</Text>
                                 </Pressable>
-                                <Pressable onPress={() => onSend()}>
+                                <Pressable
+                                    onPress={() => onSend()}
+                                    hitSlop={10}
+                                >
                                     <Text style={[styles.signLink, { color: '#1b1b1b'}]}>Skicka</Text>
                                 </Pressable>
                             </View>
@@ -190,6 +201,11 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginTop: 4
+    },
+    titleInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6
     },
     statusBadge: {
         paddingVertical: 3,

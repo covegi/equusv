@@ -11,6 +11,9 @@
       "bundleIdentifier": "com.equusv.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
+        "NSAppTransportSecurity": {
+        "NSAllowsArbitraryLoads": true
+    },
         "NSCameraUsageDescription": "EquusCert behöver kameraåtkomst för att ta hästfoton.",
         "NSPhotoLibraryUsageDescription": "EquusCert behöver åtkomst till bildbiblioteket för att välja hästfoton."
       }

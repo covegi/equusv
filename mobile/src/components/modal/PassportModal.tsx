@@ -297,7 +297,7 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                            
                             <View style={[styles.submitButton, { paddingBottom: insets.bottom }]}>
                                 <PrimaryButton onPress={handleSave}>
-                                    {horse?.id ? 'Spara ändringar' : 'Skapa draft'}</PrimaryButton>
+                                    {horse?.id ? 'Spara ändringar' : 'Spara utkast'}</PrimaryButton>
                             </View>
                         </View>
                     </ScrollView>

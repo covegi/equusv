@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, FlatList, ActivityIndicator, Modal, Alert, Pressable } from 'react-native'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useWallet } from '@/context/WalletContext'
-import { PushDrop, LockingScript, LookupResolver, Transaction } from '@bsv/sdk'
+import { PushDrop, LockingScript, LookupResolver, Transaction, AuthFetch } from '@bsv/sdk'
 import * as SecureStore from 'expo-secure-store'
 
 import HorseListCard from '@/components/journal/HorseListCard'
@@ -10,6 +10,9 @@ import { fetchFromUhrp } from '@/utils/uhrp'
 import HorseJournal from '@/components/journal/HorseJournal'
 import Header from '@/components/header/header'
 import { HorsePassportRecord } from '@/types/horse-passport-record'
+import DrawerMenu from '@/components/navigation/DrawerMeny'
+
+const TOKEN_SERVER_URL = process.env.EXPO_PUBLIC_TOKEN_SERVER_URL
 
 export default function MyHorsesScreen() {
     const [horse, setHorse] = useState<HorsePassport[]>([])
@@ -21,6 +24,11 @@ export default function MyHorsesScreen() {
     const [selectedRecord, setSelectedRecord] = useState<HorsePassportRecord | null>(null)
     const [showCreateNewPassport, setCreateNewPassport] = useState(false)
     const [refreshKey, setRefreshKey] = useState(0)
+    const [drawerVisible, setDrawerVisible] = useState(false)
+
+    const authFetch = useMemo(() =>
+        wallet ? new AuthFetch(wallet) : null
+    , [wallet])
 
     useEffect(() => {
         if (horse.length === 0) return
@@ -184,13 +192,62 @@ export default function MyHorsesScreen() {
         setRefreshKey(prev => prev + 1)
     }
 
-    const sendToBreedingOrg = async () => {
+    const sendToBreedingOrg = async ( record: HorsePassportRecord ) => {
+        if (!authFetch) return
+
+        try {
+            const response = await authFetch?.fetch(`${TOKEN_SERVER_URL}/identity/passport/create`, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json'},
+                body: JSON.stringify({
+                  record: { ...record, status: 'pending'},
+                  identityKey: wallet!.identityKey  
+                })
+            })
+            
+            const data = await response.json()
+            console.log('Response:', data.txid, data.outputIndex)
+
+            const { tx: txBase64, txid, outputIndex } = data
+            const tx = Array.from(Buffer.from(txBase64, 'base64'))
+
+            await wallet.internalizeAction({
+                tx,
+                outputs: [{
+                    outputIndex,
+                    protocol: 'basket insertion',
+                    insertionRemittance: {
+                        basket: `equusv-${record.horse.id}`,
+                        customInstructions: JSON.stringify({ type: 'horse-passport'}),
+                        tags: ['passport']
+                    }
+                }],
+                description: `pending passport: ${record.horse.name}`
+            })
+            
+            console.log('Internalized:', txid)
+
+            const raw = await SecureStore.getItemAsync(`passport-draft-${record.horse.id}`)
+            if (raw) {
+                const draft = JSON.parse(raw)
+                draft.status = 'pending'
+                await SecureStore.setItemAsync(`passport-draft-${record.horse.id}`, JSON.stringify(draft))
+            }
+            setSelectedRecord(null)
+            setRefreshKey(prev => prev + 1)
         
+        } catch (error) {
+            console.error('sendToBreedingOrg failed', error)
+            Alert.alert('Fel', 'Kunde inte hitta ansökan')
+        }
     }
     
     return (
             <View style={styles.outerContainer}>
-                <Header onHorseCreated={() => setRefreshKey(prev => prev + 1)}>Hästägare</Header>
+                <Header
+                    onHorseCreated={() => setRefreshKey(prev => prev + 1)}
+                    onMenuPress={() => setDrawerVisible(true)}
+                />
                 <View style={[styles.centerContainer]}>
                 {isLoading 
                     ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 }}>
@@ -224,6 +281,10 @@ export default function MyHorsesScreen() {
                         onSend={sendToBreedingOrg}
                     />
                 </Modal>
+                <DrawerMenu
+                    visible={drawerVisible}
+                    onClose={() => setDrawerVisible(false)}
+                />
         </View>
     )
 }
