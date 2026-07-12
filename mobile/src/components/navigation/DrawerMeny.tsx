@@ -120,33 +120,37 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         gap: 8,
-        marginBottom: 16
+        marginBottom: 4
     },
     roleItem: {
         paddingVertical: 5,
         paddingHorizontal: 10,
         borderRadius: 16,
         backgroundColor: '#fff',
-        borderWidth: 0.5,
+        borderWidth: 1,
         borderColor: '#E8E0D8',
     },
     roleItemActive: {
         backgroundColor: '#574238',
         borderColor: '#574238',
+        borderWidth: 0,
+        paddingVertical: 6,
+        paddingHorizontal: 11,
     },
     roleText: {
         fontFamily: 'Inter_400Regular',
-        fontSize: 11,
+        fontSize: 12,
         color: '#574238',
     },
     roleTextActive: {
         color: '#fff',
-        fontFamily: 'Inter_600SemiBold',
-        fontSize: 11
+        fontFamily: 'Inter_400Regular',
+        fontSize: 12
     },
     divider: {
         height: 1,
         backgroundColor: '#E8E0D8',
-        marginVertical: 16,
+        marginTop: 12,
+        marginBottom: 16,
     },
 })

@@ -1,4 +1,5 @@
 export const SEX = [
     'Hingst',
-    'Sto'
+    'Sto',
+    'Valack'
 ]

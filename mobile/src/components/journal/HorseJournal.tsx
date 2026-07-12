@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, Pressable, Alert } from "react-native"
+import { StyleSheet, View, Pressable, Alert } from "react-native"
 import { useState, useEffect } from "react"
 import type { HorsePassportRecord } from "@/types/horse-passport-record"
 import FontAwesome from "@expo/vector-icons/FontAwesome"

@@ -26,7 +26,7 @@ export default function LoginScreen() {
                         const wallet = await loadWallet()
                         if (wallet !== null) {
                         setWallet(wallet)
-                        router.replace('/horses')
+                        router.replace('/home')
                     } else {
                         Alert.alert('Fel', 'Kunde inte ladda arkivet.')
                         }

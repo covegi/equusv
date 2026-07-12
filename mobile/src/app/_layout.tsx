@@ -33,23 +33,12 @@ export default function RootLayout() {
               <RoleProvider>
                 <Stack screenOptions={{ headerShown: false }}>
                   <Stack.Screen
-                    name='horses'
+                    name='home'
                     options={{ headerShown: false }}
                   >
                   </Stack.Screen>
-                  <Stack.Screen
-                    name='passport'
-                    options={{ 
-                      headerShown: true,
-                      title: 'Hästpass',
-                      headerStyle: { backgroundColor: '#1a1a1a'},
-                      contentStyle: { paddingTop: 10, backgroundColor: '#1a1a1a' },
-                      headerTintColor: '#f7f2f2',
-                      headerBackVisible: false,
-                      gestureEnabled: false,
-                    }} />
                 </Stack>
-              </RoleProvider>
+                </RoleProvider>
             </WalletProvider>
         </GestureHandlerRootView>
     )

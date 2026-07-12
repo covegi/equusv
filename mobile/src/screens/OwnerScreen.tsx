@@ -1,7 +1,7 @@
-import { StyleSheet, Text, View, FlatList, ActivityIndicator, Modal, Alert, Pressable } from 'react-native'
+import { StyleSheet, Text, View, FlatList, ActivityIndicator, Modal, Alert } from 'react-native'
 import { useState, useEffect, useMemo } from 'react'
 import { useWallet } from '@/context/WalletContext'
-import { PushDrop, LockingScript, LookupResolver, Transaction, AuthFetch } from '@bsv/sdk'
+import { PushDrop, LookupResolver, Transaction, AuthFetch } from '@bsv/sdk'
 import * as SecureStore from 'expo-secure-store'
 
 import HorseListCard from '@/components/journal/HorseListCard'
@@ -14,7 +14,7 @@ import DrawerMenu from '@/components/navigation/DrawerMeny'
 
 const TOKEN_SERVER_URL = process.env.EXPO_PUBLIC_TOKEN_SERVER_URL
 
-export default function MyHorsesScreen() {
+export default function OwnerScreen() {
     const [horse, setHorse] = useState<HorsePassport[]>([])
     const [horseDraft, setHorseDraft] = useState<HorsePassportRecord[]>([])
     const { wallet } = useWallet()
@@ -294,13 +294,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#F5F0EB',
         position: 'relative'
-    },
-    hamburgerContainer: {
-        marginRight: 25
-    },
-    headerContainer: {
-        height: 120,
-        marginLeft: 15,
     },
     centerContainer: {
         flex: 1,

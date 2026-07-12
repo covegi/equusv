@@ -18,9 +18,14 @@ export default function Header({ onHorseCreated, onMenuPress }: { onHorseCreated
                 <Feather name='menu' size={22} color='#574238' />
             </Pressable>
             <Text style={styles.heading}>{roleLabel}</Text>
-            <Pressable onPress={() => setNewPassportVisible(true)} hitSlop={10}>
-                <Feather name='plus' size={22} color='#574238' />
-            </Pressable>
+            {onHorseCreated ? (
+                <Pressable onPress={() => setNewPassportVisible(true)} hitSlop={10}>
+                    <Feather name='plus' size={22} color='#574238' />
+                </Pressable>
+            ) : (
+                <View style={{ width: 22 }} />
+            )
+        }
             <PassportModal  
                 visible={newPassportVisible}
                 onClose={() => setNewPassportVisible(false)}
