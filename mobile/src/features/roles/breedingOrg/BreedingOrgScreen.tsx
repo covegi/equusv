@@ -1,21 +1,54 @@
-import { StyleSheet, View, Text, Pressable } from "react-native"
+import { StyleSheet, View, Text, FlatList } from "react-native"
 import { useState } from 'react'
 
 import Header from "@/components/header/header"
 import DrawerMenu from "@/components/navigation/DrawerMeny"
+import BreedingOrgCard from "./BreedingOrgCard"
 
-
+const DUMMY = [
+    { id: '1', name: 'Molly', category: 'IDENTITET', taskLabel: 'Passansökan', breed: 'Welsh', sex: 'Sto', birthDate: '2026', statusText: 'Väntar på granskning' },
+    { id: '2', name: 'Sally', category: 'AVEL', taskLabel: 'Betäckningsrapport', breed: 'Gotlandsruss', sex: 'Sto', birthDate: '2021', statusText: 'Väntar på registrering' },
+]
 
 export default function BreedingOrgScreen() {
     const [drawerVisible, setDrawerVisible] = useState(false)
+
+    let content
+
+    if (DUMMY.length === 0) {
+        content = (
+            <View style={styles.centerContainer}>
+                <Text style={styles.iconText}>Inga inkomna ärenden</Text>
+            </View>
+            )
+        } else {
+            content = (
+                <FlatList
+                    data={DUMMY}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => 
+                        <BreedingOrgCard
+                            name={item.name}
+                            category={item.category}
+                            taskLabel={item.taskLabel}
+                            breed={item.breed}
+                            sex={item.sex}
+                            birthDate={item.birthDate}
+                            statusText={item.statusText}
+                            onPress={() => {}}
+                        />
+                    }
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingTop: 20, paddingBottom: 50, paddingHorizontal: 25 }}
+                />
+            )
+        }
 
     return (
         <>
             <View style={styles.outerContainer}>
                 <Header onMenuPress={() => setDrawerVisible(true)} />
-                <View style={styles.centerContainer}>
-                    <Text style={styles.iconText}>Inga inkomna ärenden</Text>
-                </View>
+                {content}
             </View>
             <DrawerMenu 
                 visible={drawerVisible}
