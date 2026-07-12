@@ -194,13 +194,14 @@ export default function OwnerScreen() {
 
     const sendToBreedingOrg = async ( record: HorsePassportRecord ) => {
         if (!authFetch) return
+        const submittedAt = new Date().toISOString()
 
         try {
             const response = await authFetch?.fetch(`${TOKEN_SERVER_URL}/identity/passport/create`, {
                 method: 'POST',
                 headers: { 'content-type': 'application/json'},
                 body: JSON.stringify({
-                  record: { ...record, status: 'pending'},
+                  record: { ...record, status: 'pending', submittedAt: submittedAt},
                   identityKey: wallet!.identityKey  
                 })
             })
@@ -231,6 +232,7 @@ export default function OwnerScreen() {
             if (raw) {
                 const draft = JSON.parse(raw)
                 draft.status = 'pending'
+                draft.submittedAt = submittedAt
                 await SecureStore.setItemAsync(`passport-draft-${record.horse.id}`, JSON.stringify(draft))
             }
             setSelectedRecord(null)
