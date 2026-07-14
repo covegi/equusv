@@ -1,10 +1,15 @@
 import { ReactNode } from "react"
 import { StyleSheet, Text, Pressable } from "react-native"
+import type { LayoutChangeEvent } from "react-native"
 
-export default function FilterButton({ children, isActive, disabled, onPress }: { children: ReactNode, isActive: boolean, disabled: boolean, onPress: () => void }) {
+export default function FilterButton({ children, isActive, onPress, onLayout }: { children: ReactNode, isActive: boolean, onPress: () => void, onLayout?: (e: LayoutChangeEvent) => void }) {
 
     return (
-        <Pressable onPress={onPress} style={[styles.container, isActive && styles.active]} disabled={disabled}>
+        <Pressable
+            onPress={onPress}
+            onLayout={onLayout}
+            style={[styles.container, isActive && styles.active]}
+        >
             <Text style={[isActive && styles.activeText]}>{children}</Text>
         </Pressable>
     )

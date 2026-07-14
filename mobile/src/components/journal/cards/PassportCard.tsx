@@ -10,8 +10,8 @@ export default function PassportCard({ horse, status='draft', onEdit, onDelete, 
         draft:    { bg: '#F5F0EB', text: '#8a7267', label: 'Utkast',   dot: '#c6c6c7', verifiedText: 'Ej verifierat',          checkmark: false },
         pending:  { bg: '#FFF3E0', text: '#B65109', label: 'Skickat',  dot: '#d4a843', verifiedText: 'Väntar på verifiering',  checkmark: false },
         revision: { bg: '#FCEAEA', text: '#A13232', label: 'Revision', dot: '#A13232', verifiedText: 'Återsänd',               checkmark: false },
-        approved: { bg: '#E8F5E9', text: '#2E7D32', label: 'Godkänt',  dot: '#2E7D32', verifiedText: 'Godkänt',                checkmark: false },
         active:   { bg: '#E3F2FD', text: '#1565C0', label: 'Aktivt',   dot: '#b65109', verifiedText: 'Verifierat',             checkmark: true },
+        inactive: { bg: '#F5F0EB', text: '#8a7267', label: 'Inaktivt',  dot: '#8a7267', verifiedText: 'Inaktivt',               checkmark: false },
     }
 
     const current = statusColors[status] ?? statusColors.draft

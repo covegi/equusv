@@ -6,12 +6,14 @@ import DrawerMenu from "@/components/navigation/DrawerMeny"
 import BreedingOrgCard from "./BreedingOrgCard"
 
 const DUMMY = [
-    { id: '1', name: 'Molly', category: 'IDENTITET', taskLabel: 'Passansökan', breed: 'Welsh', sex: 'Sto', birthDate: '2026', statusText: 'Väntar på granskning' },
-    { id: '2', name: 'Sally', category: 'AVEL', taskLabel: 'Betäckningsrapport', breed: 'Gotlandsruss', sex: 'Sto', birthDate: '2021', statusText: 'Väntar på registrering' },
+    { id: '1', name: 'Molly', category: 'IDENTITET', taskLabel: 'Passansökan', breed: 'Welsh', sex: 'Sto', birthDate: '2026-02-17', statusText: 'Väntar på granskning' },
+    { id: '2', name: 'Sally', category: 'AVEL', taskLabel: 'Betäckningsrapport', breed: 'Gotlandsruss', sex: 'Sto', birthDate: '2021-10-05', statusText: 'Väntar på registrering' },
 ]
 
 export default function BreedingOrgScreen() {
     const [drawerVisible, setDrawerVisible] = useState(false)
+
+    const onPress = () => {}
 
     let content
 
@@ -35,7 +37,7 @@ export default function BreedingOrgScreen() {
                             sex={item.sex}
                             birthDate={item.birthDate}
                             statusText={item.statusText}
-                            onPress={() => {}}
+                            onPress={() => onPress}
                         />
                     }
                     showsVerticalScrollIndicator={false}

@@ -20,11 +20,12 @@ export default function BreedingOrgCard({ name, category, taskLabel, breed, sex,
                     </View>
                     <Text style={styles.category}>{category}</Text>
                     <View style={styles.metaRow}>
-                        <Text style={styles.metaText}>{breed}</Text>
-                        <Entypo name="dot-single" size={14} color="#8a7267" style={styles.dot} />
+                        <Text style={styles.metaText}>Född {birthDate}</Text>
+                        <Entypo name="dot-single" size={14} color="#8a7267" />
                         <Text style={styles.metaText}>{sex}</Text>
-                        <Entypo name="dot-single" size={14} color="#8a7267" style={styles.dot} />
-                        <Text style={styles.metaText}>{birthDate}</Text>
+                        <Entypo name="dot-single" size={14} color="#8a7267" />
+                        
+                        <Text style={styles.metaText}>{breed}</Text>
                     </View>
                     <Text style={styles.status}>{statusText}</Text>
                 </View>
@@ -89,11 +90,8 @@ const styles = StyleSheet.create({
     },
     metaText: {
         fontFamily: 'Inter_400Regular',
-        fontSize: 12,
+        fontSize: 11,
         color: '#8a7267',
-    },
-    dot: {
-        marginTop: 1
     },
     status: {
         fontFamily: 'Inter_400Regular',
