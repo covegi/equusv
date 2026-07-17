@@ -2,7 +2,7 @@ import { StyleSheet, View, Text, Image } from "react-native"
 import type { HorsePassport } from "@/types/horse-passport"
 import Entypo from '@expo/vector-icons/Entypo';
 
-export default function JournalHeader({ horse, horseImage }: {horse: Partial<HorsePassport>, horseImage: string}) {
+export default function JournalHeader({ horse, horseImage }: {horse: Partial<HorsePassport>, horseImage?: string}) {
 
     return (
         <View style={styles.outerContainer}>

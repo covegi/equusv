@@ -2,16 +2,18 @@ import { StyleSheet, View, Text, Pressable } from "react-native"
 import { useState } from "react"
 import type { HorsePassport } from "@/types/horse-passport"
 import Ionicons from "@expo/vector-icons/Ionicons"
+import { useRole } from "@/context/RoleContext"
 
-export default function PassportCard({ horse, status='draft', onEdit, onDelete, onSend }: { horse: Partial<HorsePassport>, status?: string, onEdit: () => void, onDelete: () => void, onSend: () => void }) {
+export default function PassportCard({ horse, status='draft', onEdit, onDelete, onSend, onRevision, onApprove }: { horse: Partial<HorsePassport>, status?: string, onEdit: () => void, onDelete: () => void, onSend: () => void, onRevision?: () => void, onApprove?: () => void }) {
     const [expanded, setExpanded] = useState(false)
+    const { activeRole } = useRole()
 
     const statusColors: Record<string, { bg: string, text: string, label: string, dot: string, verifiedText: string, checkmark: boolean }> = {
-        draft:    { bg: '#F5F0EB', text: '#8a7267', label: 'Utkast',   dot: '#c6c6c7', verifiedText: 'Ej verifierat',          checkmark: false },
-        pending:  { bg: '#FFF3E0', text: '#B65109', label: 'Skickat',  dot: '#d4a843', verifiedText: 'Väntar på verifiering',  checkmark: false },
-        revision: { bg: '#FCEAEA', text: '#A13232', label: 'Revision', dot: '#A13232', verifiedText: 'Återsänd',               checkmark: false },
-        active:   { bg: '#E3F2FD', text: '#1565C0', label: 'Aktivt',   dot: '#b65109', verifiedText: 'Verifierat',             checkmark: true },
-        inactive: { bg: '#F5F0EB', text: '#8a7267', label: 'Inaktivt',  dot: '#8a7267', verifiedText: 'Inaktivt',               checkmark: false },
+        draft:    { bg: '#F5F0EB', text: '#8a7267', label: 'Utkast',   dot: '#c6c6c7', verifiedText: 'Ej verifierat', checkmark: false },
+        pending:  { bg: '#FFF3E0', text: '#B65109', label: 'Skickat',  dot: '#d4a843', verifiedText: 'Väntar på verifiering', checkmark: false },
+        revision: { bg: '#FCEAEA', text: '#A13232', label: 'Revision', dot: '#A13232', verifiedText: 'Återsänd', checkmark: false },
+        active:   { bg: '#E3F2FD', text: '#1565C0', label: 'Aktivt',   dot: '#b65109', verifiedText: 'Verifierat', checkmark: true },
+        inactive: { bg: '#F5F0EB', text: '#8a7267', label: 'Inaktivt',  dot: '#8a7267', verifiedText: 'Inaktivt', checkmark: false },
     }
 
     const current = statusColors[status] ?? statusColors.draft
@@ -135,10 +137,22 @@ export default function PassportCard({ horse, status='draft', onEdit, onDelete, 
                             </View>
 
                         )}
-                        {status === 'pending' && (
+                        {status === 'pending' && activeRole === 'owner' && (
                             <Text style={[styles.signLink, { color: '#93000a' }]}>Återkalla</Text>
                         )}
-                        {status === 'revision' && (
+                        {status === 'pending' && activeRole === 'breedingOrg' && (
+                            <View style={styles.draftBtns}>
+                                <Pressable onPress={onRevision} hitSlop={10}>
+                                    <Text style={[styles.signLink, { color: '#93000a' }]}>Revision</Text>
+                                </Pressable>
+                                <Pressable onPress={onApprove} hitSlop={10}>
+                                    <Text style={[styles.signLink, { color: '#1b1b1b' }]}>Godkänn</Text>
+                                </Pressable>
+                            </View>
+                        )}
+
+
+                        {status === 'revision' && activeRole === 'owner' && (
                             <View style={styles.draftBtns}>
                                 <Text style={[styles.signLink, { color: '#8a7267'}]}>Redigera</Text>
                                 <Text style={[styles.signLink, { color: '#1b1b1b'}]}>Skicka igen</Text>

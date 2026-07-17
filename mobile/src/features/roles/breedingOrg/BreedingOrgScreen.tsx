@@ -1,17 +1,71 @@
-import { StyleSheet, View, Text, FlatList } from "react-native"
-import { useState } from 'react'
+import { StyleSheet, View, Text, FlatList, Modal } from "react-native"
+import { useState, useEffect } from 'react'
+import { LookupResolver, Transaction, PushDrop, Utils } from "@bsv/sdk"
 
 import Header from "@/components/header/header"
 import DrawerMenu from "@/components/navigation/DrawerMeny"
 import BreedingOrgCard from "./BreedingOrgCard"
+import HorseJournal from "@/components/journal/HorseJournal"
+import { HorsePassportRecord } from "@/types/horse-passport-record"
 
 const DUMMY = [
     { id: '1', name: 'Molly', category: 'IDENTITET', taskLabel: 'Passansökan', breed: 'Welsh', sex: 'Sto', birthDate: '2026-02-17', statusText: 'Väntar på granskning' },
     { id: '2', name: 'Sally', category: 'AVEL', taskLabel: 'Betäckningsrapport', breed: 'Gotlandsruss', sex: 'Sto', birthDate: '2021-10-05', statusText: 'Väntar på registrering' },
 ]
 
-export default function BreedingOrgScreen() {
+export default function BreedingOrgScreen({ }) {
     const [drawerVisible, setDrawerVisible] = useState(false)
+    const [pendingHorses, setPendingHorses] = useState<HorsePassportRecord[]>([])
+    const [selectedRecord, setSelectedRecord] = useState<HorsePassportRecord | null>(null)
+
+    useEffect(() => {
+        const fetchPending = async () => {
+            try {
+                const resolver = new LookupResolver({
+                    hostOverrides: {
+                        'ls_horse_passport': ['https://chooser-crimp-recast.ngrok-free.dev']
+                    }
+                })
+                const answer = await resolver.query({
+                    service: 'ls_passport',
+                    query: { status: 'pending' }
+                })
+                console.log('answer: ', JSON.stringify(answer))
+
+                if (answer.type === 'output-list') {
+                    const records = answer.outputs.map(({ beef, outputIndex } ) => {
+                        const tx = Transaction.fromBEEF(beef)
+                        const decoded = PushDrop.decode(tx.outputs[outputIndex].lockingScript)
+                        return {
+                            horse: {
+                                id: Utils.toUTF8(decoded.fields[2]),
+                                name: Utils.toUTF8(decoded.fields[3]),
+                                breed: Utils.toUTF8(decoded.fields[4]),
+                                birthDate: Utils.toUTF8(decoded.fields[5]),
+                                sex: Utils.toUTF8(decoded.fields[6]),
+                                color: Utils.toUTF8(decoded.fields[7]),
+                                ownerAtRegistration: Utils.toUTF8(decoded.fields[8]),
+                                location: Utils.toUTF8(decoded.fields[9]),
+                                foodChainStatus: Utils.toUTF8(decoded.fields[10]) === 'true',
+                                ueln: Utils.toUTF8(decoded.fields[11]),
+                                chip: Utils.toUTF8(decoded.fields[12]),
+                            },
+                            status: Utils.toUTF8(decoded.fields[1]),
+                            createdAt: Utils.toUTF8(decoded.fields[14]),
+                            submittedAt: Utils.toUTF8(decoded.fields[15]),
+                            } as HorsePassportRecord
+                    })
+                    
+                    setPendingHorses(records.sort((a, b) =>
+                        (a.submittedAt ?? '').localeCompare(b.submittedAt ?? '')
+                    ))
+                }
+            } catch (error) {
+                console.error('Lookup failed', error)
+            }
+        } 
+        fetchPending()
+    }, [])
 
     const onPress = () => {}
 
@@ -26,20 +80,25 @@ export default function BreedingOrgScreen() {
         } else {
             content = (
                 <FlatList
-                    data={DUMMY}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => 
-                        <BreedingOrgCard
-                            name={item.name}
-                            category={item.category}
-                            taskLabel={item.taskLabel}
-                            breed={item.breed}
-                            sex={item.sex}
-                            birthDate={item.birthDate}
-                            statusText={item.statusText}
-                            onPress={() => onPress}
-                        />
-                    }
+                    data={pendingHorses}
+                    keyExtractor={(item) => item.horse.id ?? ''}
+                    renderItem={({ item }) => {
+                        const h = item.horse
+                        if (!h.id || !h.name || !h.breed || !h.sex || !h.birthDate) return null
+
+                        return (
+                            <BreedingOrgCard
+                                name={h.name}
+                                category='IDENTITET'
+                                taskLabel='Passansökan'
+                                breed={h.breed}
+                                sex={h.sex}
+                                birthDate={h.birthDate}
+                                statusText='Väntar på granskning'
+                                onPress={() => setSelectedRecord(item)}
+                            />
+                        )
+                    }}
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{ paddingTop: 20, paddingBottom: 50, paddingHorizontal: 25 }}
                 />
@@ -56,6 +115,20 @@ export default function BreedingOrgScreen() {
                 visible={drawerVisible}
                 onClose={() => setDrawerVisible(false)}
             />
+            <HorseJournal 
+                record={selectedRecord}
+                onClose={() => setSelectedRecord(null)}
+                onApprove={() => {}}
+                onRevision={() => {}}
+            />
+            <Modal visible={!!selectedRecord} animationType="slide" presentationStyle="pageSheet">
+                <HorseJournal 
+                    record={selectedRecord}
+                    onClose={() => setSelectedRecord(null)}
+                    onApprove={(record) => { console.log('Approve:', record.horse.id) }}
+                    onRevision={(record) => { console.log('Revision:', record.horse.id) }}
+                />
+            </Modal>
         </>
         
     )

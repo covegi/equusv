@@ -9,7 +9,7 @@ import PassportModal from "../modal/PassportModal"
 import { useRole } from "@/context/RoleContext"
 import { journalPermissions } from "@/config/journalPermissions"
 
-export default function HorseJournal({ record, horseImage, onClose, onDelete, onSend, onApprove, onRevision }: { record: HorsePassportRecord | null, horseImage: string, onClose: () => void, onDelete: (id: string) => void, onSend: (record: HorsePassportRecord) => void, onApprove?: (record: HorsePassportRecord) => void, onRevision?: (record: HorsePassportRecord) => void }) {
+export default function HorseJournal({ record, horseImage, onClose, onDelete, onSend, onApprove, onRevision }: { record: HorsePassportRecord | null, horseImage?: string, onClose: () => void, onDelete?: (id: string) => void, onSend?: (record: HorsePassportRecord) => void, onApprove?: (record: HorsePassportRecord) => void, onRevision?: (record: HorsePassportRecord) => void }) {
      const [isActive, setIsActive] = useState('Alla')
      const [showEdit, setShowEdit] = useState(false)
      const [currentRecord, setCurrentRecord] = useState(record)
@@ -54,7 +54,7 @@ export default function HorseJournal({ record, horseImage, onClose, onDelete, on
                `Vill du radera utkast för ${currentRecord.horse.name ?? 'denna häst'}?`,
                [
                     { text: 'Avbryt', style: 'cancel' },
-                    { text: 'Radera', style: 'destructive', onPress: () => onDelete(currentRecord.horse.id!)}
+                    { text: 'Radera', style: 'destructive', onPress: () => onDelete?.(currentRecord.horse.id!)}
                ]
           )
      }
@@ -67,7 +67,7 @@ export default function HorseJournal({ record, horseImage, onClose, onDelete, on
                `Vill du skicka ansökan för ${currentRecord.horse.name ?? 'denna häst'}?`,
                [
                     { text: 'Avbryt', style: 'cancel' },
-                    { text: 'Skicka', style: 'default', onPress: () => onSend(currentRecord) }
+                    { text: 'Skicka', style: 'default', onPress: () => onSend?.(currentRecord) }
                ]
           )
      }
