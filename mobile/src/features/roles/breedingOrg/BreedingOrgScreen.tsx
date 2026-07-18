@@ -36,8 +36,10 @@ export default function BreedingOrgScreen({ }) {
                     const records = answer.outputs.map(({ beef, outputIndex } ) => {
                         const tx = Transaction.fromBEEF(beef)
                         const decoded = PushDrop.decode(tx.outputs[outputIndex].lockingScript)
-                        console.log('Decoded fields count:', decoded.fields.length)
-                        console.log('Field 11 (ueln):', Utils.toUTF8(decoded.fields[11]))
+                        // console.log('decoded keys:', Object.keys(decoded))
+                        // console.log('lockingPublicKey:', decoded.lockingPublicKey)
+                        // console.log('Decoded fields count:', decoded.fields.length)
+                        // console.log('Field 11 (ueln):', Utils.toUTF8(decoded.fields[11]))
                         return {
                             horse: {
                                 id: Utils.toUTF8(decoded.fields[2]),
@@ -55,11 +57,10 @@ export default function BreedingOrgScreen({ }) {
                             status: Utils.toUTF8(decoded.fields[1]),
                             createdAt: Utils.toUTF8(decoded.fields[14]),
                             submittedAt: Utils.toUTF8(decoded.fields[15]),
+                            ownerIdentityKey: decoded.lockingPublicKey.toString(),
                             } as HorsePassportRecord
                             
                     })
-
-                    
                     
                     setPendingHorses(records.sort((a, b) =>
                         (a.submittedAt ?? '').localeCompare(b.submittedAt ?? '')

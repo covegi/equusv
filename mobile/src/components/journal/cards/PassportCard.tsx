@@ -1,12 +1,14 @@
-import { StyleSheet, View, Text, Pressable } from "react-native"
+import { StyleSheet, View, Text, Pressable, TextInput } from "react-native"
 import { useState } from "react"
 import type { HorsePassport } from "@/types/horse-passport"
 import Ionicons from "@expo/vector-icons/Ionicons"
 import { useRole } from "@/context/RoleContext"
 
-export default function PassportCard({ horse, status='draft', onEdit, onDelete, onSend, onRevision, onApprove }: { horse: Partial<HorsePassport>, status?: string, onEdit: () => void, onDelete: () => void, onSend: () => void, onRevision?: () => void, onApprove?: () => void }) {
+export default function PassportCard({ horse, status='draft', onEdit, onDelete, onSend, onRevision, onApprove }: { horse: Partial<HorsePassport>, status?: string, onEdit?: () => void, onDelete?: () => void, onSend?: () => void, onRevision?: (comment: string) => void, onApprove?: () => void }) {
     const [expanded, setExpanded] = useState(false)
     const { activeRole } = useRole()
+    const [showRevisionInput, setShowRevisionInput] = useState(false)
+    const [revisionComment, setRevisionComment] = useState('')
 
     const statusColors: Record<string, { bg: string, text: string, label: string, dot: string, verifiedText: string, checkmark: boolean }> = {
         draft:    { bg: '#F5F0EB', text: '#8a7267', label: 'Utkast',   dot: '#c6c6c7', verifiedText: 'Ej verifierat', checkmark: false },
@@ -112,58 +114,81 @@ export default function PassportCard({ horse, status='draft', onEdit, onDelete, 
                         </View>
                     </View>
                     <View style={styles.divider} />
-                    <View style={styles.footerRow}>
-                        <Text style={styles.verifier}>Skapat av hästägare</Text>
-                        {status === 'draft' && (
-                            <View style={styles.draftBtns}>
-                                <Pressable
-                                    onPress={() => onDelete()}
-                                    hitSlop={10}
-                                >
-                                    <Text style={[styles.signLink, { color: '#93000a' }]}>Radera</Text>
+                    {status === 'pending' && activeRole === 'breedingOrg' && showRevisionInput ? (
+                        <>
+                            <Text style={styles.commentLabel}>Kommentar till hästägare</Text>
+                            <TextInput
+                                style={styles.commentInput}
+                                placeholder="Beskriv vad som behövs kompletteras (valfritt)"
+                                placeholderTextColor="#8a7267"
+                                value={revisionComment}
+                                onChangeText={setRevisionComment}
+                                multiline
+                            />
+                            <View style={[styles.draftBtns, { justifyContent: 'flex-end', marginTop: 10 }]}>
+                                <Pressable onPress={() => { setShowRevisionInput(false); setRevisionComment('')}} hitSlop={10}>
+                                    <Text style={[styles.signLink, { color: '#8a7267' }]}>Avbryt</Text>
+                                </Pressable> 
+                                <Pressable onPress={() => onRevision?.(revisionComment)} hitSlop={10}>
+                                    <Text style={[styles.signLink, { color: '#93000a' }]}>Skicka revision</Text>
                                 </Pressable>
-                                <Pressable
-                                    onPress={() => onEdit()}
-                                    hitSlop={10}
-                                >
+                            </View>
+                        </>
+                    ):  (
+                        <View style={styles.footerRow}>
+                            <Text style={styles.verifier}>Skapat av hästägare</Text>
+                        
+                            {status === 'draft' && activeRole === 'owner' && (
+                                <View style={styles.draftBtns}>
+                                    <Pressable
+                                        onPress={() => onDelete?.()}
+                                        hitSlop={10}
+                                    >
+                                        <Text style={[styles.signLink, { color: '#93000a' }]}>Radera</Text>
+                                    </Pressable>
+                                    <Pressable
+                                        onPress={() => onEdit?.()}
+                                        hitSlop={10}
+                                    >
+                                        <Text style={[styles.signLink, { color: '#8a7267'}]}>Redigera</Text>
+                                    </Pressable>
+                                    <Pressable
+                                        onPress={() => onSend?.()}
+                                        hitSlop={10}
+                                    >
+                                        <Text style={[styles.signLink, { color: '#1b1b1b'}]}>Skicka</Text>
+                                    </Pressable>
+                                 </View>
+                            )}
+
+                            {status === 'pending' && activeRole === 'owner' && (
+                                <Text style={[styles.signLink, { color: '#93000a' }]}>Återkalla</Text>
+                            )}
+                            
+                            {status === 'pending' && activeRole === 'breedingOrg' && (
+                                <View style={styles.draftBtns}>
+                                    <Pressable onPress={() => setShowRevisionInput(true)} hitSlop={10}>
+                                        <Text style={[styles.signLink, { color: '#93000a' }]}>Revision</Text>
+                                    </Pressable>
+                                    <Pressable onPress={onApprove} hitSlop={10}>
+                                        <Text style={[styles.signLink, { color: '#1b1b1b' }]}>Godkänn</Text>
+                                    </Pressable>
+                                </View>
+                            )}
+
+                            {status === 'revision' && activeRole === 'owner' && (
+                                <View style={styles.draftBtns}>
                                     <Text style={[styles.signLink, { color: '#8a7267'}]}>Redigera</Text>
-                                </Pressable>
-                                <Pressable
-                                    onPress={() => onSend()}
-                                    hitSlop={10}
-                                >
-                                    <Text style={[styles.signLink, { color: '#1b1b1b'}]}>Skicka</Text>
-                                </Pressable>
-                            </View>
-
-                        )}
-                        {status === 'pending' && activeRole === 'owner' && (
-                            <Text style={[styles.signLink, { color: '#93000a' }]}>Återkalla</Text>
-                        )}
-                        {status === 'pending' && activeRole === 'breedingOrg' && (
-                            <View style={styles.draftBtns}>
-                                <Pressable onPress={onRevision} hitSlop={10}>
-                                    <Text style={[styles.signLink, { color: '#93000a' }]}>Revision</Text>
-                                </Pressable>
-                                <Pressable onPress={onApprove} hitSlop={10}>
-                                    <Text style={[styles.signLink, { color: '#1b1b1b' }]}>Godkänn</Text>
-                                </Pressable>
-                            </View>
-                        )}
-
-
-                        {status === 'revision' && activeRole === 'owner' && (
-                            <View style={styles.draftBtns}>
-                                <Text style={[styles.signLink, { color: '#8a7267'}]}>Redigera</Text>
-                                <Text style={[styles.signLink, { color: '#1b1b1b'}]}>Skicka igen</Text>
-                            </View>
-                        )}
-                    </View>
+                                    <Text style={[styles.signLink, { color: '#1b1b1b'}]}>Skicka igen</Text>
+                                </View>
+                            )}
+                        </View>
+                    )}
                 </>
-            )}
-            </View>
-    )
-}
+                )} 
+                </View>
+            )
+        }
 
 const styles = StyleSheet.create({
     outerContainer: {
@@ -304,7 +329,22 @@ const styles = StyleSheet.create({
     draftBtns: {
         flexDirection: 'row',
         gap: 12,
-    }
+    },
+    commentLabel: {
+        fontSize: 11,
+        color: '#8a7267',
+        marginBottom: 6
+    },
+    commentInput: {
+        backgroundColor: '#F5F0EB',
+        borderRadius: 8,
+        padding: 12,
+        fontSize: 11,
+        fontFamily: 'Inter_400Regular',
+        color: '#1b1b1b',
+        minHeight: 50,
+        textAlignVertical: 'top',
+    },
 
 })
 

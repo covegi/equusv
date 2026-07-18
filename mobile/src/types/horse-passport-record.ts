@@ -6,5 +6,7 @@ export type HorsePassportRecord = {
     createdAt: string,
     submittedAt?: string
     receivedAt?: string,
-    issuedAt?: string
+    issuedAt?: string,
+    revisionComment?: string,
+    ownerIdentityKey?: string
 }   
