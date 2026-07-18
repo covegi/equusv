@@ -36,6 +36,8 @@ export default function BreedingOrgScreen({ }) {
                     const records = answer.outputs.map(({ beef, outputIndex } ) => {
                         const tx = Transaction.fromBEEF(beef)
                         const decoded = PushDrop.decode(tx.outputs[outputIndex].lockingScript)
+                        console.log('Decoded fields count:', decoded.fields.length)
+                        console.log('Field 11 (ueln):', Utils.toUTF8(decoded.fields[11]))
                         return {
                             horse: {
                                 id: Utils.toUTF8(decoded.fields[2]),
@@ -54,7 +56,10 @@ export default function BreedingOrgScreen({ }) {
                             createdAt: Utils.toUTF8(decoded.fields[14]),
                             submittedAt: Utils.toUTF8(decoded.fields[15]),
                             } as HorsePassportRecord
+                            
                     })
+
+                    
                     
                     setPendingHorses(records.sort((a, b) =>
                         (a.submittedAt ?? '').localeCompare(b.submittedAt ?? '')
@@ -114,12 +119,6 @@ export default function BreedingOrgScreen({ }) {
             <DrawerMenu 
                 visible={drawerVisible}
                 onClose={() => setDrawerVisible(false)}
-            />
-            <HorseJournal 
-                record={selectedRecord}
-                onClose={() => setSelectedRecord(null)}
-                onApprove={() => {}}
-                onRevision={() => {}}
             />
             <Modal visible={!!selectedRecord} animationType="slide" presentationStyle="pageSheet">
                 <HorseJournal 

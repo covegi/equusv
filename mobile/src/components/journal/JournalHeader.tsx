@@ -9,15 +9,13 @@ export default function JournalHeader({ horse, horseImage }: {horse: Partial<Hor
             <Image source={{ uri: horseImage}} style={styles.thumbnail} resizeMode='cover' />
             <View style={styles.innerContainer}>
                 <Text style={styles.name}>{horse.name}</Text>
-                <Text style={styles.ueln}>{horse.ueln}</Text>
+                <Text style={styles.ueln}>SE-123456789</Text>
+                <Text style={styles.firstInnerRowText}>{horse.breed}</Text>
                 <View style={styles.firstInnerRow}>
                     <Text style={styles.firstInnerRowText}>Född {horse.birthDate?.split(' ').pop() ?? '_'}</Text>
                     <Entypo name="dot-single" size={14} color="#8a7267" style={styles.dot} />
                     <Text style={styles.firstInnerRowText}>{horse.sex}</Text>
-                    <Entypo name="dot-single" size={14} color="#8a7267" style={styles.dot} />
-                    <Text style={styles.firstInnerRowText}>{horse.breed}</Text>
                 </View>
-                    <Text style={styles.secondInnerRowText}>Ägare: {horse.ownerAtRegistration}</Text>
             </View>
             
 
@@ -60,7 +58,7 @@ const styles = StyleSheet.create({
         color: '#8a7267',
         marginTop: 2,
     },
-    firstInnerRowText: {
+    firstInnerRowText: {    
         fontSize: 12,
         marginTop: 2,
         color: '#8a7267'
