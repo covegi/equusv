@@ -1,6 +1,8 @@
-import { StyleSheet, View, Text, FlatList, Modal } from "react-native"
+import { StyleSheet, View, Text, FlatList, Modal, Alert } from "react-native"
 import { useState, useEffect } from 'react'
 import { LookupResolver, Transaction, PushDrop, Utils } from "@bsv/sdk"
+import { MessageBoxClient } from '@bsv/message-box-client'
+import { useWallet } from "@/context/WalletContext"
 
 import Header from "@/components/header/header"
 import DrawerMenu from "@/components/navigation/DrawerMeny"
@@ -8,12 +10,8 @@ import BreedingOrgCard from "./BreedingOrgCard"
 import HorseJournal from "@/components/journal/HorseJournal"
 import { HorsePassportRecord } from "@/types/horse-passport-record"
 
-const DUMMY = [
-    { id: '1', name: 'Molly', category: 'IDENTITET', taskLabel: 'Passansökan', breed: 'Welsh', sex: 'Sto', birthDate: '2026-02-17', statusText: 'Väntar på granskning' },
-    { id: '2', name: 'Sally', category: 'AVEL', taskLabel: 'Betäckningsrapport', breed: 'Gotlandsruss', sex: 'Sto', birthDate: '2021-10-05', statusText: 'Väntar på registrering' },
-]
-
 export default function BreedingOrgScreen({ }) {
+    const { wallet } = useWallet()
     const [drawerVisible, setDrawerVisible] = useState(false)
     const [pendingHorses, setPendingHorses] = useState<HorsePassportRecord[]>([])
     const [selectedRecord, setSelectedRecord] = useState<HorsePassportRecord | null>(null)
@@ -30,16 +28,11 @@ export default function BreedingOrgScreen({ }) {
                     service: 'ls_passport',
                     query: { status: 'pending' }
                 })
-                console.log('answer: ', JSON.stringify(answer))
 
                 if (answer.type === 'output-list') {
                     const records = answer.outputs.map(({ beef, outputIndex } ) => {
                         const tx = Transaction.fromBEEF(beef)
                         const decoded = PushDrop.decode(tx.outputs[outputIndex].lockingScript)
-                        // console.log('decoded keys:', Object.keys(decoded))
-                        // console.log('lockingPublicKey:', decoded.lockingPublicKey)
-                        // console.log('Decoded fields count:', decoded.fields.length)
-                        // console.log('Field 11 (ueln):', Utils.toUTF8(decoded.fields[11]))
                         return {
                             horse: {
                                 id: Utils.toUTF8(decoded.fields[2]),
@@ -73,11 +66,49 @@ export default function BreedingOrgScreen({ }) {
         fetchPending()
     }, [])
 
+    const handleRevision = (record: HorsePassportRecord, comment: string) => {
+        Alert.alert(
+            'Skicka revision',
+            `Vill du skicka tillbaka ansök för ${record.horse.name?.trim() ?? 'denna häst'}?`,
+            [
+                    { text: 'Avbryt', style: 'cancel'},
+                    { text: 'Skicka', style: 'default', onPress: () => sendRevision(record, comment) }
+            ]
+        )
+    }
+
+    const sendRevision = async (record: HorsePassportRecord, comment: string) => {
+        if (!wallet || !record.ownerIdentityKey) return
+
+        try {
+            const msgBox = new MessageBoxClient({
+                walletClient: wallet,
+                host: 'https://messagebox.babbage.systems',
+            })
+            await msgBox.init()
+
+            await msgBox.sendMessage({
+                recipient: record.ownerIdentityKey,
+                messageBox: 'equusv_passport_revisions',
+                body: {
+                    type: 'revision',
+                    horseId: record.horse.id,
+                    comment,
+                    record: {...record, status: 'revision'}
+                },
+            })
+            console.log('Revision sent to:', record.ownerIdentityKey)
+            setSelectedRecord(null)
+        } catch (error) {
+            console.error('Failed to send revision:', error)
+        }
+    }
+
     const onPress = () => {}
 
     let content
 
-    if (DUMMY.length === 0) {
+    if (pendingHorses.length === 0) {
         content = (
             <View style={styles.centerContainer}>
                 <Text style={styles.iconText}>Inga inkomna ärenden</Text>
@@ -126,7 +157,7 @@ export default function BreedingOrgScreen({ }) {
                     record={selectedRecord}
                     onClose={() => setSelectedRecord(null)}
                     onApprove={(record) => { console.log('Approve:', record.horse.id) }}
-                    onRevision={(record) => { console.log('Revision:', record.horse.id) }}
+                    onRevision={sendRevision}
                 />
             </Modal>
         </>

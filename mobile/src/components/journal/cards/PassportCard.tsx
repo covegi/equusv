@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#F5F0EB',
         borderRadius: 8,
         padding: 12,
-        fontSize: 11,
+        fontSize: 13,
         fontFamily: 'Inter_400Regular',
         color: '#1b1b1b',
         minHeight: 50,

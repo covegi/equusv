@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Pressable, Alert } from "react-native"
+import { StyleSheet, View, Pressable, Alert, KeyboardAvoidingView, Platform, ScrollView } from "react-native"
 import { useState, useEffect, useMemo } from "react"
 import type { HorsePassportRecord } from "@/types/horse-passport-record"
 import FontAwesome from "@expo/vector-icons/FontAwesome"
@@ -9,7 +9,7 @@ import PassportModal from "../modal/PassportModal"
 import { useRole } from "@/context/RoleContext"
 import { journalPermissions } from "@/config/journalPermissions"
 
-export default function HorseJournal({ record, horseImage, onClose, onDelete, onSend, onApprove, onRevision }: { record: HorsePassportRecord | null, horseImage?: string, onClose: () => void, onDelete?: (id: string) => void, onSend?: (record: HorsePassportRecord) => void, onApprove?: (record: HorsePassportRecord) => void, onRevision?: (record: HorsePassportRecord) => void }) {
+export default function HorseJournal({ record, horseImage, onClose, onDelete, onSend, onApprove, onRevision }: { record: HorsePassportRecord | null, horseImage?: string, onClose: () => void, onDelete?: (id: string) => void, onSend?: (record: HorsePassportRecord) => void, onApprove?: (record: HorsePassportRecord) => void, onRevision?: (record: HorsePassportRecord, comment: string) => void }) {
      const [isActive, setIsActive] = useState('Alla')
      const [showEdit, setShowEdit] = useState(false)
      const [currentRecord, setCurrentRecord] = useState(record)
@@ -73,11 +73,14 @@ export default function HorseJournal({ record, horseImage, onClose, onDelete, on
      }
 
      return (
-         <View style={styles.outerContainer}>
+         <KeyboardAvoidingView
+               style={styles.outerContainer}
+               behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+               keyboardVerticalOffset={60}
+               >
                <Pressable onPress={onClose} style={styles.closeBtn}>
                     <FontAwesome name='angle-down' size={40} color='#574238' />
                </Pressable>
-               <JournalHeader horse={currentRecord.horse} horseImage={horseImage} />
                {pillWidths.length < filterBtns.length && (
                     <View style={{ flexDirection: 'row', position: 'absolute', opacity: 0}}>
                          {filterBtns.map((btn, i) => (
@@ -97,6 +100,12 @@ export default function HorseJournal({ record, horseImage, onClose, onDelete, on
                          ))}
                     </View>
                )}
+               
+               <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps='handled'
+               >
+               <JournalHeader horse={currentRecord.horse} horseImage={horseImage} />
                <View
                     style={styles.filterButtonContainer}
                     onLayout={(e) => {
@@ -125,7 +134,9 @@ export default function HorseJournal({ record, horseImage, onClose, onDelete, on
                     onEdit={() => setShowEdit(true)}
                     onDelete={handleDelete}
                     onSend={handleSend}
+                    onRevision={(comment) => onRevision?.(currentRecord!, comment)}
                />
+                </ScrollView>
                <PassportModal
                     horse={currentRecord!.horse}
                     visible={showEdit}
@@ -135,7 +146,7 @@ export default function HorseJournal({ record, horseImage, onClose, onDelete, on
                          setShowEdit(false)
                     }}
                     />
-         </View>
+               </KeyboardAvoidingView>
      )
 }
 
