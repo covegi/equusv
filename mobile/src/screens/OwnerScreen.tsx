@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useWallet } from '@/context/WalletContext'
 import { PushDrop, LookupResolver, Transaction, AuthFetch } from '@bsv/sdk'
 import * as SecureStore from 'expo-secure-store'
+import { createMessageBoxClient, MESSAGE_BOXES, MESSAGEBOX_HOST } from '@/utils/messageBox'
 
 import HorseListCard from '@/components/journal/HorseListCard'
 import type { HorsePassport } from '@/types/horse-passport'
@@ -243,6 +244,57 @@ export default function OwnerScreen() {
             Alert.alert('Fel', 'Kunde inte hitta ansökan')
         }
     }
+
+    const fetchRevisions = async () => {
+        console.log('fetchRevisions called')
+        if (!wallet) {
+            console.log('No wallet')
+            return
+        }
+
+        try {
+            console.log('Creating MessageBoxClient...')
+            const msgBox = await createMessageBoxClient(wallet)
+            console.log('MessageBoxClient created')
+            console.log('listing messages')
+            const messages = await msgBox.listMessagesLite({
+                messageBox: MESSAGE_BOXES.revisions,
+                host: MESSAGEBOX_HOST
+            })
+            console.log('Revision messages:', messages.length)
+
+            for (const msg of messages) {
+                const body = typeof msg.body === 'string' ? JSON.parse(msg.body) : msg.body
+                console.log('Message:', body.horseId, body.comment)
+                if (body.type !== 'revision') continue
+
+                const raw = await SecureStore.getItemAsync(`passport-draft-${body.horseId}`)
+                if (raw) {  
+                    const draft = JSON.parse(raw)
+                    draft.status = 'revision'
+                    draft.revisionComment = body.comment ?? ''
+                    await SecureStore.setItemAsync(`passport-draft-${body.horseId}`, JSON.stringify(draft))
+                }
+             }
+
+             if (messages.length > 0) {
+                await msgBox.acknowledgeMessage({
+                    messageIds: messages.map(m => m.messageId)
+                })
+
+                if (selectedRecord?.horse?.id) {
+                    const raw = await SecureStore.getItemAsync(`passport-draft-${selectedRecord.horse.id}`)
+                    if (raw) {
+                        setSelectedRecord(JSON.parse(raw))
+                    }
+                }
+                setRefreshKey(prev => prev + 1)
+             }
+        } catch (error: any) {
+            console.error('Failed:', error?.message)
+            console.error('Full error:', JSON.stringify(error, null, 2))
+        }
+    }
     
     return (
             <View style={styles.outerContainer}>
@@ -281,6 +333,7 @@ export default function OwnerScreen() {
                         onClose={() => setSelectedRecord(null)}
                         onDelete={deleteRecord}
                         onSend={sendToBreedingOrg}
+                        onRefresh={fetchRevisions}
                     />
                 </Modal>
                 <DrawerMenu

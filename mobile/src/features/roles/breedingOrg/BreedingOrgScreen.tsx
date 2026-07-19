@@ -1,7 +1,7 @@
 import { StyleSheet, View, Text, FlatList, Modal, Alert } from "react-native"
 import { useState, useEffect } from 'react'
 import { LookupResolver, Transaction, PushDrop, Utils } from "@bsv/sdk"
-import { MessageBoxClient } from '@bsv/message-box-client'
+import { createMessageBoxClient, MESSAGE_BOXES, MESSAGEBOX_HOST } from "@/utils/messageBox"
 import { useWallet } from "@/context/WalletContext"
 
 import Header from "@/components/header/header"
@@ -50,7 +50,7 @@ export default function BreedingOrgScreen({ }) {
                             status: Utils.toUTF8(decoded.fields[1]),
                             createdAt: Utils.toUTF8(decoded.fields[14]),
                             submittedAt: Utils.toUTF8(decoded.fields[15]),
-                            ownerIdentityKey: decoded.lockingPublicKey.toString(),
+                            ownerIdentityKey: Utils.toUTF8(decoded.fields[18])
                             } as HorsePassportRecord
                             
                     })
@@ -81,22 +81,21 @@ export default function BreedingOrgScreen({ }) {
         if (!wallet || !record.ownerIdentityKey) return
 
         try {
-            const msgBox = new MessageBoxClient({
-                walletClient: wallet,
-                host: 'https://messagebox.babbage.systems',
-            })
-            await msgBox.init()
+            const msgBox = await createMessageBoxClient(wallet)
 
             await msgBox.sendMessage({
                 recipient: record.ownerIdentityKey,
-                messageBox: 'equusv_passport_revisions',
+                messageBox: MESSAGE_BOXES.revisions,
                 body: {
                     type: 'revision',
+                    tokenType: 'passport',
                     horseId: record.horse.id,
                     comment,
                     record: {...record, status: 'revision'}
                 },
-            })
+            },
+            MESSAGEBOX_HOST
+        )
             console.log('Revision sent to:', record.ownerIdentityKey)
             setSelectedRecord(null)
         } catch (error) {
@@ -157,7 +156,7 @@ export default function BreedingOrgScreen({ }) {
                     record={selectedRecord}
                     onClose={() => setSelectedRecord(null)}
                     onApprove={(record) => { console.log('Approve:', record.horse.id) }}
-                    onRevision={sendRevision}
+                    onRevision={handleRevision}
                 />
             </Modal>
         </>

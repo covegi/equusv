@@ -9,7 +9,7 @@ import PassportModal from "../modal/PassportModal"
 import { useRole } from "@/context/RoleContext"
 import { journalPermissions } from "@/config/journalPermissions"
 
-export default function HorseJournal({ record, horseImage, onClose, onDelete, onSend, onApprove, onRevision }: { record: HorsePassportRecord | null, horseImage?: string, onClose: () => void, onDelete?: (id: string) => void, onSend?: (record: HorsePassportRecord) => void, onApprove?: (record: HorsePassportRecord) => void, onRevision?: (record: HorsePassportRecord, comment: string) => void }) {
+export default function HorseJournal({ record, horseImage, onClose, onDelete, onSend, onApprove, onRevision, onRefresh }: { record: HorsePassportRecord | null, horseImage?: string, onClose: () => void, onDelete?: (id: string) => void, onSend?: (record: HorsePassportRecord) => void, onApprove?: (record: HorsePassportRecord) => void, onRevision?: (record: HorsePassportRecord, comment: string) => void, onRefresh?: () => void }) {
      const [isActive, setIsActive] = useState('Alla')
      const [showEdit, setShowEdit] = useState(false)
      const [currentRecord, setCurrentRecord] = useState(record)
@@ -131,10 +131,12 @@ export default function HorseJournal({ record, horseImage, onClose, onDelete, on
                <PassportCard
                     horse={currentRecord?.horse}
                     status={currentRecord!.status}
+                    revisionComment={currentRecord?.revisionComment}
                     onEdit={() => setShowEdit(true)}
                     onDelete={handleDelete}
                     onSend={handleSend}
                     onRevision={(comment) => onRevision?.(currentRecord!, comment)}
+                    onRefresh={() => onRefresh?.()}
                />
                 </ScrollView>
                <PassportModal

@@ -4,11 +4,11 @@ import type { HorsePassport } from "@/types/horse-passport"
 import Ionicons from "@expo/vector-icons/Ionicons"
 import { useRole } from "@/context/RoleContext"
 
-export default function PassportCard({ horse, status='draft', onEdit, onDelete, onSend, onRevision, onApprove }: { horse: Partial<HorsePassport>, status?: string, onEdit?: () => void, onDelete?: () => void, onSend?: () => void, onRevision?: (comment: string) => void, onApprove?: () => void }) {
+export default function PassportCard({ horse, status='draft', onEdit, onDelete, onSend, onRevision, onApprove, onRefresh, revisionComment }: { horse: Partial<HorsePassport>, status?: string, onEdit?: () => void, onDelete?: () => void, onSend?: () => void, onRevision?: (comment: string) => void, onApprove?: () => void, onRefresh?: () => void, revisionComment?: string }) {
     const [expanded, setExpanded] = useState(false)
     const { activeRole } = useRole()
     const [showRevisionInput, setShowRevisionInput] = useState(false)
-    const [revisionComment, setRevisionComment] = useState('')
+    const [commentInput, setCommentInput] = useState('')
 
     const statusColors: Record<string, { bg: string, text: string, label: string, dot: string, verifiedText: string, checkmark: boolean }> = {
         draft:    { bg: '#F5F0EB', text: '#8a7267', label: 'Utkast',   dot: '#c6c6c7', verifiedText: 'Ej verifierat', checkmark: false },
@@ -44,17 +44,32 @@ export default function PassportCard({ horse, status='draft', onEdit, onDelete, 
                                 <Ionicons name='information-circle-outline' size={18} color='#8a7267' style={{ marginTop: 4 }}/>
                             </Pressable>
                         </View>
-                        <View style={[styles.statusBadge, { backgroundColor: current.bg }]}>
-                            <Text style={[styles.statusText, { color: current.text }]} >
-                                {current.label}
-                            </Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                            {status === 'pending' && activeRole === 'owner' && (
+                                <Pressable onPress={onRefresh} hitSlop={10}>
+                                    <Ionicons name='refresh-outline' size={16} color='#8a7267' />
+                                </Pressable>
+                            )}
+                            <View style={[styles.statusBadge, { backgroundColor: current.bg }]}>
+                                <Text style={[styles.statusText, { color: current.text }]} >
+                                    {current.label}
+                                </Text>
+                            </View>
                         </View>
+                       
                 </View>
-                {status === 'revision' ?
-                <View style={styles.revisionBanner}>
-                      <Text style={styles.revisionText}>Avelsorganisation har skickat tillbaka ansökan. Vänligen kontrollera och komplettera uppgifterna.</Text>  
-                </View> 
-                : ''
+                {status === 'revision' && activeRole === 'owner' &&
+                <>
+                    <View style={styles.revisionBanner}>
+                        <Text style={styles.revisionText}>Avelsorganisation har skickat tillbaka ansökan. Vänligen kontrollera och komplettera uppgifterna.</Text>  
+                    </View> 
+                    {!!revisionComment && (
+                        <View style={styles.revisionComment}>
+                            <Ionicons name='chatbubble-outline' size={14} color='#8a7267' style={{ marginTop: 1 }} />
+                            <Text style={styles.revisionCommentText}>"{revisionComment}"</Text> 
+                        </View>
+                    )}
+                </>
                 }
             </Pressable>
 
@@ -121,20 +136,20 @@ export default function PassportCard({ horse, status='draft', onEdit, onDelete, 
                                 style={styles.commentInput}
                                 placeholder="Beskriv vad som behövs kompletteras (valfritt)"
                                 placeholderTextColor="#8a7267"
-                                value={revisionComment}
-                                onChangeText={setRevisionComment}
+                                value={commentInput}
+                                onChangeText={setCommentInput}
                                 multiline
                             />
                             <View style={[styles.draftBtns, { justifyContent: 'flex-end', marginTop: 10 }]}>
-                                <Pressable onPress={() => { setShowRevisionInput(false); setRevisionComment('')}} hitSlop={10}>
+                                <Pressable onPress={() => { setShowRevisionInput(false); setCommentInput('')}} hitSlop={10}>
                                     <Text style={[styles.signLink, { color: '#8a7267' }]}>Avbryt</Text>
                                 </Pressable> 
-                                <Pressable onPress={() => onRevision?.(revisionComment)} hitSlop={10}>
+                                <Pressable onPress={() => onRevision?.(commentInput)} hitSlop={10}>
                                     <Text style={[styles.signLink, { color: '#93000a' }]}>Skicka revision</Text>
                                 </Pressable>
                             </View>
                         </>
-                    ):  (
+                    ):  (   
                         <View style={styles.footerRow}>
                             <Text style={styles.verifier}>Skapat av hästägare</Text>
                         
@@ -345,6 +360,20 @@ const styles = StyleSheet.create({
         minHeight: 50,
         textAlignVertical: 'top',
     },
-
+    revisionComment: {
+        backgroundColor: '#F5F0EB',
+        borderRadius: 8,
+        padding: 10,
+        flexDirection: 'row',
+        gap: 8,
+        alignItems: 'flex-start',
+        marginBottom: 12,
+    },
+    revisionCommentText: {
+        fontSize: 11,
+        color: '#574238',
+        lineHeight: 16,
+        flex: 1,
+    },
 })
 
