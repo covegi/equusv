@@ -1,5 +1,4 @@
 export type HorsePassport = {
-    version: string,
     id: string,
     name: string
     breed: string
@@ -9,9 +8,7 @@ export type HorsePassport = {
     ownerAtRegistration: string
     location: string
     foodChainStatus: boolean
-    // external fields
     ueln?: string
     chip?: string
     organisation?: string
-    issuedDate?: string
 }

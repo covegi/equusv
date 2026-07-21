@@ -72,6 +72,18 @@ export default function HorseJournal({ record, horseImage, onClose, onDelete, on
           )
      }
 
+     const handleApprove = () => {
+          if (!currentRecord.horse.id) return
+          Alert.alert(
+               'Godkänn ansökan',
+               `Vill du godkänna passansökan för ${currentRecord.horse.name ?? 'denna häst'}?`,
+               [
+                    { text: 'Avbryt', style: 'cancel'},
+                    { text: 'Godkänn', style: 'default', onPress: () => onApprove?.(currentRecord) }
+               ]
+          )
+     }
+
      return (
          <KeyboardAvoidingView
                style={styles.outerContainer}
@@ -137,6 +149,7 @@ export default function HorseJournal({ record, horseImage, onClose, onDelete, on
                     onSend={handleSend}
                     onRevision={(comment) => onRevision?.(currentRecord!, comment)}
                     onRefresh={() => onRefresh?.()}
+                    onApprove={handleApprove}
                />
                 </ScrollView>
                <PassportModal

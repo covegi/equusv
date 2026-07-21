@@ -1,16 +1,17 @@
 import { StyleSheet, View, Text, Pressable, TextInput } from "react-native"
 import { useState } from "react"
 import type { HorsePassport } from "@/types/horse-passport"
+import type { PassportStatus } from "@/types/horse-passport-record"
 import Ionicons from "@expo/vector-icons/Ionicons"
 import { useRole } from "@/context/RoleContext"
 
-export default function PassportCard({ horse, status='draft', onEdit, onDelete, onSend, onRevision, onApprove, onRefresh, revisionComment }: { horse: Partial<HorsePassport>, status?: string, onEdit?: () => void, onDelete?: () => void, onSend?: () => void, onRevision?: (comment: string) => void, onApprove?: () => void, onRefresh?: () => void, revisionComment?: string }) {
+export default function PassportCard({ horse, status='draft', onEdit, onDelete, onSend, onRevision, onApprove, onRefresh, revisionComment }: { horse: Partial<HorsePassport>, status?: PassportStatus, onEdit?: () => void, onDelete?: () => void, onSend?: () => void, onRevision?: (comment: string) => void, onApprove?: () => void, onRefresh?: () => void, revisionComment?: string }) {
     const [expanded, setExpanded] = useState(false)
     const { activeRole } = useRole()
     const [showRevisionInput, setShowRevisionInput] = useState(false)
     const [commentInput, setCommentInput] = useState('')
 
-    const statusColors: Record<string, { bg: string, text: string, label: string, dot: string, verifiedText: string, checkmark: boolean }> = {
+    const statusColors: Record<PassportStatus, { bg: string, text: string, label: string, dot: string, verifiedText: string, checkmark: boolean }> = {
         draft:    { bg: '#F5F0EB', text: '#8a7267', label: 'Utkast',   dot: '#c6c6c7', verifiedText: 'Ej verifierat', checkmark: false },
         pending:  { bg: '#FFF3E0', text: '#B65109', label: 'Skickat',  dot: '#d4a843', verifiedText: 'Väntar på verifiering', checkmark: false },
         revision: { bg: '#FCEAEA', text: '#A13232', label: 'Revision', dot: '#A13232', verifiedText: 'Återsänd', checkmark: false },
@@ -56,7 +57,6 @@ export default function PassportCard({ horse, status='draft', onEdit, onDelete, 
                                 </Text>
                             </View>
                         </View>
-                       
                 </View>
                 {status === 'revision' && activeRole === 'owner' &&
                 <>
@@ -193,8 +193,12 @@ export default function PassportCard({ horse, status='draft', onEdit, onDelete, 
 
                             {status === 'revision' && activeRole === 'owner' && (
                                 <View style={styles.draftBtns}>
-                                    <Text style={[styles.signLink, { color: '#8a7267'}]}>Redigera</Text>
-                                    <Text style={[styles.signLink, { color: '#1b1b1b'}]}>Skicka igen</Text>
+                                    <Pressable onPress={onEdit} hitSlop={10}>
+                                        <Text style={[styles.signLink, { color: '#8a7267'}]}>Redigera</Text>
+                                    </Pressable>
+                                    <Pressable onPress={onSend} hitSlop={10}>
+                                        <Text style={[styles.signLink, { color: '#1b1b1b'}]}>Skicka igen</Text>
+                                    </Pressable>
                                 </View>
                             )}
                         </View>

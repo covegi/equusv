@@ -102,8 +102,6 @@ export default function OwnerScreen() {
             return
         }
 
-        // Local data from SecureStore
-
         const stored = await SecureStore.getItemAsync('draftIds')
         const ids = stored ? JSON.parse(stored) : []
         const drafts: HorsePassportRecord[] = []
@@ -112,49 +110,6 @@ export default function OwnerScreen() {
             if (raw) drafts.push(JSON.parse(raw))
         }
         
-    //    const uelns: string[] = JSON.parse(await SecureStore.getItemAsync('horseUelns') ?? '[]')
-
-    //    if (uelns.length === 0) {
-    //         setIsLoading(false)
-    //         return
-    //    }
-
-    //    console.log('uelns:', uelns)
-
-    //    const allOutputs = await Promise.all(
-    //     uelns.map(ueln => wallet.listOutputs({
-    //         basket: `equusv-${ueln}`,
-    //         include: 'locking scripts',
-    //     }))
-    //    )
-
-    //     const outputs = allOutputs.flatMap(r => r.outputs)
-
-    //     const horses: HorsePassport[] = outputs
-    //         .filter(output => {
-    //             return output.lockingScript && !output.lockingScript.startsWith('76a914')
-    //         })
-    //         .map(output => {
-    //         const script = LockingScript.fromHex(output.lockingScript!)
-    //         const { fields } = PushDrop.decode(script)
-
-    //         const decode = (field: number[]) => Buffer.from(field).toString('utf-8')
-
-        //     return {
-        //         name: decode(fields[1]),
-        //         breed: decode(fields[2]),
-        //         birthDate: decode(fields[3]),
-        //         sex: decode(fields[4]),
-        //         color: decode(fields[5]),
-        //         ueln: decode(fields[6]),
-        //         chip: decode(fields[7]),
-        //         ownerAtRegistration: decode(fields[8]),
-        //         location: decode(fields[9]),
-        //         organisation: decode(fields[10]),
-        //         issuedDate: decode(fields[11]),
-        //         foodChainStatus: decode(fields[12]) === 'true',
-        //     } as HorsePassport
-        // })
         setHorseDraft(drafts)
         console.log('Loaded drafts:', drafts.length, JSON.stringify(drafts))
         setIsLoading(false)
@@ -234,6 +189,7 @@ export default function OwnerScreen() {
                 const draft = JSON.parse(raw)
                 draft.status = 'pending'
                 draft.submittedAt = submittedAt
+                draft.revisionComment = ''
                 await SecureStore.setItemAsync(`passport-draft-${record.horse.id}`, JSON.stringify(draft))
             }
             setSelectedRecord(null)
@@ -278,9 +234,11 @@ export default function OwnerScreen() {
              }
 
              if (messages.length > 0) {
+                console.log('Acknowledging:', messages.map(m => m.messageId))
                 await msgBox.acknowledgeMessage({
                     messageIds: messages.map(m => m.messageId)
                 })
+                console.log('Acknowledged')
 
                 if (selectedRecord?.horse?.id) {
                     const raw = await SecureStore.getItemAsync(`passport-draft-${selectedRecord.horse.id}`)
