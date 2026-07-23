@@ -9,9 +9,7 @@
     import uhrpRouter from './routes/identity/uhrp.js'
     import horseOwnerCertificate from './routes/certify/horse-owner.js'
     import horseBreederCertificate from './routes/certify/breeding-organisation.js'
-    import identityKey from './routes/utils/identityKey.js'
-    import connectDB from './db.js'
-    import draftRouter from './routes/drafts.js'
+    import identityKey from './utils/identityKey.js'
 
     dotenv.config()
     const app = express()
@@ -25,6 +23,14 @@
             chain: 'main',
             rootKeyHex: EQUUS_ROOT_KEY!,
         })
+
+        // list and abort all stuck nosend transaction
+        const { actions } = await wallet.listActions({
+            labels: ['_specOpNoSendActions' as any, 'abort'],
+            labelQueryMode: 'any'
+        })
+        console.log('Aborted nosend actions:', actions.length)
+        console.log('Balance after cleanup:', await wallet.balance())
 
         console.log('Token-server identityKey:', wallet.identityKey)
 
@@ -71,12 +77,9 @@
             allowUnauthenticated: false
         })
 
-        await connectDB()
-
         app.use(corsMiddleware)
         app.use(authMiddleware)
 
-        app.use('/', draftRouter(wallet))
         app.use('/', passportRouter(wallet))
         app.use('/', uhrpRouter(wallet))
 
@@ -90,75 +93,75 @@
             console.log(`token-server is running on port ${PORT}`)
         })
         
-        const client = new PeerPayClient({
-                walletClient: wallet, 
-                messageBoxHost: 'https://messagebox.babbage.systems'
-        })
+        // const client = new PeerPayClient({
+        //         walletClient: wallet, 
+        //         messageBoxHost: 'https://messagebox.babbage.systems'
+        // })
 
-    const pollMessages = async () => {
-        while (true) {
-            try {
-                const messages = await client.listMessages({
-                    messageBox: 'equusv-passport-certification'
-                })
-                for (const message of messages) {
-                    console.log('Inkommande passansökan från:', message.sender)
+    // const pollMessages = async () => {
+    //     while (true) {
+    //         try {
+    //             const messages = await client.listMessages({
+    //                 messageBox: 'equusv-passport-certification'
+    //             })
+    //             for (const message of messages) {
+    //                 console.log('Inkommande passansökan från:', message.sender)
                     
-                    const draft = typeof message.body === 'string'
-                    ? JSON.parse(message.body)
-                    : message.body
+    //                 const draft = typeof message.body === 'string'
+    //                 ? JSON.parse(message.body)
+    //                 : message.body
 
-                    console.log('Draft mottagen:', JSON.stringify(draft))
+    //                 console.log('Draft mottagen:', JSON.stringify(draft))
 
-                    if (draft.action === 'revoke') {
-                        console.log('Återkallelse mottagen för:', draft.ueln)
-                        await client.acknowledgeMessage({ messageIds: [message.messageId]})
-                        continue
-                    }
+    //                 if (draft.action === 'revoke') {
+    //                     console.log('Återkallelse mottagen för:', draft.ueln)
+    //                     await client.acknowledgeMessage({ messageIds: [message.messageId]})
+    //                     continue
+    //                 }
 
-                    await new Promise(resolve => setTimeout(resolve, 5000))
+    //                 await new Promise(resolve => setTimeout(resolve, 5000))
 
-                    const pending = await client.listMessages({ messageBox: 'equusv-passport-certification' })
-                    const revoked = pending.some(m => {
-                        const body = typeof m.body === 'string' ? JSON.parse(m.body) : m.body
-                        return body.action === 'revoke' && body.ueln === draft.horse.ueln
-                    }) 
+    //                 const pending = await client.listMessages({ messageBox: 'equusv-passport-certification' })
+    //                 const revoked = pending.some(m => {
+    //                     const body = typeof m.body === 'string' ? JSON.parse(m.body) : m.body
+    //                     return body.action === 'revoke' && body.ueln === draft.horse.ueln
+    //                 }) 
 
-                    if (revoked) {
-                        console.log('Återkallad – skickar inte svar')
-                        await client.acknowledgeMessage({ messageIds: [message.messageId]})
-                        continue
-                    }
+    //                 if (revoked) {
+    //                     console.log('Återkallad – skickar inte svar')
+    //                     await client.acknowledgeMessage({ messageIds: [message.messageId]})
+    //                     continue
+    //                 }
 
-                    const draftString = JSON.stringify(draft)
-                    const draftBytes = Array.from(Buffer.from(draftString, 'utf-8'))
-                    console.log('Hashar draft...')
-                    const messageHash = Hash.sha256(draftBytes)
+    //                 const draftString = JSON.stringify(draft)
+    //                 const draftBytes = Array.from(Buffer.from(draftString, 'utf-8'))
+    //                 console.log('Hashar draft...')
+    //                 const messageHash = Hash.sha256(draftBytes)
 
-                    console.log('Signerar...')
-                    const privateKey = PrivateKey.fromString(EQUUS_ROOT_KEY!)
-                    const signature = privateKey.sign(messageHash)
+    //                 console.log('Signerar...')
+    //                 const privateKey = PrivateKey.fromString(EQUUS_ROOT_KEY!)
+    //                 const signature = privateKey.sign(messageHash)
 
-                    console.log('Skickar svar till:', message.sender)
+    //                 console.log('Skickar svar till:', message.sender)
 
-                    await Promise.all([
-                        client.sendMessage({
-                            recipient: message.sender,
-                            messageBox: 'equusv-passport-certification-response',
-                            body: JSON.stringify({ messageHash, signature, ueln: draft.horse.ueln })
-                        }),
-                        client.acknowledgeMessage({ messageIds: [message.messageId] })
-                    ])
-                    console.log('Svar skickat och acknowledged')
-                }
-            } catch (error) {
-                console.error(error)
-            }
-            await new Promise(resolve => setTimeout(resolve, 3000))
-        }
-    }
-    pollMessages()
-    console.log('Lyssnare aktiv')
+    //                 await Promise.all([
+    //                     client.sendMessage({
+    //                         recipient: message.sender,
+    //                         messageBox: 'equusv-passport-certification-response',
+    //                         body: JSON.stringify({ messageHash, signature, ueln: draft.horse.ueln })
+    //                     }),
+    //                     client.acknowledgeMessage({ messageIds: [message.messageId] })
+    //                 ])
+    //                 console.log('Svar skickat och acknowledged')
+    //             }
+    //         } catch (error) {
+    //             console.error(error)
+    //         }
+    //         await new Promise(resolve => setTimeout(resolve, 3000))
+    //     }
+    // }
+    // pollMessages()
+    // console.log('Lyssnare aktiv')
         
     }
 
