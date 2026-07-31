@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
         backgroundColor: '#574238',
-        borderRadius: 12,
+        borderRadius: 8,
         padding: 16,
 
     },

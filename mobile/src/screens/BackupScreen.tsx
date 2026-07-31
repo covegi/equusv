@@ -1,11 +1,10 @@
-import { StyleSheet, View, ImageBackground, Alert } from "react-native"
+import { StyleSheet, View, Text, ImageBackground, Alert } from "react-native"
 import { useState, useEffect } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from "expo-router"
 import { generateKey, storeKey } from "@/utils/wallet"
 import * as SecureStore from 'expo-secure-store'
 import Heading from "@/components/text/Heading"
-import BodyText from "@/components/text/BodyText"
 import PrimaryButton from "@/components/buttons/PrimaryButton"
 import BackButton from "@/components/buttons/BackButton"
 import MnemonicWord from "@/components/grid/MnemonicWord"
@@ -61,7 +60,7 @@ export default function BackupScreen() {
             </View>
             <View style={styles.container}>
                 <View style={styles.bodyTextTop}>
-                    <BodyText color='#FF8A80'>Spara denna nyckel säkert</BodyText>
+                    <Text>Spara denna nyckel säkert</Text>
                 </View>
                 <View style={styles.boxContainer}>
                     {mnemonicArray.map((mnem, index) => (
@@ -72,7 +71,7 @@ export default function BackupScreen() {
                     <PrimaryButton onPress={handleSaveKey}>Jag har sparat min nyckel</PrimaryButton>
                 </View>
                 <View style={styles.bodyTextBottom}>
-                    <BodyText color='#FF8A80'>Dela aldrig denna nyckel med någon</BodyText>
+                    <Text>Dela aldrig denna nyckel med någon</Text>
                 </View>
             </View>
         </ImageBackground>
