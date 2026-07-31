@@ -1,8 +1,8 @@
 import { Router } from 'express'
 import type { Request, Response } from 'express'
-import { Transaction, PushDrop, Hash, Utils } from '@bsv/sdk'
-import type { AtomicBEEF } from '@bsv/sdk'
-import { type CreateActionArgs, type WalletInterface, ProtoWallet } from '@bsv/sdk'
+import { Transaction, PushDrop, Hash, Utils,ProtoWallet } from '@bsv/sdk'
+import type { AtomicBEEF, CreateActionArgs, WalletInterface } from '@bsv/sdk'
+import { createMessageBoxClient, MESSAGE_BOXES, MESSAGEBOX_HOST } from '../../utils/messageBox.js'
 import type { HorsePassportRecord } from '../../types/horse-passport-record.js'
 import { buildPassportFields, serializeFields } from '../../utils/passportFields.js'
 import { PASSPORT_BASKET, tagHorse, TAG_STATUS_PENDING, TAG_STATUS_ACTIVE } from '../../constants/baskets.js'
@@ -325,12 +325,27 @@ export default (wallet: WalletInterface) => {
 
             console.log(`Submitted to LARS overlay: ${finalTxid}`)
 
-            return res.json({
-                tx: Buffer.from(finalTx).toString('base64'),
-                txid: finalTxid,
-                outputIndex
-            })
+            try {
+                const msgBox = await createMessageBoxClient(wallet)
+                await msgBox.sendMessage({
+                    recipient: record.identityKey,
+                    messageBox: MESSAGE_BOXES.active,
+                    body: {
+                        tx: Buffer.from(finalTx).toString('base64'),
+                        txid: finalTxid,
+                        outputIndex,
+                        horseId: record.horse.id,
+                        name: record.horse.name
+                    }
+                },
+                MESSAGEBOX_HOST
+            )
+                console.log('Sent active token to owner:', record.identityKey)
+            } catch (error) {
+                console.error('PeerMessage send failed:', error)
+            }
 
+            return res.json({ status: 'active', txid: finalTxid })
 
         } catch (error) {
             console.error(error)

@@ -7,6 +7,7 @@
     import { PeerPayClient } from '@bsv/message-box-client'
     import passportRouter from './routes/identity/passport.js'
     import uhrpRouter from './routes/identity/uhrp.js'
+    import spendRouter from './routes/admin.js'
     import horseOwnerCertificate from './routes/certify/horse-owner.js'
     import horseBreederCertificate from './routes/certify/breeding-organisation.js'
     import identityKey from './utils/identityKey.js'
@@ -85,6 +86,8 @@
 
         app.use('/', horseOwnerCertificate(wallet))
         app.use('/', horseBreederCertificate(wallet))
+
+        app.use(spendRouter(wallet))
     
         app.use('/', identityKey(wallet))
        
