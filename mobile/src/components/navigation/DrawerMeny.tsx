@@ -14,7 +14,7 @@ const SCREEN_WIDTH = Dimensions.get('window').width
 const DRAWER_WIDTH = SCREEN_WIDTH * 0.75
 const CLOSE_THRESHOLD = DRAWER_WIDTH * 0.3
 
-export default function DrawerMenu({ visible, onClose }: { visible: boolean, onClose: () => void }) {
+export default function DrawerMenu({ visible, onClose, onList, onRequestList, onClearDevice }: { visible: boolean, onClose: () => void, onList?: () => void, onRequestList?: () => void, onClearDevice?: () => void }) {
     const { activeRole, setActiveRole, availableRoles } = useRole()
     const insets = useSafeAreaInsets()
     const translateX = useSharedValue(-DRAWER_WIDTH)
@@ -83,6 +83,17 @@ export default function DrawerMenu({ visible, onClose }: { visible: boolean, onC
                 ))}
                 </View>
                 <View style={styles.divider} />
+                <Pressable onPress={onList} hitSlop={10}>
+                    <Text>List tokens</Text>
+                </Pressable>
+                <View style={{ marginVertical: 12 }}/>
+                <Pressable onPress={onRequestList} hitSlop={10}>
+                    <Text>Spend all tokens</Text>
+                </Pressable>
+                <View style={{ marginVertical: 12 }}/>
+                <Pressable onPress={onClearDevice} hitSlop={10}>
+                    <Text>Clear local data</Text>
+                </Pressable>
                 </Animated.View>
             </GestureDetector>
         </>

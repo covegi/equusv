@@ -3,6 +3,7 @@
     import { LookupResolver, Transaction, PushDrop, Utils, AuthFetch, Hash } from "@bsv/sdk"
     import { createMessageBoxClient, MESSAGE_BOXES, MESSAGEBOX_HOST } from "@/utils/messageBox"
     import { useWallet } from "@/context/WalletContext"
+    import { buildPassportFields, serializeFields } from "@/utils/passportFields"
 
     import Header from "@/components/header/header"
     import DrawerMenu from "@/components/navigation/DrawerMeny"
@@ -11,46 +12,6 @@
     import { HorsePassportRecord, isPassportStatus, ApprovalPayload } from "@/types/horse-passport-record"
 
     const TOKEN_SERVER_URL = process.env.EXPO_PUBLIC_TOKEN_SERVER_URL
-
-    const serializeFields = (fields: number[][]): number[] => {
-        const out: number[] = []
-        for (const field of fields) {
-            const len = field.length
-            out.push((len >>> 24) & 0xff, (len >>> 16) & 0xff, (len >>> 8) & 0xff, len & 0xff)
-            out.push(...field)
-        }
-        return out
-    }
-
-    const buildPassportFields = (record: HorsePassportRecord): number[][] => {
-        const horse = record.horse
-
-        const fields = [
-            record.version,
-            record.status,
-            horse.id,
-            horse.name,
-            horse.breed,
-            horse.birthDate,
-            horse.sex,
-            horse.color,
-            horse.ownerAtRegistration,
-            horse.location,
-            (horse.foodChainStatus ?? false).toString(),
-            horse.ueln,
-            horse.chip,
-            horse.organisation,
-            record.createdAt,
-            record.submittedAt,
-            record.issuedAt,
-            record.identityKey
-        ].map(field => Utils.toArray(field ?? '', 'utf8'))
-
-        if (fields.length !== 18) {
-            throw new Error(`Expected 18 fields, got ${fields.length}`)
-        }
-        return fields
-    }
 
     export default function BreedingOrgScreen({ }) {
         const { wallet } = useWallet()
@@ -191,20 +152,20 @@
 
             const signatureHex = Utils.toHex(signature)
 
-            const publicKey = await wallet!.getPublicKey({ identityKey: true })
+            const { publicKey } = await wallet!.getPublicKey({ identityKey: true })
 
             try {
                 const response = await authFetch?.fetch(`${TOKEN_SERVER_URL}/identity/passport/approve`, {
                     method: 'POST',
-                    headers: { 'content-type': 'application / json' },
-                    body: JSON.stringify({
-                        signature: {
+                    headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify(
+                        {
                             record: approved,
                             hash,
                             signature: signatureHex,
                             certifierIdentityKey: publicKey
                         }
-                    })
+                    )
                 })
                 if (!response.ok) {
                     const text = await response.text()
@@ -216,8 +177,6 @@
                 console.error(error)
             }
         }
-
-        const onPress = () => {}
 
         let content
 

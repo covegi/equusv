@@ -64,7 +64,7 @@ export default function HorseJournal({ record, horseImage, onClose, onDelete, on
           if (!currentRecord.horse.id) return
           Alert.alert(
                'Skicka till avelsorganisation',
-               `Vill du skicka ansökan för ${currentRecord.horse.name ?? 'denna häst'}?`,
+               `Vill du skicka ansökan för ${currentRecord.horse.name?.trim() ?? 'denna häst'}?`,
                [
                     { text: 'Avbryt', style: 'cancel' },
                     { text: 'Skicka', style: 'default', onPress: () => onSend?.(currentRecord) }
@@ -76,7 +76,7 @@ export default function HorseJournal({ record, horseImage, onClose, onDelete, on
           if (!currentRecord.horse.id) return
           Alert.alert(
                'Godkänn ansökan',
-               `Vill du godkänna passansökan för ${currentRecord.horse.name ?? 'denna häst'}?`,
+               `Vill du godkänna passansökan för ${currentRecord.horse.name?.trim() ?? 'denna häst'}?`,
                [
                     { text: 'Avbryt', style: 'cancel'},
                     { text: 'Godkänn', style: 'default', onPress: () => onApprove?.(currentRecord) }

@@ -281,17 +281,6 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                                         placeholder='Svensk avelsorganisation'
                                         disabled
                                     />
-                                    <SectionRowInput
-                                        label='Utfärdat'
-                                        value={horsePassport.issuedDate ?? ''}
-                                        onChangeText={(text) => {
-                                            setHorsePassport({ ...horsePassport, issuedDate: text })
-                                            setErrors({ ...errors, issuedDate: false})
-                                        }}
-                                        hasError={errors.issuedDate}
-                                        placeholder='Datum'
-                                        disabled
-                                    />
                                 </View>
                             </Section>
                            

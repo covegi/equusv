@@ -8,7 +8,7 @@ export const isPassportStatus = (v: string): v is PassportStatus =>
 
 export type HorsePassportRecord = {
     horse: Partial<HorsePassport>,
-    version: string,
+    version?: string,
     status: PassportStatus,
     createdAt: string,
     submittedAt?: string
