@@ -3,8 +3,6 @@ import { useEffect } from "react"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { router } from "expo-router"
 import * as SecureStore from 'expo-secure-store'
-import PrimaryButton from "@/components/buttons/PrimaryButton"
-import SecondaryButton from "@/components/buttons/SecondaryButton"
 
 export default function StartScreen() {
     const insets = useSafeAreaInsets()
@@ -40,7 +38,7 @@ export default function StartScreen() {
                         <Text style={styles.punchline}>All historik — spårbar, delbar, verifierad</Text>
                         <View style={styles.btnContainer}>
                     <Pressable onPress={() => router.push('/backup')} style={styles.primaryBtn}>
-                        <Text style={styles.primaryBtnText}>Skapa nytt arkiv</Text>
+                        <Text style={styles.primaryBtnText} numberOfLines={1} adjustsFontSizeToFit>Skapa nytt arkiv med BankID</Text>
                     </Pressable>
                     <Pressable onPress={() => {}} hitSlop={10}>
                         <Text style={{ color: '#1b1b1b'}}>Så funkar det</Text>

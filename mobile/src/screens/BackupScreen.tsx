@@ -1,14 +1,10 @@
-import { StyleSheet, View, Text, ImageBackground, Alert } from "react-native"
+import { StyleSheet, View, Text, Pressable, Alert, Image } from "react-native"
 import { useState, useEffect } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from "expo-router"
 import { generateKey, storeKey } from "@/utils/wallet"
 import * as SecureStore from 'expo-secure-store'
-import Heading from "@/components/text/Heading"
-import PrimaryButton from "@/components/buttons/PrimaryButton"
 import BackButton from "@/components/buttons/BackButton"
-import MnemonicWord from "@/components/grid/MnemonicWord"
-
 
 export default function BackupScreen() {
     const [mnemonic, setMnemonic] = useState('')
@@ -48,69 +44,143 @@ export default function BackupScreen() {
 
     if (loading) return null
 
-    const mnemonicArray = mnemonic ? mnemonic.split(' ') : [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '', ' ']
+    const mnemonicArray = mnemonic ? mnemonic.split(' ') : [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
 
     return (
-        <ImageBackground source={require('@/assets/images/horse-backup-screen.jpg')} style={styles.image} imageStyle={{ left: -25, top: -30}}>
-             <View style={[styles.backButton, { top: insets.top + 16 }]}>
-                <BackButton />
+        <View style={styles.container}>
+            <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+                <BackButton color='#1b1b1b' />
             </View>
-            <View style={[styles.heading, { top: insets.top + 72 }]}>
-                <Heading>Din återställningsnyckel</Heading>
+
+            <View style={styles.intro}>
+                <Text style={styles.title}>Din återställningsnyckel</Text>
+                <Text style={styles.subtitle}>Skriv ner orden i ordning och förvara dem säkert.</Text>
             </View>
-            <View style={styles.container}>
-                <View style={styles.bodyTextTop}>
-                    <Text>Spara denna nyckel säkert</Text>
-                </View>
-                <View style={styles.boxContainer}>
-                    {mnemonicArray.map((mnem, index) => (
-                         <MnemonicWord boxNumber={index + 1} key={index}>{mnem}</MnemonicWord>
-                    ))}
-                </View>
-                <View style={styles.confirmButton}>
-                    <PrimaryButton onPress={handleSaveKey}>Jag har sparat min nyckel</PrimaryButton>
-                </View>
-                <View style={styles.bodyTextBottom}>
-                    <Text>Dela aldrig denna nyckel med någon</Text>
-                </View>
+
+            <View style={styles.grid}>
+                {mnemonicArray.map((word, i) => (
+                    <View key={i} style={styles.cell}>
+                        <View style={styles.row}>
+                            <Text style={styles.num}>{i + 1}</Text>
+                            <Text style={styles.word}>{word}</Text>
+                        </View>
+                    </View>
+                ))}
             </View>
-        </ImageBackground>
+
+            <View style={{ flex: 1 }} />
+
+            <View style={styles.recovery}>
+                <Image source={require('../../assets/images/BankID_logo_neg.png')} style={styles.bankIDImage} resizeMode="contain"/>
+                <Text style={styles.recoveryText}>
+                    Tappar du telefonen återställer du med BankID. Orden är reservkopia om appen försvinner.
+                </Text>
+            </View>
+
+            <View style={[styles.footer, { paddingBottom: insets.bottom + 24 }]}>
+                <Pressable onPress={handleSaveKey} style={styles.btn}>
+                    <Text style={styles.btnText} numberOfLines={1}>Jag har sparat min nyckel</Text>
+                </Pressable>
+                <Text style={styles.warning}>Dela aldrig denna nyckel med någon</Text>
+            </View>
+        </View>
     )
 }
 
 const styles = StyleSheet.create({
-    image: {
-        flex: 1
-    },
-    backButton: {
-        position: 'absolute',
-        left: 16
-    },
-    heading: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        alignItems: 'center',
-    },
     container: {
         flex: 1,
-        justifyContent: 'center',
+        backgroundColor: '#F5F0EB',
     },
-    bodyTextTop: {
+    header: {
+        paddingHorizontal: 24,
+    },
+    intro: {
+        paddingHorizontal: 30,
+        paddingTop: 18,
         alignItems: 'center',
-        marginBottom: 36
     },
-    boxContainer: {
+    title: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#1b1b1b',
+        letterSpacing: -0.2,
+    },
+    subtitle: {
+        fontSize: 12,
+        fontWeight: '400',
+        color: '#8a7267',
+        marginTop: 8,
+        textAlign: 'center',
+        lineHeight: 17,
+    },
+    grid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        justifyContent: 'center',
-        gap: 8
+        paddingHorizontal: 30,
+        marginTop: 24,
     },
-    confirmButton: {
-        marginTop: 32
+    cell: {
+        width: '50%',
+        paddingHorizontal: 6,
     },
-    bodyTextBottom: {
+    row: {
+        flexDirection: 'row',
+        alignItems: 'baseline',
+        gap: 10,
+        paddingVertical: 10,
+        borderBottomWidth: 0.5,
+        borderBottomColor: '#E8E0D8',
+    },
+    num: {
+        fontSize: 10,
+        color: '#8a7267',
+        width: 17,
+    },
+    word: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#1b1b1b',
+    },
+    recovery: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: 8,
+        marginHorizontal: 30,
+        paddingTop: 14,
+        marginBottom: 20,
+        borderTopWidth: 0.5,
+        borderTopColor: '#E8E0D8',
+    },
+    recoveryText: {
+        flex: 1,
+        fontSize: 12,
+        color: '#574238',
+        lineHeight: 17,
+    },
+    footer: {
+        paddingHorizontal: 30,
+    },
+    btn: {
+        backgroundColor: '#1b1b1b',
+        borderRadius: 8,
+        paddingVertical: 14,
         alignItems: 'center',
-        marginTop: 36
-    }
+    },
+    btnText: {
+        color: '#fff',
+        fontSize: 13,
+        fontWeight: '600',
+    },
+    warning: {
+        textAlign: 'center',
+        fontSize: 11,
+        color: '#8a7267',
+        marginTop: 16,
+    },
+    bankIDImage: {
+        width: 34,
+        height: 34,
+        borderRadius: 7,
+    },
 })

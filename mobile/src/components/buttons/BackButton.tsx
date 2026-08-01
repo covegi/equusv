@@ -14,9 +14,9 @@ export default function BackButton({ color='#f7f2f2', emptyPin }: { color?: stri
     }
 
     return (
-        <Pressable onPress={handleOnPress} style={styles.container}>
+        <Pressable onPress={handleOnPress} style={styles.container} hitSlop={10}>
             <View>
-                <AntDesign name="arrow-left" size={24} color={color} />
+                <AntDesign name="arrow-left" size={20} color={color} />
             </View>
         </Pressable> 
     )
