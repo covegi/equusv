@@ -2,12 +2,11 @@ import { StyleSheet, Text, View, ImageBackground, TouchableOpacity, Animated, Im
 import { useState, useEffect, useRef } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as SecureStore from 'expo-secure-store'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useRouter } from 'expo-router'
 import { useWallet } from '@/context/WalletContext'
 import { loadWallet } from '@/utils/wallet'
-
-import PrimaryButton from '@/components/buttons/PrimaryButton'
 
 export default function LoginScreen() {
     const insets = useSafeAreaInsets()
@@ -63,16 +62,27 @@ export default function LoginScreen() {
         setPin(pin.slice(0, -1))
     }
 
-     const handleDeleteSecureStore = async () => {
+    const handleDeleteSecureStore = async () => {
+        try {
             await SecureStore.deleteItemAsync('rootKeyHex')
-            router.replace('/')
+            await SecureStore.deleteItemAsync('pin')
+            await AsyncStorage.clear()
+            console.log('cleared OK')
+            const keys = await AsyncStorage.getAllKeys()
+            console.log('keys after clear:', keys)
+        } catch (error) {
+            console.log('clear failed', error)
         }
+        router.replace('/')
+    }
 
     return (
-        <ImageBackground source={require('@/assets/images/horse-pin-screen.jpg')} style={styles.backgroundImage}>
-            <View style={styles.overlay}/>
-            <View style={[styles.logoContainer, { top: insets.top }]}>
-                    <Image source={require('@/assets/images/logo_transparent.png')} style={{ width: 200, height: 200 }} resizeMode='contain' />
+        <View style={styles.container}>
+            <View style={[styles.logoContainer, { top: insets.top + 60 }]}>
+                    <Image
+                        source={require('../../assets/images/equusv-icon-transparent-bg.png')}
+                        style={styles.icon}
+                        resizeMode='contain' />
             </View>
             <View style={styles.outerDotContainer}>
                 <Animated.View style={[styles.innerDotContainer, { transform: [{ translateX: shakeAnim }]}]}>
@@ -109,29 +119,30 @@ export default function LoginScreen() {
                         </TouchableOpacity>
                 </View>
                 <TouchableOpacity onPress={handleBackSpace} style={styles.backArrow}>
-                    <Ionicons name="backspace-sharp" size={48} color="#f7f2f2" />
+                    <Ionicons name="backspace-sharp" size={48} color="#1b1b1b" />
                 </TouchableOpacity>
             </View>
-             <View style={styles.container}>
-                <PrimaryButton onPress={handleDeleteSecureStore}>Rensa SecureStore</PrimaryButton>
-            </View>
-        </ImageBackground>
+             <TouchableOpacity onPress={handleDeleteSecureStore} style={[styles.devLink, { bottom: insets.bottom + 16 }]}>
+                <Text style={styles.devLinkText}>Rensa SecureStore</Text>
+            </TouchableOpacity>
+        </View>
     )
 }
 
 const styles = StyleSheet.create({
-    backgroundImage: {
+    container: {
         flex: 1,
-    },
-    overlay: {
-        ...StyleSheet.absoluteFill,
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        backgroundColor: '#F5F0EB',
     },
     logoContainer: {
         position: 'absolute',
         left: 0,
         right: 0,
         alignItems: 'center',
+    },
+    icon: {
+        width: 64,
+        height: 64,
     },
     outerDotContainer: {
         position: 'absolute',
@@ -147,20 +158,21 @@ const styles = StyleSheet.create({
         height: 12,
         borderRadius: 6,
         borderWidth: 1,
-        borderColor: '#f7f2f2',
-        margin: 6
+        borderColor: '#b8ab9e',
+        margin: 6,
     },
     dotFilled: {
-        backgroundColor: '#f7f2f2'
+        backgroundColor: '#1b1b1b',
+        borderColor: '#1b1b1b',
     },
     numberMainContainer: {
         position: 'absolute',
         top: '30%',
         left: '50%',
-        transform: [{ translateX: '-50%'}],
+        transform: [{ translateX: '-50%' }],
     },
     numberRow: {
-        flexDirection: 'row'
+        flexDirection: 'row',
     },
     numberContainer: {
         width: 80,
@@ -169,26 +181,30 @@ const styles = StyleSheet.create({
         margin: 5,
         justifyContent: 'center',
         alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#f7f2f2',
+        backgroundColor: '#EAE1D8',
     },
     numberRowZero: {
-        alignItems: 'center'
+        alignItems: 'center',
     },
     number: {
         fontFamily: 'Inter_300Light',
         fontSize: 22,
-        color: '#f7f2f2'
+        color: '#1b1b1b',
     },
     backArrow: {
         position: 'absolute',
         top: '80%',
-        left: '75%'
+        left: '75%',
     },
-    container: {
-        flex: 1,
-        justifyContent: 'flex-end',
+    devLink: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
         alignItems: 'center',
-        margin: 60
-    }
+    },
+    devLinkText: {
+        fontSize: 11,
+        color: '#8a7267',
+        textDecorationLine: 'underline',
+    },
 })

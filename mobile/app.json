@@ -30,8 +30,8 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#f7f2f2",
-          "image": "./assets/images/equus-splash-icon.png",
-          "imageWidth": 200
+          "image": "./assets/images/equusv-icon-transparent-bg.png",
+          "imageWidth": 105
         }
       ],
       "expo-secure-store",

@@ -18,7 +18,7 @@ function WordField({ index, value, onChange }: { index: number, value: string, o
                     value={value}
                     onChangeText={onChange}
                     onFocus={() => setFocused(true)}
-                    onBlur={() => setFocused(true)}
+                    onBlur={() => setFocused(false)}
                     style={styles.word}
                     autoCapitalize='none'
                     autoCorrect={false}

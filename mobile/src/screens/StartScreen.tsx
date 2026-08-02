@@ -24,12 +24,12 @@ export default function StartScreen() {
             <View style={styles.outerContainer}>
                 <View style={styles.textBlock}>
                     <Image
-                        source={require('@/assets/images/equusv-horse-icon.png')}
+                        source={require('../../assets/images/equusv-horse-icon.png')}
                         style={{ width: width * 0.13, height: width * 0.13 }}
                         resizeMode="contain"
                     />
                     <Image 
-                        source={require('@/assets/images/EquusV_Inter_Regular_transparent.png')} 
+                        source={require('../../assets/images/equusv_inter_regular_transparent.png')} 
                         style={{ width: width * 0.6, height: width * 0.6 * (60/220) }}
                         resizeMode="contain"
                     />
