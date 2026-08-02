@@ -1,11 +1,9 @@
-import { StyleSheet, Text, View, ImageBackground, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
 import { useState, useEffect, useCallback } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import * as SecureStore from 'expo-secure-store'
 import { useRouter, useFocusEffect } from 'expo-router'
-
-import Heading from '@/components/text/Heading'
 
 export default function CreatePinScreen() {
     const insets = useSafeAreaInsets()
@@ -38,64 +36,67 @@ export default function CreatePinScreen() {
     }
 
     return (
-        <ImageBackground source={require('@/assets/images/horse-pin-screen.jpg')} style={styles.backgroundImage}>
-            <View style={styles.overlay}/>
-            <View style={[styles.heading, { top: insets.top + 72 }]}>
-                <Heading>Skapa din PIN-kod</Heading>
-            </View>
-            <View style={styles.dotContainer}>
-                {Array.from({ length: 6 }).map((_, i) => (
-                <View key={i} style={[styles.dot, i < pin.length && styles.dotFilled]} />
-                ))}
-            </View>
-            <View style={styles.numberMainContainer}>
-                <View style={styles.numberRow}>
-                    {['1', '2', '3'].map((num, i) => (
-                        <TouchableOpacity onPress={() => handlePress(num)} key={num} style={styles.numberContainer}>
-                            <Text style={styles.number}>{num}</Text>
-                        </TouchableOpacity>
+        <>
+            <View style={styles.container}/>
+                <View style={[styles.heading, { top: insets.top + 72 }]}>
+                    <Text style={styles.title}>Skapa din PIN-kod</Text>
+                </View>
+                <View style={styles.dotContainer}>
+                    {Array.from({ length: 6 }).map((_, i) => (
+                    <View key={i} style={[styles.dot, i < pin.length && styles.dotFilled]} />
                     ))}
                 </View>
-                <View style={styles.numberRow}>
-                    {['4', '5', '6'].map((num, i) => (
-                        <TouchableOpacity onPress={() => handlePress(num)} key={num} style={styles.numberContainer}>
-                            <Text style={styles.number}>{num}</Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-                <View style={styles.numberRow}>
-                    {['7', '8', '9'].map((num, i) => (
-                        <TouchableOpacity onPress={() => handlePress(num)} key={num} style={styles.numberContainer}>
-                            <Text style={styles.number}>{num}</Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-                <View style={styles.numberRowZero}>
-                        <TouchableOpacity onPress={() => handlePress('0')} style={styles.numberContainer}>
-                            <Text style={styles.number}>0</Text>
-                        </TouchableOpacity>
-                </View>
-                <TouchableOpacity onPress={handleBackSpace} style={styles.backArrow}>
-                    <Ionicons name="backspace-sharp" size={48} color="#f7f2f2" />
-                </TouchableOpacity>
+                <View style={styles.numberMainContainer}>
+                    <View style={styles.numberRow}>
+                        {['1', '2', '3'].map((num, i) => (
+                            <TouchableOpacity onPress={() => handlePress(num)} key={num} style={styles.numberContainer}>
+                                <Text style={styles.number}>{num}</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                    <View style={styles.numberRow}>
+                        {['4', '5', '6'].map((num, i) => (
+                            <TouchableOpacity onPress={() => handlePress(num)} key={num} style={styles.numberContainer}>
+                                <Text style={styles.number}>{num}</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                    <View style={styles.numberRow}>
+                        {['7', '8', '9'].map((num, i) => (
+                            <TouchableOpacity onPress={() => handlePress(num)} key={num} style={styles.numberContainer}>
+                                <Text style={styles.number}>{num}</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                    <View style={styles.numberRowZero}>
+                            <TouchableOpacity onPress={() => handlePress('0')} style={styles.numberContainer}>
+                                <Text style={styles.number}>0</Text>
+                            </TouchableOpacity>
+                    </View>
+                    <TouchableOpacity onPress={handleBackSpace} style={styles.backArrow}>
+                        <Ionicons name="backspace-sharp" size={48} color="#1b1b1b" />
+                    </TouchableOpacity>
             </View>
-        </ImageBackground>
+        </>
     )
 }
 
 const styles = StyleSheet.create({
-    backgroundImage: {
+    container: {
         flex: 1,
-    },
-    overlay: {
-        ...StyleSheet.absoluteFill,
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        backgroundColor: '#F5F0EB',
     },
     heading: {
         position: 'absolute',
         left: 0,
         right: 0,
         alignItems: 'center',
+    },
+    title: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#1b1b1b',
+        letterSpacing: -0.2,
     },
     dotContainer: {
         position: 'absolute',
@@ -109,20 +110,21 @@ const styles = StyleSheet.create({
         height: 12,
         borderRadius: 6,
         borderWidth: 1,
-        borderColor: '#f7f2f2',
-        margin: 6
+        borderColor: '#b8ab9e',
+        margin: 6,
     },
     dotFilled: {
-        backgroundColor: '#f7f2f2'
+        backgroundColor: '#1b1b1b',
+        borderColor: '#1b1b1b',
     },
     numberMainContainer: {
         position: 'absolute',
         top: '30%',
         left: '50%',
-        transform: [{ translateX: '-50%'}],
+        transform: [{ translateX: '-50%' }],
     },
     numberRow: {
-        flexDirection: 'row'
+        flexDirection: 'row',
     },
     numberContainer: {
         width: 80,
@@ -131,20 +133,19 @@ const styles = StyleSheet.create({
         margin: 5,
         justifyContent: 'center',
         alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#f7f2f2',
+        backgroundColor: '#EAE1D8',
     },
     numberRowZero: {
-        alignItems: 'center'
+        alignItems: 'center',
     },
     number: {
         fontFamily: 'Inter_300Light',
         fontSize: 22,
-        color: '#f7f2f2'
+        color: '#1b1b1b',
     },
     backArrow: {
         position: 'absolute',
         top: '80%',
-        left: '75%'
-    }
+        left: '75%',
+    },
 })
