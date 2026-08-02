@@ -14,8 +14,8 @@
         "NSAppTransportSecurity": {
         "NSAllowsArbitraryLoads": true
     },
-        "NSCameraUsageDescription": "EquusCert behöver kameraåtkomst för att ta hästfoton.",
-        "NSPhotoLibraryUsageDescription": "EquusCert behöver åtkomst till bildbiblioteket för att välja hästfoton."
+        "NSCameraUsageDescription": "EquusV behöver kameraåtkomst för att ta hästfoton.",
+        "NSPhotoLibraryUsageDescription": "EquusV behöver åtkomst till bildbiblioteket för att välja hästfoton."
       }
     },
     "android": {
@@ -29,7 +29,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#f7f2f2",
+          "backgroundColor": "#F5F0EB",
           "image": "./assets/images/equusv-icon-transparent-bg.png",
           "imageWidth": 105
         }
