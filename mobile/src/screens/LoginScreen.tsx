@@ -67,9 +67,7 @@ export default function LoginScreen() {
             await SecureStore.deleteItemAsync('rootKeyHex')
             await SecureStore.deleteItemAsync('pin')
             await AsyncStorage.clear()
-            console.log('cleared OK')
             const keys = await AsyncStorage.getAllKeys()
-            console.log('keys after clear:', keys)
         } catch (error) {
             console.log('clear failed', error)
         }
