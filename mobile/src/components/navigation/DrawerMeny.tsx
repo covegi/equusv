@@ -5,12 +5,15 @@ import Animated, {
     useSharedValue,
     useAnimatedStyle,
     withTiming,
-    Easing
+    Easing,
 } from 'react-native-reanimated'
+import { scheduleOnRN } from 'react-native-worklets'
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useRole } from "@/context/RoleContext"
 import type { RoleId } from "@/constants/certificates"
 import Ionicons from "@expo/vector-icons/Ionicons"
+import { CertData } from "@/types/cert-data"
+import CertificateCard from "@/features/identity/CertificateCard"
 
 const SCREEN_WIDTH = Dimensions.get('window').width
 const DRAWER_WIDTH = SCREEN_WIDTH * 0.75
@@ -18,6 +21,25 @@ const CLOSE_THRESHOLD = DRAWER_WIDTH * 0.3
 const SCREEN_HEIGHT = Dimensions.get('window').height
 const SHEET_HEIGHT = SCREEN_HEIGHT * 0.4
 const SHEET_CLOSE_THRESHOLD = SHEET_HEIGHT * 0.3
+const CERT_SHEET_HEIGHT = SCREEN_HEIGHT * 0.88
+const CERT_SHEET_CLOSE_THRESHOLD = CERT_SHEET_HEIGHT * 0.3
+
+const CERTS: Record<'owner' | 'breedingOrg', CertData> = {
+    owner: {
+        certType: 'Hästägarcertifikat',
+        holderName: 'Peter de Michiel',
+        certifier: 'Självdeklarerat',
+        verificationState: 'self-declared',
+        serialNumber: '12345',
+    },
+    breedingOrg: {
+        certType: 'Avelsorganisationscertifikat',
+        holderName: 'Svenska Fullblodsavelsföreningen',
+        certifier: 'Jordbruksverket',
+        verificationState: 'unverified',
+        serialNumber: '12345',
+    },
+}
 
 export default function DrawerMenu({ visible, onClose, onList, onRequestList, onClearDevice }: { visible: boolean, onClose: () => void, onList?: () => void, onRequestList?: () => void, onClearDevice?: () => void }) {
     const { activeRole, setActiveRole, availableRoles } = useRole()
@@ -25,7 +47,9 @@ export default function DrawerMenu({ visible, onClose, onList, onRequestList, on
     const translateX = useSharedValue(-DRAWER_WIDTH)
     const translateY = useSharedValue(SHEET_HEIGHT)
     const [menuOpen, setMenuOpen] = useState(false)
+    const [selectedCert, setSelectedCert] = useState<('owner' | 'breedingOrg' | null)>(null)
     const [certListOpen, setCertListOpen] = useState(false)
+    const certTranslateY = useSharedValue(CERT_SHEET_HEIGHT)
 
     useEffect(() => {
         translateX.value = withTiming(visible ? 0 : -DRAWER_WIDTH, { duration: 250 })
@@ -34,6 +58,13 @@ export default function DrawerMenu({ visible, onClose, onList, onRequestList, on
     useEffect(() => {
         translateY.value = withTiming(certListOpen ? 0 : SHEET_HEIGHT, { duration: 250, easing: Easing.out(Easing.cubic) })
     }, [certListOpen])
+
+    useEffect(() => {
+        certTranslateY.value = withTiming(selectedCert ? 0 : CERT_SHEET_HEIGHT, {
+            duration: 250,
+            easing: Easing.out(Easing.cubic)
+        })
+    }, [selectedCert])
 
     const panGesture = Gesture.Pan()
         .activeOffsetX([-10, 10])
@@ -64,6 +95,22 @@ export default function DrawerMenu({ visible, onClose, onList, onRequestList, on
             }
         })
 
+    const certSheetPanGesture = Gesture.Pan()
+        .onUpdate((e) => {
+            if (e.translationY > 0) certTranslateY.value = e.translationY
+        })
+        .onEnd((e) => {
+            if (e.translationY > CERT_SHEET_CLOSE_THRESHOLD) {
+                certTranslateY.value = withTiming(CERT_SHEET_HEIGHT, { 
+                    duration: 200,
+                    easing: Easing.out(Easing.cubic)    
+                })
+                scheduleOnRN(setSelectedCert, null)
+            } else {
+                certTranslateY.value = withTiming(0, { duration: 200 })
+            }
+        })
+
     const drawerStyle = useAnimatedStyle(() => ({
         transform: [{ translateX: translateX.value }]
     }))
@@ -74,6 +121,10 @@ export default function DrawerMenu({ visible, onClose, onList, onRequestList, on
 
     const sheetStyle = useAnimatedStyle(() => ({
         transform: [{ translateY: translateY.value }]
+    }))
+
+    const certSheetStyle = useAnimatedStyle(() => ({
+        transform: [{ translateY: certTranslateY.value }]
     }))
 
     const handleRoleSelect = (roleId: RoleId) => {
@@ -127,7 +178,8 @@ export default function DrawerMenu({ visible, onClose, onList, onRequestList, on
                 ))}
                 </View>
                 <View style={styles.divider} />
-                <Pressable onPress={onList} hitSlop={10}>
+
+                {/* <Pressable onPress={onList} hitSlop={10}>
                     <Text>List tokens</Text>
                 </Pressable>
                 <View style={{ marginVertical: 12 }}/>
@@ -137,7 +189,7 @@ export default function DrawerMenu({ visible, onClose, onList, onRequestList, on
                 <View style={{ marginVertical: 12 }}/>
                 <Pressable onPress={onClearDevice} hitSlop={10}>
                     <Text>Clear local data</Text>
-                </Pressable>
+                </Pressable> */}
 
                 <View style={{ flex: 1 }} /> 
 
@@ -173,7 +225,9 @@ export default function DrawerMenu({ visible, onClose, onList, onRequestList, on
             </GestureDetector>
 
             {certListOpen && (
-                <Pressable style={styles.sheetBackdrop} onPress={() => setCertListOpen(false)} />
+                <Pressable style={styles.sheetBackdrop} onPress={() => {
+                    setCertListOpen(false)
+                }} />
             )}
             <GestureDetector gesture={certListPanGesture}>
                 <Animated.View style={[styles.sheet, sheetStyle, { paddingBottom: insets.bottom + 16 }]}>
@@ -196,7 +250,10 @@ export default function DrawerMenu({ visible, onClose, onList, onRequestList, on
                             <Pressable
                                 key={cert.role}
                                 style={styles.certRow}
-                                onPress={() => {}}
+                                onPress={() => {
+                                    setCertListOpen(false)
+                                    setSelectedCert(cert.role === 'Hästägare' ? 'owner' : 'breedingOrg')
+                                }}
                             >
                                 <Ionicons name='ribbon-outline' size={22} color='#574238' />
                                 <View style={styles.certInfo}>
@@ -206,6 +263,16 @@ export default function DrawerMenu({ visible, onClose, onList, onRequestList, on
                                 <Ionicons name="chevron-forward" size={18} color="#b8ab9e" />
                             </Pressable>
                         ))}
+                </Animated.View>
+            </GestureDetector>
+
+            { selectedCert && (
+                <Pressable style={styles.certSheetBackdrop} onPress={() => setSelectedCert(null)} />
+            )}
+            <GestureDetector gesture={certSheetPanGesture}>
+                <Animated.View style={[styles.certSheet, certSheetStyle, {paddingBottom: insets.bottom + 20}]}>
+                    <View style={styles.grabber} />
+                    {selectedCert && <CertificateCard cert={CERTS[selectedCert]} />}
                 </Animated.View>
             </GestureDetector>
                 </>
@@ -421,5 +488,22 @@ const styles = StyleSheet.create({
     certStatus: {
         fontSize: 12,
         color: '#8a7267',
+    },
+    certSheetBackdrop: {
+        ...StyleSheet.absoluteFill,
+        backgroundColor: 'rgba(0,0,0,0.4)',
+        zIndex: 40,
+    },
+    certSheet: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: CERT_SHEET_HEIGHT,
+        backgroundColor: '#F5F0EB',
+        borderTopLeftRadius: 18,
+        borderTopRightRadius: 18,
+        paddingHorizontal: 20,
+        zIndex: 41,
     },
 })
