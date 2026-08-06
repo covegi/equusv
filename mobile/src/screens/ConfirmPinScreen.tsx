@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import * as SecureStore from 'expo-secure-store'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useRouter } from 'expo-router'
 import { useWallet } from '@/context/WalletContext'
 import { CERT_TYPE_HORSE_OWNER } from '../constants/certificates'
@@ -19,7 +20,6 @@ export default function ConfirmPinScreen() {
     const shakeAnim = useRef(new Animated.Value(0)).current
     const router = useRouter()
     const { setWallet } = useWallet()
-    const [name, setName] = useState<{ firstName: string, lastName: string }>({ firstName: '', lastName: ''})
 
     const shake = () => {
         Animated.sequence([
@@ -47,6 +47,9 @@ export default function ConfirmPinScreen() {
                             return
                         }
 
+                        const stored = await AsyncStorage.getItem('onboarding-name')
+                        const { firstName, lastName } = JSON.parse(stored ?? '{}')
+
                         console.log('About to aquireCertificate')
                         const cert = await wallet?.acquireCertificate({
                             type: CERT_TYPE_HORSE_OWNER,
@@ -54,8 +57,8 @@ export default function ConfirmPinScreen() {
                             acquisitionProtocol: 'issuance',
                             fields: { 
                                 role: 'equusv-horse-owner',
-                                firstName: name.firstName,
-                                lastName: name.lastName
+                                firstName: firstName,
+                                lastName: lastName
                             },
                             certifierUrl: `${TOKEN_SERVER_URL}/certify/horse-owner`
                         })
