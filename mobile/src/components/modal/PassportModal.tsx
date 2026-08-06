@@ -281,6 +281,7 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
                                         placeholder='Svensk avelsorganisation'
                                         disabled
                                     />
+
                                 </View>
                             </Section>
                            

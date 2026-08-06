@@ -3,5 +3,7 @@ export type CertData = {
     holderName: string,
     certifier: string,
     verificationState: 'self-declared' | 'unverified' | 'verified'
-    serialNumber: string
+    serialNumber: string,
+    organisationName?: string,
+    role?: string
 }

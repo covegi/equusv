@@ -7,6 +7,7 @@ import Animated, {
     withTiming,
     Easing,
 } from 'react-native-reanimated'
+import Svg, { Path, Circle } from 'react-native-svg'
 import { scheduleOnRN } from 'react-native-worklets'
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useRole } from "@/context/RoleContext"
@@ -14,6 +15,7 @@ import type { RoleId } from "@/constants/certificates"
 import Ionicons from "@expo/vector-icons/Ionicons"
 import { CertData } from "@/types/cert-data"
 import CertificateCard from "@/features/identity/CertificateCard"
+import type { HorsePassportRecord } from "@/types/horse-passport-record"
 
 const SCREEN_WIDTH = Dimensions.get('window').width
 const DRAWER_WIDTH = SCREEN_WIDTH * 0.75
@@ -34,14 +36,16 @@ const CERTS: Record<'owner' | 'breedingOrg', CertData> = {
     },
     breedingOrg: {
         certType: 'Avelsorganisationscertifikat',
-        holderName: 'Svenska Fullblodsavelsföreningen',
+        holderName: 'Peter de Michiel',
+        organisationName: 'Svenska fullblodsavelsföreningen',
+        role: 'Admin',
         certifier: 'Jordbruksverket',
         verificationState: 'unverified',
         serialNumber: '12345',
     },
 }
 
-export default function DrawerMenu({ visible, onClose, onList, onRequestList, onClearDevice }: { visible: boolean, onClose: () => void, onList?: () => void, onRequestList?: () => void, onClearDevice?: () => void }) {
+export default function DrawerMenu({ visible, onClose, horses = [], onList, onRequestList, onClearDevice }: { visible: boolean, onClose: () => void, horses?: HorsePassportRecord[], onList?: () => void, onRequestList?: () => void, onClearDevice?: () => void }) {
     const { activeRole, setActiveRole, availableRoles } = useRole()
     const insets = useSafeAreaInsets()
     const translateX = useSharedValue(-DRAWER_WIDTH)
@@ -50,6 +54,12 @@ export default function DrawerMenu({ visible, onClose, onList, onRequestList, on
     const [selectedCert, setSelectedCert] = useState<('owner' | 'breedingOrg' | null)>(null)
     const [certListOpen, setCertListOpen] = useState(false)
     const certTranslateY = useSharedValue(CERT_SHEET_HEIGHT)
+    const [certActive, setCertActive] = useState(false)
+
+    const certRows: { role: string; roleId: RoleId; status: string }[] = [
+        { role: 'Hästägare', roleId: 'owner', status: 'Självdeklarerat' },
+        { role: 'Avelsorganisation', roleId: 'breedingOrg', status: 'Självdeklarerat' },
+    ]
 
     useEffect(() => {
         translateX.value = withTiming(visible ? 0 : -DRAWER_WIDTH, { duration: 250 })
@@ -146,6 +156,22 @@ export default function DrawerMenu({ visible, onClose, onList, onRequestList, on
         }}
     ]
 
+    function LocationPin({ size = 18, color = '#b65109' }) {
+        return (
+            <Svg width={size} height={size} viewBox="0 0 24 24">
+                <Path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    fill={color}
+                    d="M12 1C6.75 1 2.5 5.13 2.5 9.7c0 1.85.9 3.9 2.1 5.85 1.2 1.95 2.75 3.85 4.15 5.4 1.05 1.16 1.9 2.05 2.55 2.7.38.38.99.38 1.4 0 .65-.65 1.5-1.54 2.55-2.7 1.4-1.55 2.95-3.45 4.15-5.4C20.6 13.6 21.5 11.55 21.5 9.7 21.5 5.13 17.25 1 12 1Zm0 3c3.6 0 6.5 2.55 6.5 5.7 0 1.35-.7 3-1.7 4.65-1 1.65-2.3 3.3-3.5 4.65-.5.56-.94 1.02-1.3 1.38-.36-.36-.8-.82-1.3-1.38-1.2-1.35-2.5-3-3.5-4.65C6.2 12.7 5.5 11.05 5.5 9.7 5.5 6.55 8.4 4 12 4Z"
+                />
+                <Circle cx="12" cy="9.7" r="2.3" fill={color} />
+            </Svg>
+        )
+    }
+
+    const activeRoleDef = availableRoles.find(r => r.id === activeRole)
+
     return (
         <>
             <Animated.View
@@ -157,26 +183,33 @@ export default function DrawerMenu({ visible, onClose, onList, onRequestList, on
 
             <GestureDetector gesture={panGesture}>
                 <Animated.View style={[styles.drawer, drawerStyle, { paddingTop: insets.top + 20 }]} >
-                <Text style={styles.sectionLabel}>Roll</Text>
-                <View style={styles.roleRow}>
-                {availableRoles.map((role) => (
-                    <Pressable
-                        key={role.id}
-                        style={[
-                            styles.roleItem,
-                            activeRole === role.id && styles.roleItemActive
-                        ]}
-                        onPress={() => handleRoleSelect(role.id)}
-                    >
-                        <Text style={[
-                            styles.roleText,
-                            activeRole === role.id && styles.roleTextActive
-                        ]}>
-                            {role.label}
-                        </Text>
-                    </Pressable>
-                ))}
-                </View>
+                { activeRole === 'owner' ? (
+                    horses.map((record) => (
+                        <View key={record.horse.id} style={styles.headerRow}>
+                                <View style={styles.headerAvatar}>
+                                    <Text style={styles.headerAvatarText}>{initialsFrom(record.horse.name!)}</Text>
+                                </View>
+                            <View style={styles.headerInfo}>
+                                <Text style={styles.headerName} numberOfLines={1}>{record.horse.name}</Text>
+                                <View style={styles.headerLocation}>
+                                    <Text style={styles.headerLocationText} numberOfLines={1}>Stall Påskarp</Text>
+                                    <LocationPin size={14} color="#b65109" />
+                                    <Pressable onPress={() => {}} style={styles.checkinButton} hitSlop={10}>
+                                        <Text style={styles.checkinLabel}>Check-in</Text>
+                                    </Pressable>
+                                </View>
+                            </View>
+                        </View>
+                    ))
+                ) : (
+                    <View style={styles.headerRow}>
+                        <View style={styles.headerAvatar}>
+                            <Text style={styles.headerAvatarText}>{initialsFrom(CERTS.breedingOrg.organisationName ?? '')}</Text>
+                        </View>
+                        <Text style={[styles.headerName, { flex: 1 }]}>{CERTS.breedingOrg.organisationName}</Text>
+                    </View>
+                )
+            }
                 <View style={styles.divider} />
 
                 {/* <Pressable onPress={onList} hitSlop={10}>
@@ -216,7 +249,7 @@ export default function DrawerMenu({ visible, onClose, onList, onRequestList, on
                         </View>
                         <View style={styles.userInfo}>
                             <Text style={styles.userName} numberOfLines={1}>{'Peter de Michiel'}</Text>
-                            <Text style={styles.userRole} numberOfLines={1}>{'Hästägare'}</Text>
+                            <Text style={styles.userRole} numberOfLines={1}>{activeRoleDef?.label}</Text>
                         </View>
                         <Ionicons name='chevron-expand' size={20} color='#b8ab9e' />
                     </Pressable>
@@ -243,26 +276,23 @@ export default function DrawerMenu({ visible, onClose, onList, onRequestList, on
 
                         <Text style={styles.sheetLabel}>CERTIFIKAT</Text>
 
-                        {[
-                            { role: 'Hästägare', status: 'Självdeklarerat' },
-                            { role: 'Avelsorganisation', status: 'Självdeklarerat' }
-                        ].map((cert) => (
-                            <Pressable
-                                key={cert.role}
-                                style={styles.certRow}
-                                onPress={() => {
-                                    setCertListOpen(false)
-                                    setSelectedCert(cert.role === 'Hästägare' ? 'owner' : 'breedingOrg')
-                                }}
-                            >
-                                <Ionicons name='ribbon-outline' size={22} color='#574238' />
-                                <View style={styles.certInfo}>
-                                    <Text style={styles.certRole}>{cert.role}</Text>
-                                    <Text style={styles.certStatus}>{cert.status}</Text>
+                        {certRows.map((cert) => {
+                            const isActive = activeRole === cert.roleId 
+                            return (
+                                <View key={cert.roleId} style={[styles.certRow, isActive && styles.certRowActive]}>
+                                    <Pressable style={styles.certRowMain} onPress={() => setActiveRole(cert.roleId)}>
+                                        <Ionicons name='ribbon-outline' size={22} color='#574238' />
+                                        <View style={styles.certInfo}>
+                                            <Text style={styles.certRole}>{cert.role}</Text>
+                                                { isActive && <Text style={styles.certActiveText}>Aktivt</Text> }
+                                            </View>
+                                    </Pressable>
+                                    <Pressable style={styles.certChevron} onPress={() => setSelectedCert(cert.roleId as 'owner' | 'breedingOrg')}>
+                                        <Ionicons name="chevron-forward" size={18} color="#b8ab9e" />
+                                    </Pressable>
                                 </View>
-                                <Ionicons name="chevron-forward" size={18} color="#b8ab9e" />
-                            </Pressable>
-                        ))}
+                            )
+                        })}
                 </Animated.View>
             </GestureDetector>
 
@@ -272,7 +302,7 @@ export default function DrawerMenu({ visible, onClose, onList, onRequestList, on
             <GestureDetector gesture={certSheetPanGesture}>
                 <Animated.View style={[styles.certSheet, certSheetStyle, {paddingBottom: insets.bottom + 20}]}>
                     <View style={styles.grabber} />
-                    {selectedCert && <CertificateCard cert={CERTS[selectedCert]} />}
+                    {selectedCert && <CertificateCard cert={CERTS[selectedCert]} certActive />}
                 </Animated.View>
             </GestureDetector>
                 </>
@@ -468,14 +498,13 @@ const styles = StyleSheet.create({
     },
     certRow: {
         flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
+        alignItems: 'stretch',
         backgroundColor: '#fff',
         borderWidth: 0.5,
         borderColor: '#E8E0D8',
         borderRadius: 10,
-        padding: 14,
         marginBottom: 8,
+        overflow: 'hidden',
     },
     certInfo: {
         flex: 1,
@@ -505,5 +534,86 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 18,
         paddingHorizontal: 20,
         zIndex: 41,
+    },
+    certRowActive: {
+        backgroundColor: '#E3F2FD',
+        borderColor: '#E3F2FD',
+    },
+    certRowMain: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        padding: 14,
+    },
+    certChevron: {
+        justifyContent: 'center',
+        paddingHorizontal: 14,
+    },
+    certStatusActive: {
+        color: '#1565C0',
+    },
+    certRoleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        alignSelf: 'flex-start'
+    },
+    certActiveText: {
+        fontSize: 12,
+        fontWeight: '500',
+        color: '#1565C0',
+    },
+    headerRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        paddingVertical: 8,
+    },
+    headerAvatar: {
+        width: 38,
+        height: 38,
+        borderRadius: 19,
+        backgroundColor: '#EAE1D8',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    headerAvatarText: {
+        fontSize: 13,
+        fontWeight: '500',
+        color: '#574238',
+    },
+    headerName: {
+        fontSize: 15,
+        fontWeight: '500',
+        color: '#1b1b1b',
+    },
+    headerLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        flexShrink: 1
+    },
+    headerLocationText: {
+        fontSize: 13,
+        color: '#8a7267',
+    },
+    headerInfo: {
+        flex: 1,
+    },
+    headerLocation: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 5,
+        marginTop: 1,
+    },
+    checkinButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    checkinLabel: {
+        fontSize: 11,
+        color: '#b8ab9e',
     },
 })

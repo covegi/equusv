@@ -19,6 +19,7 @@ export default function ConfirmPinScreen() {
     const shakeAnim = useRef(new Animated.Value(0)).current
     const router = useRouter()
     const { setWallet } = useWallet()
+    const [name, setName] = useState<{ firstName: string, lastName: string }>({ firstName: '', lastName: ''})
 
     const shake = () => {
         Animated.sequence([
@@ -51,7 +52,11 @@ export default function ConfirmPinScreen() {
                             type: CERT_TYPE_HORSE_OWNER,
                             certifier: EQUUSV_IDENTITY_KEY!,
                             acquisitionProtocol: 'issuance',
-                            fields: { role: 'equusv-horse-owner'},
+                            fields: { 
+                                role: 'equusv-horse-owner',
+                                firstName: name.firstName,
+                                lastName: name.lastName
+                            },
                             certifierUrl: `${TOKEN_SERVER_URL}/certify/horse-owner`
                         })
                         console.log('certificate acquired:', JSON.stringify(cert))

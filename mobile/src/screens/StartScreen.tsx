@@ -37,7 +37,7 @@ export default function StartScreen() {
                         <Text style={styles.slogan}>Hela hästens liv i en journal</Text>
                         <Text style={styles.punchline}>All historik — spårbar, delbar, verifierad</Text>
                         <View style={styles.btnContainer}>
-                    <Pressable onPress={() => router.push('/backup')} style={styles.primaryBtn}>
+                    <Pressable onPress={() => router.push('/create-profile')} style={styles.primaryBtn}>
                         <Text style={styles.primaryBtnText} numberOfLines={1} adjustsFontSizeToFit>Skapa nytt arkiv med BankID</Text>
                     </Pressable>
                     <Pressable onPress={() => {}} hitSlop={10}>

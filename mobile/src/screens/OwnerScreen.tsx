@@ -544,6 +544,7 @@ export default function OwnerScreen() {
                 <DrawerMenu
                     visible={drawerVisible}
                     onClose={() => setDrawerVisible(false)}
+                    horses={listData}
                     onList={() => listInventory()}
                     onRequestList={() => requestList()}
                     onClearDevice={() => clearDevice()}

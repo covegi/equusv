@@ -10,14 +10,24 @@ const initialsFrom = (name: string) => {
         : parts[0]?.slice(0, 2).toUpperCase() ?? ''
 }
 
-export default function CertificateCard({ cert }: { cert: CertData}) {
+export default function CertificateCard({ cert, certActive }: { cert: CertData, certActive: boolean }) {
     const isVerified = cert.verificationState === 'verified'
 
     return (
         <View style={styles.card}>
+            { certActive && (
+                <View style={styles.activeBadge}>
+                    <Text style={styles.activeBadgeText}>Aktivt</Text>
+                </View>
+            )}
             <View style={{ alignItems: 'center' }}>
                 <Ionicons name='ribbon' size={26} color={isVerified ? '#b65109' : '#574238'} />
-                <Text style={styles.title}>{cert.certType}</Text>
+                <Text style={[styles.title, cert.organisationName && { marginBottom: 2 }]}>{cert.certType}</Text>
+                { cert.organisationName && (
+                    <Text style={styles.subtitle} numberOfLines={1} adjustsFontSizeToFit>
+                        {cert.organisationName}
+                    </Text>
+                )}
             </View>
 
             <View style={styles.holder}>
@@ -31,6 +41,14 @@ export default function CertificateCard({ cert }: { cert: CertData}) {
             </View>
 
             <View style={styles.divider} />
+
+            { cert.role && (
+                 <View style={styles.fieldRow}>
+                    <Text style={styles.fieldLabel}>Roll</Text>
+                    <Text style={styles.fieldValue}>{cert.role}</Text>
+                 </View>
+            )}
+           
 
             <View style={styles.fieldRow}>
                 <Text style={styles.fieldLabel}>Certifierare</Text>
@@ -152,5 +170,25 @@ const styles = StyleSheet.create({
     verifiedPillText: { 
         fontSize: 11, 
         color: '#fff' 
+    },
+    subtitle: {
+        fontSize: 13,
+        color: '#8a7267',
+        textAlign: 'center',
+        marginBottom: 22,
+    },
+    activeBadge: {
+        position: 'absolute',
+        top: 16,
+        right: 16,
+        backgroundColor: '#E3F2FD',
+        paddingHorizontal: 9,
+        paddingVertical: 3,
+        borderRadius: 12,
+    },
+    activeBadgeText: {
+        fontSize: 11,
+        fontWeight: '500',
+        color: '#1565C0',
     },
 })

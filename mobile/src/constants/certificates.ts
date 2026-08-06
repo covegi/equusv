@@ -11,5 +11,5 @@ export interface RoleDefinition {
 
 export const ROLES: RoleDefinition[] = [
     { id: 'owner', label: 'Hästägare', certType: CERT_TYPE_HORSE_OWNER },
-    { id: 'breedingOrg', label: 'Avelsorganisation', certType: CERT_TYPE_BREEDING_ORG },
+    { id: 'breedingOrg', label: 'Medarbetare', certType: CERT_TYPE_BREEDING_ORG },
 ]
