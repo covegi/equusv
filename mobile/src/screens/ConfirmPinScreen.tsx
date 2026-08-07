@@ -6,7 +6,8 @@ import * as SecureStore from 'expo-secure-store'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useRouter } from 'expo-router'
 import { useWallet } from '@/context/WalletContext'
-import { CERT_TYPE_HORSE_OWNER } from '../constants/certificates'
+import { CERT_TYPE_BREEDING_ORG, CERT_TYPE_HORSE_OWNER } from '../constants/certificates'
+import { publishIdentityCertificate } from '@/utils/certificates'    
 
 import BackButton from '@/components/buttons/BackButton'
 import { loadWallet } from '@/utils/wallet'
@@ -50,19 +51,50 @@ export default function ConfirmPinScreen() {
                         const stored = await AsyncStorage.getItem('onboarding-name')
                         const { firstName, lastName } = JSON.parse(stored ?? '{}')
 
-                        console.log('About to aquireCertificate')
-                        const cert = await wallet?.acquireCertificate({
+                        console.log('About to aquire owner certificate')
+                        const ownerCert = await wallet?.acquireCertificate({
                             type: CERT_TYPE_HORSE_OWNER,
                             certifier: EQUUSV_IDENTITY_KEY!,
                             acquisitionProtocol: 'issuance',
                             fields: { 
-                                role: 'equusv-horse-owner',
+                                role: 'owner',
                                 firstName: firstName,
                                 lastName: lastName
                             },
                             certifierUrl: `${TOKEN_SERVER_URL}/certify/horse-owner`
                         })
-                        console.log('certificate acquired:', JSON.stringify(cert))
+                        console.log('owner certificate acquired:', JSON.stringify(ownerCert))
+
+                        console.log('About to aquire breedingOrg certificate')
+
+                        const breedingOrgCert = await wallet.acquireCertificate({
+                            type: CERT_TYPE_BREEDING_ORG,
+                            certifier:  EQUUSV_IDENTITY_KEY!,
+                            acquisitionProtocol: 'issuance',
+                            fields: {
+                                role: 'admin',
+                                firstName: firstName,
+                                lastName: lastName,
+                                organisationName: 'Svenska Fullblodsavelsföreningen',
+                            },
+                            certifierUrl: `${TOKEN_SERVER_URL}/certify/breeding-organisation`
+                        })
+
+                        console.log('breedingOrg certificate acquired:', JSON.stringify(breedingOrgCert))
+
+                        await publishIdentityCertificate({
+                            cert: ownerCert, 
+                            wallet,
+                            fieldsToReveal: ['firstName', 'lastName']
+                        })
+
+                        await publishIdentityCertificate({
+                            cert: breedingOrgCert,
+                            wallet,
+                            fieldsToReveal: ['firstName', 'lastName', 'organisationName']
+                        })
+
+                        await AsyncStorage.removeItem('onboarding-name')
                         
                         setWallet(wallet)
                         router.replace('/home')

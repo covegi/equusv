@@ -7,6 +7,7 @@ import Animated, {
     withTiming,
     Easing,
 } from 'react-native-reanimated'
+import { DisplayableIdentity, IdentityClient } from "@bsv/sdk"
 import Svg, { Path, Circle } from 'react-native-svg'
 import { scheduleOnRN } from 'react-native-worklets'
 import { useSafeAreaInsets } from "react-native-safe-area-context"
@@ -16,6 +17,7 @@ import Ionicons from "@expo/vector-icons/Ionicons"
 import { CertData } from "@/types/cert-data"
 import CertificateCard from "@/features/identity/CertificateCard"
 import type { HorsePassportRecord } from "@/types/horse-passport-record"
+import { useWallet } from "@/context/WalletContext"
 
 const SCREEN_WIDTH = Dimensions.get('window').width
 const DRAWER_WIDTH = SCREEN_WIDTH * 0.75
@@ -48,6 +50,7 @@ const CERTS: Record<'owner' | 'breedingOrg', CertData> = {
 export default function DrawerMenu({ visible, onClose, horses = [], onList, onRequestList, onClearDevice }: { visible: boolean, onClose: () => void, horses?: HorsePassportRecord[], onList?: () => void, onRequestList?: () => void, onClearDevice?: () => void }) {
     const { activeRole, setActiveRole, availableRoles } = useRole()
     const insets = useSafeAreaInsets()
+    const { wallet } = useWallet()
     const translateX = useSharedValue(-DRAWER_WIDTH)
     const translateY = useSharedValue(SHEET_HEIGHT)
     const [menuOpen, setMenuOpen] = useState(false)
@@ -55,11 +58,27 @@ export default function DrawerMenu({ visible, onClose, horses = [], onList, onRe
     const [certListOpen, setCertListOpen] = useState(false)
     const certTranslateY = useSharedValue(CERT_SHEET_HEIGHT)
     const [certActive, setCertActive] = useState(false)
+    const [identities, setIdentities] = useState<DisplayableIdentity[]>([])
 
     const certRows: { role: string; roleId: RoleId; status: string }[] = [
         { role: 'Hästägare', roleId: 'owner', status: 'Självdeklarerat' },
         { role: 'Avelsorganisation', roleId: 'breedingOrg', status: 'Självdeklarerat' },
     ]
+
+    useEffect(() => {
+        if (!wallet) return
+        const run = async () => {
+            const { publicKey } = await wallet.getPublicKey({ identityKey: true })
+            console.log('my identityKey:', publicKey)
+            const client = new IdentityClient(wallet)
+            const result = await client.resolveByIdentityKey({
+                identityKey: publicKey
+            })
+            console.log('discovered:', JSON.stringify(result))
+            setIdentities(result)
+        }
+        run()
+    }, [wallet])
 
     useEffect(() => {
         translateX.value = withTiming(visible ? 0 : -DRAWER_WIDTH, { duration: 250 })
