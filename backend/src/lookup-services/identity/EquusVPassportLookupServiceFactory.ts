@@ -38,20 +38,26 @@ class EquusVHorsePassportLookupService implements LookupService {
             txid,
             outputIndex,
             version: Utils.toUTF8(decoded.fields[0]),
-            name: Utils.toUTF8(decoded.fields[1]),
-            breed: Utils.toUTF8(decoded.fields[2]),
-            birthDate: Utils.toUTF8(decoded.fields[3]),
-            sex: Utils.toUTF8(decoded.fields[4]),
-            color: Utils.toUTF8(decoded.fields[5]),
-            ueln: Utils.toUTF8(decoded.fields[6]),
-            chip: Utils.toUTF8(decoded.fields[7]),
+            status: Utils.toUTF8(decoded.fields[1]),
+            id: Utils.toUTF8(decoded.fields[2]),
+            name: Utils.toUTF8(decoded.fields[3]),
+            breed: Utils.toUTF8(decoded.fields[4]),
+            birthDate: Utils.toUTF8(decoded.fields[5]),
+            sex: Utils.toUTF8(decoded.fields[6]),
+            color: Utils.toUTF8(decoded.fields[7]),
             ownerAtRegistration: Utils.toUTF8(decoded.fields[8]),
             location: Utils.toUTF8(decoded.fields[9]),
-            organisation: Utils.toUTF8(decoded.fields[10]),
-            issuedDate: Utils.toUTF8(decoded.fields[11]),
-            foodChainStatus: Utils.toUTF8(decoded.fields[12]) === 'true'
+            foodChainStatus: Utils.toUTF8(decoded.fields[10]) === 'true',
+            ueln: Utils.toUTF8(decoded.fields[11]),
+            chip: Utils.toUTF8(decoded.fields[12]),
+
+            organisation: Utils.toUTF8(decoded.fields[13]),
+            createdAt: Utils.toUTF8(decoded.fields[14]),
+            submittedAt: Utils.toUTF8(decoded.fields[15]),
+            issuedAt: Utils.toUTF8(decoded.fields[16]),
+            identityKey: Utils.toUTF8(decoded.fields[17])
         })
-        console.log(`Horse passport indexed: ${Utils.toUTF8(decoded.fields[6])}`)
+        console.log(`Horse passport indexed: ${Utils.toUTF8(decoded.fields[2])}`)
     }
 
     async outputSpent(payload: OutputSpent) {
@@ -75,17 +81,19 @@ class EquusVHorsePassportLookupService implements LookupService {
 
         let filter: any = {}
         if (query.name) filter.name = query.name
+        if (query.status) filter.status = query.status
+        if (query.id) filter.id = query.id
         if (query.breed) filter.breed = query.breed
         if (query.birthDate) filter.birthDate = query.birthDate
         if (query.sex) filter.sex = query.sex
         if (query.color) filter.color = query.color
-        if (query.ueln) filter.ueln = query.ueln
-        if (query.chip) filter.chip = query.chip
         if (query.ownerAtRegistration) filter.ownerAtRegistration = query.ownerAtRegistration
         if (query.location) filter.location = query.location
-        if (query.organisation) filter.organisation = query.organisation
-        if (query.issuedDate) filter.issuedDate = query.issuedDate
         if (query.foodChainStatus) filter.foodChainStatus = query.foodChainStatus
+        if (query.ueln) filter.ueln = query.ueln
+        if (query.chip) filter.chip = query.chip
+        if (query.organisation) filter.organisation = query.organisation
+        if (query.ownerIdentityKey) filter.ownerIdentityKey = query.ownerIdentityKey
 
         const results = await this.records.find(filter).toArray()
         console.log('MongoDB results:', JSON.stringify(results, null, 2))

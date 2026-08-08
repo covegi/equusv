@@ -1,0 +1,2 @@
+export default `# EquusV Identity Topic Manager
+Validates identity certificate tokens for the tm_identity topic. Each token carries a single PushDrop field containing a JSON-encoded BRC-52 certificate with its selectively-revealed keyring. Checks that the payload is present, parses as valid JSON, and contains the required certificate structure: type, subject, certifier and signature.`

@@ -1,0 +1,2 @@
+export default `# EquusV Identity Lookup Service
+Provides lookup functionality for identity certificate tokens in the EquusV overlay. Supports querying by subject identity key to retrieve certificate token references, so others can verify a holder's published credentials.`

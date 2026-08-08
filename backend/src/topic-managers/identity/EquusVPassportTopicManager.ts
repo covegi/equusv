@@ -25,58 +25,30 @@ export default class EquusVHorsePassportTopicManager implements TopicManager {
                 try {
                     const decoded = PushDrop.decode(output.lockingScript)
 
-                    if (!decoded.fields[0].length) {
-                        throw new Error('Version number cannot be empty')
-                    }
+                    if (!decoded.fields[0].length) throw new Error('Version cannot be empty')
 
-                    if (!decoded.fields[1].length) {
-                        throw new Error('Name cannot be empty')
-                    }
-                    
-                    if (!decoded.fields[2].length) {
-                        throw new Error('Breed cannot be empty')
-                    }
-                    
-                    if (!decoded.fields[3].length) {
-                        throw new Error('BirthDate cannot be empty')
-                    }
-                    
-                    if (!decoded.fields[4].length) {
-                        throw new Error('Sex cannot be empty')
-                    }
-                    
-                    if (!decoded.fields[5].length) {
-                        throw new Error('Color cannot be empty')
-                    }
-                    
-                    if (!decoded.fields[6].length) {
-                        throw new Error('UELN cannot be empty')
-                    }
-                    
-                    if (!decoded.fields[7].length) {
-                        throw new Error('Chip cannot be empty')
-                    }
-                    
-                    if (!decoded.fields[8].length) {
-                        throw new Error('OwnerAtRegistration cannot be empty')
-                    }
-                    
-                    if (!decoded.fields[9].length) {
-                        throw new Error('Location cannot be empty')
-                    }
-                    
-                    if (!decoded.fields[10].length) {
-                        throw new Error('Organisation cannot be empty')
-                    }
-                    
-                    if (!decoded.fields[11].length) {
-                        throw new Error('IssuedDate cannot be empty')
-                    }
-                    
-                    if (!decoded.fields[12].length) {
-                        throw new Error('FoodChainStatus cannot be empty')
-                    }
+                    if (!decoded.fields[1].length) throw new Error('Status cannot be empty')
+    
+                    if (!decoded.fields[2].length) throw new Error('ID cannot be empty')
+    
+                    if (!decoded.fields[3].length) throw new Error('Name cannot be empty')
+    
+                    if (!decoded.fields[4].length) throw new Error('Breed cannot be empty')
+    
+                    if (!decoded.fields[5].length) throw new Error('BirthDate cannot be empty')
+    
+                    if (!decoded.fields[6].length) throw new Error('Sex cannot be empty')
+    
+                    if (!decoded.fields[7].length) throw new Error('Color cannot be empty')
+    
+                    if (!decoded.fields[8].length) throw new Error('OwnerAtRegistration cannot be empty')
+    
+                    if (!decoded.fields[9].length) throw new Error('Location cannot be empty')
+    
+                    if (!decoded.fields[10].length) throw new Error('FoodChainStatus cannot be empty')
 
+                    if (!decoded.fields[17].length) throw new Error('IdentityKey cannot be empty')
+                    
                     outputs.push(i)
 
                 } catch (error) {
