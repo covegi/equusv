@@ -10,6 +10,7 @@
     import spendRouter from './routes/admin.js'
     import horseOwnerCertificate from './routes/certify/horse-owner.js'
     import horseBreederCertificate from './routes/certify/breeding-organisation.js'
+    import identityPublish from './routes/identity/publish.js'
     import identityKey from './utils/identityKey.js'
 
     dotenv.config()
@@ -86,6 +87,7 @@
 
         app.use('/', horseOwnerCertificate(wallet))
         app.use('/', horseBreederCertificate(wallet))
+        app.use('/', identityPublish(wallet))
 
         app.use(spendRouter(wallet))
     

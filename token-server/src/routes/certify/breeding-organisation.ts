@@ -28,7 +28,7 @@ export default (wallet: Wallet) => {
             serialNumber,
             req.auth!.identityKey,
             certifierPublicKey,
-            '00'.repeat(32),
+            '00'.repeat(32) + '.0',
             fields,
             masterKeyring
         )
