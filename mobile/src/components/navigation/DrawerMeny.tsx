@@ -7,7 +7,7 @@ import Animated, {
     withTiming,
     Easing,
 } from 'react-native-reanimated'
-import { DisplayableIdentity, IdentityClient } from "@bsv/sdk"
+import { DisplayableIdentity, IdentityClient, Utils } from "@bsv/sdk"
 import Svg, { Path, Circle } from 'react-native-svg'
 import { scheduleOnRN } from 'react-native-worklets'
 import { useSafeAreaInsets } from "react-native-safe-area-context"
@@ -18,6 +18,7 @@ import { CertData } from "@/types/cert-data"
 import CertificateCard from "@/features/identity/CertificateCard"
 import type { HorsePassportRecord } from "@/types/horse-passport-record"
 import { useWallet } from "@/context/WalletContext"
+import { discoverIdentity } from "@/utils/discoverIdentity"
 
 const SCREEN_WIDTH = Dimensions.get('window').width
 const DRAWER_WIDTH = SCREEN_WIDTH * 0.75
@@ -59,26 +60,29 @@ export default function DrawerMenu({ visible, onClose, horses = [], onList, onRe
     const certTranslateY = useSharedValue(CERT_SHEET_HEIGHT)
     const [certActive, setCertActive] = useState(false)
     const [identities, setIdentities] = useState<DisplayableIdentity[]>([])
-
-    const certRows: { role: string; roleId: RoleId; status: string }[] = [
-        { role: 'Hästägare', roleId: 'owner', status: 'Självdeklarerat' },
-        { role: 'Avelsorganisation', roleId: 'breedingOrg', status: 'Självdeklarerat' },
-    ]
+    const [certs, setCerts] = useState<any[]>([])
 
     useEffect(() => {
         if (!wallet) return
         const run = async () => {
             const { publicKey } = await wallet.getPublicKey({ identityKey: true })
-            console.log('my identityKey:', publicKey)
-            const client = new IdentityClient(wallet)
-            const result = await client.resolveByIdentityKey({
-                identityKey: publicKey
-            })
-            console.log('discovered:', JSON.stringify(result))
-            setIdentities(result)
+            const discovered = await discoverIdentity(publicKey)
+            setCerts(discovered)
+            console.log('discovered:', JSON.stringify(discovered))
         }
         run()
     }, [wallet])
+
+    const certRows = certs.map(cert => {
+        const type = Utils.toUTF8(Utils.toArray(cert.type, 'base64'))
+        const roleId: RoleId = type.includes('breeding') ? 'breedingOrg' : 'owner'
+        return {
+            roleId,
+            role: roleId === 'owner' ? 'Hästägare' : 'AvelsOrganisation',
+            serialNumber: cert.serialNumber,
+            decryptedFields: cert.decryptedFields
+        }
+    })
 
     useEffect(() => {
         translateX.value = withTiming(visible ? 0 : -DRAWER_WIDTH, { duration: 250 })
@@ -191,6 +195,10 @@ export default function DrawerMenu({ visible, onClose, horses = [], onList, onRe
 
     const activeRoleDef = availableRoles.find(r => r.id === activeRole)
 
+    const displayName = certs.length > 0 
+        ? `${certs[0].decryptedFields.firstName} ${certs[0].decryptedFields.lastName}`
+        : ''
+
     return (
         <>
             <Animated.View
@@ -264,10 +272,10 @@ export default function DrawerMenu({ visible, onClose, horses = [], onList, onRe
                 <View style={[styles.userRowWrapper, { paddingBottom: insets.bottom + 8 }]}>
                     <Pressable onPress={() => setMenuOpen(true)} style={styles.userRow}>
                         <View style={styles.avatar}>
-                            <Text style={styles.avatarText}>{initialsFrom('Peter de Michiel')}</Text>
+                            <Text style={styles.avatarText}>{initialsFrom(displayName)}</Text>
                         </View>
                         <View style={styles.userInfo}>
-                            <Text style={styles.userName} numberOfLines={1}>{'Peter de Michiel'}</Text>
+                            <Text style={styles.userName} numberOfLines={1}>{displayName}</Text>
                             <Text style={styles.userRole} numberOfLines={1}>{activeRoleDef?.label}</Text>
                         </View>
                         <Ionicons name='chevron-expand' size={20} color='#b8ab9e' />
@@ -287,9 +295,9 @@ export default function DrawerMenu({ visible, onClose, horses = [], onList, onRe
 
                         <View style={styles.sheetHeader}>
                             <View style={styles.sheetAvatar}>
-                                <Text style={styles.sheetAvatarText}>{initialsFrom('Peter de Michiel')}</Text>
+                                <Text style={styles.sheetAvatarText}>{initialsFrom(displayName)}</Text>
                             </View>
-                                <Text style={styles.sheetName}>Peter de Michiel</Text>
+                                <Text style={styles.sheetName}>{displayName}</Text>
                         </View>
                         
 

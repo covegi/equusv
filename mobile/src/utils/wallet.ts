@@ -1,4 +1,4 @@
-import { generateMnemonic, mnemonicToSeed, mnemonicToSeedSync } from '@scure/bip39'
+import { generateMnemonic, mnemonicToSeedSync } from '@scure/bip39'
 import { wordlist } from '@scure/bip39/wordlists/english.js'
 import { HDKey } from '@scure/bip32'
 import { PrivateKey, CachedKeyDeriver } from '@bsv/sdk'
