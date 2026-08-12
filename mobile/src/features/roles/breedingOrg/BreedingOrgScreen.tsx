@@ -4,6 +4,7 @@
     import { createMessageBoxClient, MESSAGE_BOXES, MESSAGEBOX_HOST } from "@/utils/messageBox"
     import { useWallet } from "@/context/WalletContext"
     import { buildPassportFields, serializeFields } from "@/utils/passportFields"
+    import { BREEDING_ORGS } from '../../../constants/breeding-organisations'
 
     import Header from "@/components/header/header"
     import DrawerMenu from "@/components/navigation/DrawerMeny"
@@ -18,6 +19,7 @@
         const [drawerVisible, setDrawerVisible] = useState(false)
         const [pendingHorses, setPendingHorses] = useState<HorsePassportRecord[]>([])
         const [selectedRecord, setSelectedRecord] = useState<HorsePassportRecord | null>(null)
+        const [isSending, setIsSending] = useState(false)
 
         const authFetch = useMemo(() =>
             wallet ? new AuthFetch(wallet) : null
@@ -44,6 +46,9 @@
                             if (decoded.fields.length < 18) return []
                             const version = Utils.toUTF8(decoded.fields[0])
                             if (version !== '2') return []
+
+                            const organisation = Utils.toUTF8(decoded.fields[13])
+                            if (organisation !== BREEDING_ORGS['svenska-fullblod'].name) return []
 
                             const status = Utils.toUTF8(decoded.fields[1])
                             if (!isPassportStatus(status)) return []
@@ -96,6 +101,7 @@
 
         const sendRevision = async (record: HorsePassportRecord, comment: string) => {
             if (!wallet || !record.identityKey) return
+            setIsSending(true)
 
             try {
                 const msgBox = await createMessageBoxClient(wallet)
@@ -125,12 +131,15 @@
                 })
             } catch (error) {
                 console.error('Failed to send revision:', error)
+            } finally {
+                setIsSending(false)
             }
         }
 
         const handleApprove = async (record: HorsePassportRecord) => {
             if (!authFetch) return
             if (!record.identityKey) return
+            setIsSending(true)
 
             const approved: HorsePassportRecord = {
                 ...record,
@@ -175,6 +184,8 @@
                 setPendingHorses(prev => prev.filter(h => h.horse.id !== record.horse.id))
             } catch (error) {
                 console.error(error)
+            } finally {
+                setIsSending(false)
             }
         }
 
@@ -230,6 +241,7 @@
                         onClose={() => setSelectedRecord(null)}
                         onApprove={handleApprove}
                         onRevision={handleRevision}
+                        isSending={isSending}
                     />
                 </Modal>
             </>

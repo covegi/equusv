@@ -1,5 +1,5 @@
 import { StyleSheet, View, Text, Pressable, Dimensions } from "react-native"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { Gesture, GestureDetector } from "react-native-gesture-handler"
 import Animated, {
     useSharedValue,
@@ -66,14 +66,15 @@ export default function DrawerMenu({ visible, onClose, horses = [], onList, onRe
         if (!wallet) return
         const run = async () => {
             const { publicKey } = await wallet.getPublicKey({ identityKey: true })
+            console.log('drawer discovering for:', publicKey)
             const discovered = await discoverIdentity(publicKey)
             setCerts(discovered)
-            console.log('discovered:', JSON.stringify(discovered))
+            console.log('drawer discovered:', discovered.length)
         }
         run()
     }, [wallet])
 
-    const certRows = certs.map(cert => {
+    const certRows = useMemo(() =>  certs.map(cert => {
         const type = Utils.toUTF8(Utils.toArray(cert.type, 'base64'))
         const roleId: RoleId = type.includes('breeding') ? 'breedingOrg' : 'owner'
         return {
@@ -82,7 +83,7 @@ export default function DrawerMenu({ visible, onClose, horses = [], onList, onRe
             serialNumber: cert.serialNumber,
             decryptedFields: cert.decryptedFields
         }
-    })
+    }), [certs])
 
     useEffect(() => {
         translateX.value = withTiming(visible ? 0 : -DRAWER_WIDTH, { duration: 250 })
@@ -195,9 +196,11 @@ export default function DrawerMenu({ visible, onClose, horses = [], onList, onRe
 
     const activeRoleDef = availableRoles.find(r => r.id === activeRole)
 
-    const displayName = certs.length > 0 
+    const displayName = useMemo(() => 
+        certs.length > 0 
         ? `${certs[0].decryptedFields.firstName} ${certs[0].decryptedFields.lastName}`
         : ''
+    , [certs])
 
     return (
         <>
@@ -211,7 +214,12 @@ export default function DrawerMenu({ visible, onClose, horses = [], onList, onRe
             <GestureDetector gesture={panGesture}>
                 <Animated.View style={[styles.drawer, drawerStyle, { paddingTop: insets.top + 20 }]} >
                 { activeRole === 'owner' ? (
-                    horses.map((record) => (
+                    horses.length === 0 ? (
+                        <View style={styles.emptyHeader}>
+                            <Text style={styles.emptyHeaderText}>Inga hästar ännu 🐴</Text>
+                            <Text style={styles.emptyHeaderSub}>Lägg till din första häst med +</Text>
+                        </View>
+                    ) : horses.map((record) => (
                         <View key={record.horse.id} style={styles.headerRow}>
                                 <View style={styles.headerAvatar}>
                                     <Text style={styles.headerAvatarText}>{initialsFrom(record.horse.name!)}</Text>
@@ -239,7 +247,7 @@ export default function DrawerMenu({ visible, onClose, horses = [], onList, onRe
             }
                 <View style={styles.divider} />
 
-                {/* <Pressable onPress={onList} hitSlop={10}>
+                <Pressable onPress={onList} hitSlop={10}>
                     <Text>List tokens</Text>
                 </Pressable>
                 <View style={{ marginVertical: 12 }}/>
@@ -249,7 +257,7 @@ export default function DrawerMenu({ visible, onClose, horses = [], onList, onRe
                 <View style={{ marginVertical: 12 }}/>
                 <Pressable onPress={onClearDevice} hitSlop={10}>
                     <Text>Clear local data</Text>
-                </Pressable> */}
+                </Pressable>
 
                 <View style={{ flex: 1 }} /> 
 
@@ -334,7 +342,6 @@ export default function DrawerMenu({ visible, onClose, horses = [], onList, onRe
             </GestureDetector>
                 </>
             )
-
 }
 
 const styles = StyleSheet.create({
@@ -642,5 +649,18 @@ const styles = StyleSheet.create({
     checkinLabel: {
         fontSize: 11,
         color: '#b8ab9e',
+    },
+    emptyHeader: {
+        paddingVertical: 20,
+    },
+    emptyHeaderText: {
+        fontSize: 15,
+        color: '#574238',
+        fontWeight: '600',
+    },
+    emptyHeaderSub: {
+        fontSize: 13,
+        color: '#8a7267',
+        marginTop: 4,
     },
 })

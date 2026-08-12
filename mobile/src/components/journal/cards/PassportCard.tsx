@@ -22,7 +22,7 @@ export default function PassportCard({ horse, status='draft', onEdit, onDelete, 
     const current = statusColors[status] ?? statusColors.draft
 
     const showInfo = () => {
-        console.log('Showing info modal')
+        console.log('Showing info modal')   
     }
 
     return (
@@ -53,7 +53,7 @@ export default function PassportCard({ horse, status='draft', onEdit, onDelete, 
                             )}
                             <View style={[styles.statusBadge, { backgroundColor: current.bg }]}>
                                 <Text style={[styles.statusText, { color: current.text }]} >
-                                    {current.label}
+                                    {status === 'pending' && activeRole === 'breedingOrg' ? 'Mottaget' : current.label}
                                 </Text>
                             </View>
                         </View>

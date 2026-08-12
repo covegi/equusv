@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, Animated, Alert } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, Animated, Alert, ActivityIndicator } from 'react-native'
 import { useState, useEffect, useRef } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -18,6 +18,7 @@ const EQUUSV_IDENTITY_KEY = process.env.EXPO_PUBLIC_EQUUSV_IDENTITY_KEY
 export default function ConfirmPinScreen() {
     const insets = useSafeAreaInsets()
     const [pin, setPin] = useState<string[]>([])
+    const [loading, setLoading] = useState(false)
     const shakeAnim = useRef(new Animated.Value(0)).current
     const router = useRouter()
     const { setWallet } = useWallet()
@@ -34,6 +35,7 @@ export default function ConfirmPinScreen() {
     useEffect(() => {
         const matchPin = async () => {
             if (pin.length === 6) {
+                setLoading(true)
                 console.log('matchPin called, pin length', pin.length)
                 const enteredPin = await SecureStore.getItemAsync('pin')
                 const pinStr = pin.join('')
@@ -49,10 +51,11 @@ export default function ConfirmPinScreen() {
                         }
 
                         const stored = await AsyncStorage.getItem('onboarding-name')
-                        const { firstName, lastName } = JSON.parse(stored ?? '{}')
-
-                        console.log('About to aquire owner certificate')
-                        const ownerCert = await wallet?.acquireCertificate({
+                        
+                        if (stored) {
+                            const { firstName, lastName } = JSON.parse(stored ?? '{}')
+                            console.log('About to aquire new owner certificate')
+                            const ownerCert = await wallet?.acquireCertificate({
                             type: CERT_TYPE_HORSE_OWNER,
                             certifier: EQUUSV_IDENTITY_KEY!,
                             acquisitionProtocol: 'issuance',
@@ -62,12 +65,11 @@ export default function ConfirmPinScreen() {
                                 lastName: lastName
                             },
                             certifierUrl: `${TOKEN_SERVER_URL}/certify/horse-owner`
-                        })
-                        console.log('owner certificate acquired:', JSON.stringify(ownerCert))
-
-                        console.log('About to aquire breedingOrg certificate')
-
-                        const breedingOrgCert = await wallet.acquireCertificate({
+                            })
+                            console.log('owner certificate acquired:', JSON.stringify(ownerCert))
+                        
+                            console.log('About to aquire breedingOrg certificate')
+                            const breedingOrgCert = await wallet.acquireCertificate({
                             type: CERT_TYPE_BREEDING_ORG,
                             certifier:  EQUUSV_IDENTITY_KEY!,
                             acquisitionProtocol: 'issuance',
@@ -78,24 +80,24 @@ export default function ConfirmPinScreen() {
                                 organisationName: 'Svenska Fullblodsavelsföreningen',
                             },
                             certifierUrl: `${TOKEN_SERVER_URL}/certify/breeding-organisation`
-                        })
+                            })
 
-                        console.log('breedingOrg certificate acquired:', JSON.stringify(breedingOrgCert))
+                            console.log('breedingOrg certificate acquired:', JSON.stringify(breedingOrgCert))
 
-                        await publishIdentityCertificate({
-                            cert: ownerCert, 
-                            wallet,
-                            fieldsToReveal: ['firstName', 'lastName']
-                        })
+                            await publishIdentityCertificate({
+                                cert: ownerCert, 
+                                wallet,
+                                fieldsToReveal: ['firstName', 'lastName']
+                            })
+    
+                            await publishIdentityCertificate({
+                                cert: breedingOrgCert,
+                                wallet,
+                                fieldsToReveal: ['firstName', 'lastName', 'organisationName']
+                            })
+                            await AsyncStorage.removeItem('onboarding-name')
+                        }
 
-                        await publishIdentityCertificate({
-                            cert: breedingOrgCert,
-                            wallet,
-                            fieldsToReveal: ['firstName', 'lastName', 'organisationName']
-                        })
-
-                        await AsyncStorage.removeItem('onboarding-name')
-                        
                         setWallet(wallet)
                         router.replace('/home')
                         
@@ -103,6 +105,8 @@ export default function ConfirmPinScreen() {
                         // Alert.alert('Fel', 'Ingen internetanslutning. Försök igen.')
                         console.log('ConfirmPin error:', error)
                         Alert.alert('Fel', String(error))
+                    } finally {
+                        setLoading(false)
                     }
                 } else {
                     shake()
@@ -122,6 +126,13 @@ export default function ConfirmPinScreen() {
 
     return (
             <View style={styles.container}>
+                { loading
+                    ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 }}>
+                        <ActivityIndicator color='#8a7267' size="large" />
+                        <Text style={styles.iconText}>Konfigurerar...</Text>
+                    </View>
+                : 
+                <>
                 <View style={[styles.header, { top: insets.top + 8 }]}>
                     <BackButton emptyPin={true} color='#1b1b1b' />
                 </View>
@@ -166,6 +177,8 @@ export default function ConfirmPinScreen() {
                         <Ionicons name="backspace-sharp" size={48} color="#1b1b1b" />
                     </TouchableOpacity>
                 </View>
+                </>
+                }
             </View>
     )
 }
@@ -244,5 +257,10 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: '80%',
         left: '75%',
+    },
+    iconText: {
+        fontFamily: 'Inter_300Light',
+        fontSize: 12,
+        color: '#574238'
     },
 })

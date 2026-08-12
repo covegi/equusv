@@ -1,4 +1,4 @@
-import { StyleSheet, View, Pressable, Alert, KeyboardAvoidingView, Platform, ScrollView } from "react-native"
+import { StyleSheet, View, Text, Pressable, Alert, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from "react-native"
 import { useState, useEffect, useMemo } from "react"
 import type { HorsePassportRecord } from "@/types/horse-passport-record"
 import FontAwesome from "@expo/vector-icons/FontAwesome"
@@ -9,7 +9,7 @@ import PassportModal from "../modal/PassportModal"
 import { useRole } from "@/context/RoleContext"
 import { journalPermissions } from "@/config/journalPermissions"
 
-export default function HorseJournal({ record, horseImage, onClose, onDelete, onSend, onApprove, onRevision, onRefresh }: { record: HorsePassportRecord | null, horseImage?: string, onClose: () => void, onDelete?: (id: string) => void, onSend?: (record: HorsePassportRecord) => void, onApprove?: (record: HorsePassportRecord) => void, onRevision?: (record: HorsePassportRecord, comment: string) => void, onRefresh?: () => void }) {
+export default function HorseJournal({ record, horseImage, onClose, onDelete, onSend, onApprove, onRevision, onRefresh, isSending }: { record: HorsePassportRecord | null, horseImage?: string, onClose: () => void, onDelete?: (id: string) => void, onSend?: (record: HorsePassportRecord) => void, onApprove?: (record: HorsePassportRecord) => void, onRevision?: (record: HorsePassportRecord, comment: string) => void, onRefresh?: () => void, isSending?: boolean }) {
      const [isActive, setIsActive] = useState('Alla')
      const [showEdit, setShowEdit] = useState(false)
      const [currentRecord, setCurrentRecord] = useState(record)
@@ -161,6 +161,12 @@ export default function HorseJournal({ record, horseImage, onClose, onDelete, on
                          setShowEdit(false)
                     }}
                     />
+               { isSending && (
+                    <View style={styles.sendingOverlay}>
+                         <ActivityIndicator color='#8a7267' size='large' />
+                         <Text style={styles.sendingText}>Skickar...</Text>
+                </View>
+               )}
                </KeyboardAvoidingView>
      )
 }
@@ -184,5 +190,16 @@ const styles = StyleSheet.create({
           color: '#574238',
           paddingHorizontal: 12,
           paddingVertical: 8,
+      },
+      sendingOverlay: {
+          ...StyleSheet.absoluteFill,
+          backgroundColor: 'rgba(245,240,235,0.85)',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: 12,
+      },
+      sendingText: {
+          fontSize: 15,
+          color: '#574238',
       },
 })

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TextInput, View, Alert, KeyboardAvoidingView, Platform, Pressable, Image } from "react-native"
+import { StyleSheet, Text, TextInput, View, Alert, KeyboardAvoidingView, Platform, Pressable, Image, ActivityIndicator } from "react-native"
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useState } from "react"
@@ -9,7 +9,6 @@ import { ScrollView } from "react-native-gesture-handler"
 
 function WordField({ index, value, onChange }: { index: number, value: string, onChange: (value: string) => void }) {
     const [focused, setFocused] = useState(false)
-
     return (
         <View style={styles.cell}>
             <View style={[styles.row, focused && styles.rowFocused]}>
@@ -32,6 +31,7 @@ function WordField({ index, value, onChange }: { index: number, value: string, o
 export default function RestoreScreen() {
     const insets = useSafeAreaInsets()
     const [words, setWords] = useState(['', '', '', '', '', '', '', '', '', '', '', '' ])
+    const [loading, setLoading] = useState(false)
     const router = useRouter()
 
     const handleWordInput = ( index: number, value: string ) => {
@@ -50,20 +50,40 @@ export default function RestoreScreen() {
             )
             return
         }
-        const wallet = await restoreWallet(words)
-        if (wallet) {
-            router.replace('/pin/create')
-        } else {
+        
+        setLoading(true)
+
+        try {
+            const wallet = await restoreWallet(words)
+            if (wallet) {
+                router.replace('/pin/create')
+            } else {
             Alert.alert(
                 'Något gick fel.',
                 'Arkivet kunde inte återskapas. Försök igen.',
                 [{ text: 'OK'}]
+            )}
+        } catch (error) {
+            console.log(error)
+            Alert.alert(
+                'Något gick fel.',
+                'Arkivet kunde inte återskapas. Försök igen.',
+                [{ text: 'OK' }]
             )
+        } finally {
+            setLoading(false)
         }
     }
 
     return (
         <View style={styles.container}>
+            { loading 
+                ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 }}>
+                    <ActivityIndicator color='#8a7267' size="large" />
+                    <Text style={styles.iconText}>Återskapar profil... </Text>
+                </View>
+            : 
+            <>
             <View style={[styles.header, { top: insets.top + 8 }]} >
                 <BackButton color='#1b1b1b' />
             </View>
@@ -119,6 +139,8 @@ export default function RestoreScreen() {
             
             
             </KeyboardAvoidingView>  
+            </>
+            }
         </View>
     )
 }
@@ -228,4 +250,9 @@ const styles = StyleSheet.create({
         color: '#1b1b1b',
         fontWeight: '600',
     },
+    iconText: {
+        fontFamily: 'Inter_300Light',
+        fontSize: 12,
+        color: '#574238'
+    }
 })

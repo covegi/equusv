@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, ImageBackground, TouchableOpacity, Animated, Image, Alert } from 'react-native'
+import { StyleSheet, Text, View, ImageBackground, TouchableOpacity, Animated, Image, Alert, ActivityIndicator } from 'react-native'
 import { useState, useEffect, useRef } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as SecureStore from 'expo-secure-store'
@@ -11,12 +11,14 @@ import { loadWallet } from '@/utils/wallet'
 export default function LoginScreen() {
     const insets = useSafeAreaInsets()
     const [pin, setPin] = useState<string[]>([])
+    const [loading, setLoading] = useState(false)
     const shakeAnim = useRef(new Animated.Value(0)).current
     const router = useRouter()
     const { setWallet } = useWallet()
 
     useEffect(() => {
         if (pin.length === 6) {
+            setLoading(true)
             const check = async () => {
                 const storedPin = await SecureStore.getItemAsync('pin')
                 const pinStr = pin.join('')
@@ -36,6 +38,8 @@ export default function LoginScreen() {
                         } else {
                             Alert.alert('Fel', `Oväntat fel: ${error.message}`)
                         } 
+                    } finally {
+                        setLoading(false)
                     }
                     return
                 }
@@ -76,7 +80,15 @@ export default function LoginScreen() {
 
     return (
         <View style={styles.container}>
-            <View style={[styles.logoContainer, { top: insets.top + 60 }]}>
+            { loading 
+                ? (
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 }}>
+                        <ActivityIndicator color='#8a7267' size="large" />
+                        <Text style={styles.iconText}>Loggar in...</Text>
+                    </View>
+                ) : 
+                <>
+                    <View style={[styles.logoContainer, { top: insets.top + 60 }]}>
                     <Image
                         source={require('../../assets/images/equusv-icon-transparent-bg.png')}
                         style={styles.icon}
@@ -123,8 +135,10 @@ export default function LoginScreen() {
              <TouchableOpacity onPress={handleDeleteSecureStore} style={[styles.devLink, { bottom: insets.bottom + 16 }]}>
                 <Text style={styles.devLinkText}>Rensa SecureStore</Text>
             </TouchableOpacity>
+            </>
+        }
         </View>
-    )
+    )               
 }
 
 const styles = StyleSheet.create({
@@ -205,4 +219,9 @@ const styles = StyleSheet.create({
         color: '#8a7267',
         textDecorationLine: 'underline',
     },
+    iconText: {
+        fontFamily: 'Inter_300Light',
+        fontSize: 12,
+        color: '#574238'
+    }
 })

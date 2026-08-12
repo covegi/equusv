@@ -10,36 +10,42 @@ export async function discoverIdentity(identityKey: string) {
     })
     console.log('resolver created')
 
-    const answer = await resolver.query({
-        service: 'ls_identity',
-        query: { subject: identityKey }
-    })
+    for (let i = 0; i < 5; i++) {
+        try {
+            const answer = await resolver.query({
+                service: 'ls_identity',
+                query: { subject: identityKey }
+            })
+            if (answer.type === 'output-list' && answer.outputs.length > 0) {
+                    const certs = await Promise.all(answer.outputs.map(async ({ beef, outputIndex }) => {
+                        const tx = Transaction.fromBEEF(beef)
+                        const decoded = PushDrop.decode(tx.outputs[outputIndex].lockingScript)
+                        const cert = JSON.parse(Utils.toUTF8(decoded.fields[0]))
 
-    if (answer.type !== 'output-list') return []
+                        const verifiableCert = new VerifiableCertificate(
+                            cert.type,
+                            cert.serialNumber,
+                            cert.subject,
+                            cert.certifier,
+                            cert.revocationOutpoint,
+                            cert.fields,
+                            cert.keyring,
+                            cert.signature
+                        )
+                        const decryptedFields = await verifiableCert.decryptFields(
+                            new ProtoWallet(new PrivateKey(1))
+                        )
+                        return { ...cert, decryptedFields }
+                    }))
+                    return certs
+                }
+            } catch (error) {
+                console.log('DISCOVERY THREW:', error)
+            }
+            await new Promise(r => setTimeout(r, 2500))
+        }
+        return []
+    }
+    
 
-    const certs = await Promise.all(answer.outputs.map( async ({ beef, outputIndex }) => {
-        const tx = Transaction.fromBEEF(beef)
-        const decoded = PushDrop.decode(tx.outputs[outputIndex].lockingScript)
-        const cert = JSON.parse(Utils.toUTF8(decoded.fields[0]))
-
-        const verifiableCert = new VerifiableCertificate(
-            cert.type,
-            cert.serialNumber,
-            cert.subject,
-            cert.certifier,
-            cert.revocationOutpoint,
-            cert.fields,
-            cert.keyring,
-            cert.signature
-        )
-        const decryptedFields = await verifiableCert.decryptFields(
-            new ProtoWallet(new PrivateKey(1))
-        )
-        return { ...cert, decryptedFields}
-    }))
-
-    console.log('discovered certs:', JSON.stringify(certs))
-    return certs
-}
-
-
+    

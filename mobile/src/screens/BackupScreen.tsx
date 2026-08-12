@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, Pressable, Alert, Image } from "react-native"
+import { StyleSheet, View, Text, Pressable, Alert, Image, ActivityIndicator } from "react-native"
 import { useState, useEffect } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from "expo-router"
@@ -18,7 +18,7 @@ export default function BackupScreen() {
             try {
                 const existingKey = await SecureStore.getItemAsync('rootKeyHex')
                 if (existingKey) {
-                    setLoading(false)
+                    // setLoading(false)
                     return
                 }
                 const { mnemonic, rootKeyHex } = await generateKey()
@@ -42,12 +42,20 @@ export default function BackupScreen() {
         router.push('/pin/create')
     }
 
-    if (loading) return null
+    // if (loading) return null
 
     const mnemonicArray = mnemonic ? mnemonic.split(' ') : [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
 
     return (
         <View style={styles.container}>
+
+            { loading 
+                ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 }}>
+                    <ActivityIndicator color='#8a7267' size="large" />
+                    <Text style={styles.iconText}>Skapar återställningsnyckel... </Text>
+                </View>
+                :
+            <>
             <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
                 <BackButton color='#1b1b1b' />
             </View>
@@ -83,6 +91,8 @@ export default function BackupScreen() {
                 </Pressable>
                 <Text style={styles.warning}>Dela aldrig denna nyckel med någon</Text>
             </View>
+            </>
+            }
         </View>
     )
 }
@@ -182,5 +192,10 @@ const styles = StyleSheet.create({
         width: 34,
         height: 34,
         borderRadius: 7,
+    },
+    iconText: {
+        fontFamily: 'Inter_300Light',
+        fontSize: 12,
+        color: '#574238'
     },
 })

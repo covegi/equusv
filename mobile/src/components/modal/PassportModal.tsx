@@ -58,7 +58,8 @@ export default function PassportModal({ horse, visible, onClose, onSaved }: {hor
         const draft: HorsePassportRecord = {
                 horse: {...horsePassport, id: draftId },
                 status: 'draft',
-                createdAt: new Date().toISOString()
+                createdAt: new Date().toISOString(),
+                identityKey: wallet?.identityKey
             }
 
         await SecureStore.setItemAsync(`passport-draft-${draftId}`, JSON.stringify(draft))

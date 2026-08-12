@@ -14,6 +14,7 @@ import { fetchFromUhrp } from '@/utils/uhrp'
 import HorseJournal from '@/components/journal/HorseJournal'
 import Header from '@/components/header/header'
 import DrawerMenu from '@/components/navigation/DrawerMeny'
+import { BREEDING_ORGS } from '@/constants/breeding-organisations'
 
 const TOKEN_SERVER_URL = process.env.EXPO_PUBLIC_TOKEN_SERVER_URL
 
@@ -27,6 +28,7 @@ export default function OwnerScreen() {
     const [selectedRecord, setSelectedRecord] = useState<HorsePassportRecord | null>(null)
     const [showCreateNewPassport, setCreateNewPassport] = useState(false)
     const [activeRecords, setActiveRecords] = useState<HorsePassportRecord[]>([])
+    const [isSending, setIsSending] = useState(false)
 
     const [refreshKey, setRefreshKey] = useState(0)
     const [drawerVisible, setDrawerVisible] = useState(false)
@@ -118,7 +120,10 @@ export default function OwnerScreen() {
         const drafts: HorsePassportRecord[] = []
         for (const id of ids) {
             const raw = await SecureStore.getItemAsync(`passport-draft-${id}`)
-            if (raw) drafts.push(JSON.parse(raw))
+            if (raw) {
+                const draft = JSON.parse(raw)
+                if (draft.identityKey === wallet.identityKey) drafts.push(JSON.parse(draft))
+            }
         }
         
         setHorseDraft(drafts)
@@ -190,6 +195,7 @@ export default function OwnerScreen() {
 
                 if (fields.length < 18) return []
                 if (str(fields, 0) !== '2') return []
+                if (str(fields, 17) !== wallet.identityKey) return []
 
                 const status = str(fields, 1)
                 if (!isPassportStatus(status)) return []
@@ -389,14 +395,26 @@ export default function OwnerScreen() {
 
     const sendToBreedingOrg = async ( record: HorsePassportRecord ) => {
         if (!authFetch) return
+        setIsSending(true)
         const submittedAt = new Date().toISOString()
+
+        const recordWithOrg = {
+            ...record,
+            status: 'pending' as const,
+            submittedAt,
+            horse: {
+                ...record.horse,
+                organisation: BREEDING_ORGS['svenska-fullblod'].name
+            }
+
+        }
 
         try {
             const response = await authFetch?.fetch(`${TOKEN_SERVER_URL}/identity/passport/create`, {
                 method: 'POST',
                 headers: { 'content-type': 'application/json'},
                 body: JSON.stringify({
-                  record: { ...record, status: 'pending', submittedAt: submittedAt},
+                  record: recordWithOrg,
                   identityKey: wallet!.identityKey  
                 })
             })
@@ -441,6 +459,8 @@ export default function OwnerScreen() {
         } catch (error) {
             console.error('sendToBreedingOrg failed', error)
             Alert.alert('Fel', 'Kunde inte hitta ansökan')
+        } finally {
+            setIsSending(false)
         }
     }
 
@@ -498,7 +518,51 @@ export default function OwnerScreen() {
         }
     }
 
+    const handleRefresh = async () => {
+        await fetchRevisions()
+        await fetchActive()
+    }
+
     console.log('mobile wallet identityKey:', wallet.identityKey)
+
+    let content
+
+    if (listData.length === 0) {
+        content = (
+            <View style={styles.emptyContainer}>
+                <Text style={styles.emptyTitle}>Inga hästar ännu</Text>
+                <Text style={styles.emptySub}>Tryck på + för att lägga till</Text>
+            </View>
+        )
+    } else if (isLoading) {
+        content = (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 }}>
+                <ActivityIndicator color='#8a7267' size="large" />
+                <Text style={styles.iconText}>Hämtar dina hästar... </Text>
+            </View>
+        )
+    } else {
+        content = (
+            <FlatList 
+            data={listData}
+            extraData={horseImage}
+            keyExtractor={(item) => `${item.horse.id}-${item.submittedAt ?? item.createdAt}`}
+            renderItem={({ item }) => 
+                <HorseListCard 
+                    horse={item.horse}
+                    onSpend={() => clearAll()}
+                    horseImage={item.horse.id ? horseImage[item.horse.id] : null}
+                    onPhotoUploaded={handlePhotoUploaded}
+                    isLoadingImage={item.horse.id ? isLoadingImage[item.horse.id] : false}
+                    onPress={() => setSelectedRecord(item)}    
+                />
+            }
+            showsVerticalScrollIndicator={false}
+
+            contentContainerStyle={{ paddingTop: 20, paddingBottom: 50 }}
+        />
+    )
+}
     
     return (
             <View style={styles.outerContainer}>
@@ -507,29 +571,7 @@ export default function OwnerScreen() {
                     onMenuPress={() => setDrawerVisible(true)}
                 />
                 <View style={[styles.centerContainer]}>
-                {isLoading 
-                    ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 }}>
-                        <ActivityIndicator color='#8a7267' size="large" />
-                        <Text style={styles.iconText}>Hämtar dina hästar... </Text>
-                    </View>
-                    : <FlatList 
-                    data={listData}
-                    extraData={horseImage}
-                    keyExtractor={(item) => `${item.horse.id}-${item.submittedAt ?? item.createdAt}`}
-                    renderItem={({ item }) => 
-                        <HorseListCard 
-                            horse={item.horse}
-                            onSpend={() => clearAll()}
-                            horseImage={item.horse.id ? horseImage[item.horse.id] : null}
-                            onPhotoUploaded={handlePhotoUploaded}
-                            isLoadingImage={item.horse.id ? isLoadingImage[item.horse.id] : false}
-                            onPress={() => setSelectedRecord(item)}    
-                        />
-                    }
-                    showsVerticalScrollIndicator={false}
-
-                    contentContainerStyle={{ paddingTop: 20, paddingBottom: 50 }}
-                />}
+                    {content}
                 </View>
                 <Modal visible={!!selectedRecord} animationType='slide' presentationStyle='pageSheet'>
                     <HorseJournal 
@@ -538,7 +580,8 @@ export default function OwnerScreen() {
                         onClose={() => setSelectedRecord(null)}
                         onDelete={deleteRecord}
                         onSend={sendToBreedingOrg}
-                        onRefresh={fetchRevisions}
+                        onRefresh={handleRefresh}
+                        isSending={isSending}
                     />
                 </Modal>
                 <DrawerMenu
@@ -550,8 +593,7 @@ export default function OwnerScreen() {
                     onClearDevice={() => clearDevice()}
                 />
         </View>
-    )
-}
+    )}
 
 const styles = StyleSheet.create({
     outerContainer: {
@@ -568,5 +610,22 @@ const styles = StyleSheet.create({
         fontFamily: 'Inter_300Light',
         fontSize: 12,
         color: '#f7f2f2'
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 40,
+    },
+    emptyTitle: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: '#574238',
+        marginBottom: 8,
+    },
+    emptySub: {
+        fontSize: 15,
+        color: '#8a7267',
+        textAlign: 'center',
     },
 })
