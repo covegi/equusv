@@ -11,7 +11,7 @@
 
 .eyelid {
     font-size: 20px;
-    color: var(--color-rust-bright);
+    color: var(--color-text-secondary);
 }
 
 .sectionHeading {
@@ -27,9 +27,24 @@
     line-height: 1.6;
 }
 
+.category {
+    padding: 0 48px
+}
+
+.categoryLabel {
+    font-size: 14px;
+    color: var(--color-rust-bright);
+    margin-top: 36px;
+}
+
+.divider {
+    border-bottom: 1px solid var(--color-border-light);
+    padding-top: 12px;
+} 
+
 .cardContainer {
-    margin-top: 46px;
-    padding: 0 48px;
+    margin-top: 28px;
+    padding: 0 48px ;
     display: grid;
     grid-template-columns: 1fr;
     gap: 30px;

@@ -5,5 +5,6 @@
     color: var(--color-white-warm);
     padding: 12px 14px;
     font-size: 14px;
-    font-weight: 600; 
+    font-weight: 600;
+    border-radius: 8px;
 }

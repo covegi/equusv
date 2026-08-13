@@ -247,7 +247,7 @@ export default function DrawerMenu({ visible, onClose, horses = [], onList, onRe
             }
                 <View style={styles.divider} />
 
-                <Pressable onPress={onList} hitSlop={10}>
+                {/* <Pressable onPress={onList} hitSlop={10}>
                     <Text>List tokens</Text>
                 </Pressable>
                 <View style={{ marginVertical: 12 }}/>
@@ -257,7 +257,7 @@ export default function DrawerMenu({ visible, onClose, horses = [], onList, onRe
                 <View style={{ marginVertical: 12 }}/>
                 <Pressable onPress={onClearDevice} hitSlop={10}>
                     <Text>Clear local data</Text>
-                </Pressable>
+                </Pressable> */}
 
                 <View style={{ flex: 1 }} /> 
 

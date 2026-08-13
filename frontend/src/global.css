@@ -17,16 +17,17 @@
     --color-text-muted: #8a7267;
     --color-bg-warm: #F5F0EB;
     --color-border-light: #E8E0D8;
+    --color-error: #93000a;
     --color-status-draft-bg: #F5F0EB;
     --color-status-draft-text: #8a7267;
     --color-status-pending-bg: #FFF3E0;
     --color-status-pending-text: #B65109;
     --color-status-revision-bg: #FCEAEA;
     --color-status-revision-text: #A13232;
-    --color-status-approved-bg: #E8F5E9;
-    --color-status-approved-text: #2E7D32;
     --color-status-active-bg: #E3F2FD;
-    --color-status-active-text: #1565C0;    
+    --color-status-active-text: #1565C0;
+    --color-status-inactive-bg: #F5F0EB;
+    --color-status-inactive-text: #8a7267;
   }
 
 body {

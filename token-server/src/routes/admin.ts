@@ -53,7 +53,9 @@ export default (wallet: WalletInterface) => {
                         if (idx === -1) throw new Error(`input not found: ${outpoint}`)
 
                         const sourceOutput = tx.inputs[idx].sourceTransaction!.outputs[Number(vout)]
-                        const keyID = Utils.toUTF8(PushDrop.decode(sourceOutput.lockingScript).fields[2])
+                        const decoded = PushDrop.decode(sourceOutput.lockingScript)
+                        const keyID = Utils.toUTF8(decoded.fields[2])
+                        const tokenOwner = Utils.toUTF8(decoded.fields[17])
 
                         const unlocker = pushdrop.unlock(
                             [2, 'equusv identity passport'],

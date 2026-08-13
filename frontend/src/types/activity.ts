@@ -1,6 +1,6 @@
 export type Verifier = {
-    name: string;
-    title?: string;
+    name?: string;
+    title: string;
     verified: boolean;
 }
 
@@ -9,7 +9,7 @@ export type Activity = {
     name: string,
     description: string,
     creator?: string[],
-    verifier: Verifier,
+    verifier: Verifier[] | null,
     fields: string[],
     mandatory: boolean,
     active: boolean

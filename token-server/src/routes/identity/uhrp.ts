@@ -11,7 +11,7 @@ export default (wallet: WalletInterface) => {
 
     router.post('/identity/file/create', async (req: Request, res: Response) => {
         try {
-            const { base64body, ueln, tokenType, mimeType, description, parentTxid, identityKey } = req.body
+            const { base64body, ueln, id,   tokenType, mimeType, description, parentTxid, identityKey } = req.body
 
             const pubKey = PublicKey.fromString(identityKey)
             const rawBuffer = Buffer.from(base64body, 'base64')
@@ -22,17 +22,6 @@ export default (wallet: WalletInterface) => {
                 storageURL: STORAGE_URL!,
                 wallet: wallet
             })
-
-            let gcsObjectId: string | undefined
-            const originalFetch = globalThis.fetch
-            globalThis.fetch = async (url: any, init?: any) => {
-                if (init?.method === 'PUT' && String(url).includes('storage.googleapis.com')) {
-                    const match = String(url).match(/prod-uhrp\/cdn\/([^?]+)/)
-                    if (match) gcsObjectId = match[1]
-                    return originalFetch(url, init)
-                }
-                return originalFetch(url, init)
-            }
 
             let uhrpUrl: string | undefined
             let cdnUrl: string | undefined
@@ -47,19 +36,14 @@ export default (wallet: WalletInterface) => {
                 })
                 if (uploadFileResult) {
                     uhrpUrl = uploadFileResult.uhrpURL
-
-                    cdnUrl = gcsObjectId
-                        ? `https://nanostore.babbage.systems/cdn/${gcsObjectId}`
-                        : undefined
-                    console.log('Upload complete. CDN URL:', cdnUrl)
-
+                    cdnUrl = undefined // temporary
+                    console.log('uhrpURL:', uploadFileResult.uhrpURL)
                 }
             } catch (error) {
                 console.error(error)
                 return res.status(500).json({ error: 'UHRP upload failed' })
             }
 
-            globalThis.fetch = originalFetch
 
             const pushDrop = new PushDrop(wallet)
             const createdAt = new Date().toISOString()

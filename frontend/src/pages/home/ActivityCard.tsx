@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import React from 'react'
 import styles from './ActivityCard.module.css'
 import type { Activity } from '../../types/activity'
 import { AiFillCheckCircle } from "react-icons/ai"
@@ -30,7 +31,10 @@ export default function ActivityCard({ activity }: { activity: Activity }) {
                     ))}
                </div>
 
-               <div className={styles.related}>
+               
+
+                <div className={styles.footerSection}>
+                <div className={styles.related} style={!activity.related?.length ? { visibility: 'hidden' } : undefined}>
                     <span className={styles.relatedLabel}>Relaterade:</span>
                     <div className={styles.relatedValues}>
                         {activity.related?.map(a => (
@@ -38,8 +42,7 @@ export default function ActivityCard({ activity }: { activity: Activity }) {
                         ))}
                     </div>
                </div>
-
-               <div className={styles.divider} />
+                    <div className={styles.divider} />
                     <div className={styles.rolesContainer}>
                             <div className={styles.roleRow}>
                                 <span className={styles.roleLabel}>Skapas av:</span>
@@ -47,18 +50,25 @@ export default function ActivityCard({ activity }: { activity: Activity }) {
                                     <span key={c} className={styles.roleValue}>{c}</span>
                                 ))}
                             </div>
-                            <div className={styles.roleRow}>
-                                <span className={styles.roleLabel}>Verifieras av:</span>
-                                <span className={styles.roleValue}>
-                                    {activity.verifier.name}
-                                    {activity.verifier.title && ` · ${activity.verifier.title}`}
-                                </span>
-                                {activity.verifier.verified
-                                    ? <AiFillCheckCircle className={styles.verifiedBadge} />
-                                    : <span className={styles.selfDeclaredDot} />
-                                } 
-                            </div>
-                    </div>     
+                                <div className={styles.roleRow} style={!activity.verifier ? { visibility: 'hidden' }: undefined}>
+                                    <span className={styles.roleLabel}>Verifieras av:</span>
+                                    {activity.verifier?.map((v, index) => (
+                                        <React.Fragment key={index}>
+                                         <span className={styles.roleValue}>
+                                         {v?.name}
+                                         {v?.title && ` ${v.title}`}
+                                     </span>
+                                     {v?.verified
+                                         ? <AiFillCheckCircle className={styles.verifiedBadge} />
+                                         : null
+                                     } 
+                                     </React.Fragment>
+                                    ))}
+                                   
+                                   
+                                </div>
+                    </div>  
+            </div>   
             </Link>
     )
 }

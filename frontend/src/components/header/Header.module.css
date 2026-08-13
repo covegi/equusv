@@ -59,8 +59,8 @@
     position: absolute;
     top: 23px;
     right: 873px;
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     color: var(--color-rust-bright);
     flex-shrink: 0;
   }

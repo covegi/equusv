@@ -32,11 +32,14 @@ export default class EquusVIdentityTopicManager implements TopicManager {
                     if (!cert.type || !cert.subject || !cert.certifier || !cert.signature) {
                         throw new Error('Malformed identity certificate')
                     }
-                    outputs.push(i)
-                } catch (error) {
-                    console.error('Error with outputs', i, error)
+                    outputs.push(i) 
+                    console.log('output', i, 'ADMITTED')
+                } catch (error: any) {
+                    console.error('output', i, 'REJECTED:', error.message)
                 }
             }
+
+            console.log('final outputsToAdmit:', outputs)
 
             if (outputs.length === 0) {
                 throw new Error('No valid EquusV identity token in transaction')

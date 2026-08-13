@@ -3,7 +3,8 @@
     "schemaVersion": "1.0",
     "topicManagers": {
         "tm_horse_passport": "./src/mod-passport.ts",
-        "tm_uhrp": "./src/mod-uhrp.ts"
+        "tm_uhrp": "./src/mod-uhrp.ts",
+        "tm_identity": "./src/mod-identity.ts"
     },
     "lookupServices": {
         "ls_passport": { 
@@ -12,6 +13,10 @@
         },
         "ls_uhrp": {
             "serviceFactory": "./src/mod-uhrp.ts",
+            "hydrateWith": "mongo"
+        },
+        "ls_identity": {
+            "serviceFactory": "./src/mod-identity.ts",
             "hydrateWith": "mongo"
         }
     }, 

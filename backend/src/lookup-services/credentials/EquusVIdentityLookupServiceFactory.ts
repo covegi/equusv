@@ -27,13 +27,16 @@ class EquusVIdentityLookupService implements LookupService {
     }
 
     async outputAdmittedByTopic(payload: OutputAdmittedByTopic) {
+        console.log('outputAdmittedByTopic CALLED, mode:', payload.mode, 'topic:', payload.topic)
         if (payload.mode !== 'locking-script') throw new Error('Invalid payload')
         const { topic, txid, outputIndex, lockingScript } = payload
         if (topic !== 'tm_identity') return
+        console.log('indexing for tm_identity...')
 
         const ls = LockingScript.fromHex(lockingScript.toHex())
         const decoded = PushDrop.decode(ls)
         const cert = JSON.parse(Utils.toUTF8(decoded.fields[0]))
+        console.log('cert parsed, subject:', cert.subject)
 
         await this.records.insertOne({
             txid, 

@@ -1,7 +1,8 @@
 .card {
-    position:relative;
+    position: relative;
     display: flex;
     flex-direction: column;
+    height: 100%;
     background-color: var(--color-white);
     border-radius: 14px;
     border: 1px solid var(--color-border-light);
@@ -75,6 +76,7 @@
     line-height: 1.5;
     color: var(--color-text-muted);
     margin-top: 8px;
+    min-height: 40px;
 }
   
 .divider {
@@ -116,7 +118,6 @@
 .related {
     display: flex;
     align-items: center;
-    margin-top: auto;
     padding-top: 24px;
     gap: 6px;
 }
@@ -139,6 +140,7 @@
 }
 
 .rolesContainer {
+    min-height: 44px;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -160,4 +162,8 @@
     font-weight: 600;
     color: var(--color-black);
     font-size: 12px;
+}
+
+.footerSection {
+    margin-top: auto;
 }
