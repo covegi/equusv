@@ -2,6 +2,7 @@ import { Router } from "express"
 import type { Request, Response } from "express"
 import { Transaction, PushDrop, StorageUploader, PublicKey, ECIES } from '@bsv/sdk'
 import type { WalletInterface } from "@bsv/sdk"
+import type { StorageUploaderInternal } from "../../types/uhrp-storage-uploader.js"
 
 const LARS_URL = process.env.LARS_URL
 const STORAGE_URL = process.env.STORAGE_URL
@@ -21,29 +22,37 @@ export default (wallet: WalletInterface) => {
             const storageUploader = new StorageUploader({
                 storageURL: STORAGE_URL!,
                 wallet: wallet
-            })
+            }) as unknown as StorageUploaderInternal
 
             let uhrpUrl: string | undefined
             let cdnUrl: string | undefined
 
             try {
-                const uploadFileResult = await storageUploader.publishFile({
-                    file: {
-                        data: new Uint8Array(encryptedBuffer),
-                        type: 'application/octet-stream'
-                    },
-                    retentionPeriod: 60
-                })
-                if (uploadFileResult) {
-                    uhrpUrl = uploadFileResult.uhrpURL
-                    cdnUrl = undefined // temporary
-                    console.log('uhrpURL:', uploadFileResult.uhrpURL)
+                const data = new Uint8Array(encryptedBuffer)
+
+                const { uploadURL, requiredHeaders } = await storageUploader.getUploadInfo(
+                    data.byteLength,
+                    180
+                )
+
+                const objectID = new URL(uploadURL).searchParams.get('objectID')
+                if (!objectID) {
+                    throw new Error(`uploadURL missing objectID param: ${uploadURL}`)
                 }
+
+                const uploadFileResult = await storageUploader.uploadFile(
+                    uploadURL,
+                    { data, type: 'application/octet-stream'},
+                    requiredHeaders
+                )
+
+                uhrpUrl = uploadFileResult.uhrpURL
+                cdnUrl = `${STORAGE_URL}/cdn/${objectID}`
+                console.log('uhrpURL:', uhrpUrl, 'cdnUrl:', cdnUrl)
             } catch (error) {
                 console.error(error)
                 return res.status(500).json({ error: 'UHRP upload failed' })
             }
-
 
             const pushDrop = new PushDrop(wallet)
             const createdAt = new Date().toISOString()

@@ -1,4 +1,4 @@
-export type UHRP {
+export type UHRP = {
     version: string,
     ueln: string,
     uhrpUrl: string,
@@ -11,3 +11,5 @@ export type UHRP {
     outputIndex: number,
     spent?: boolean
 }
+
+
