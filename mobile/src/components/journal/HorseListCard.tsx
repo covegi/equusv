@@ -35,6 +35,7 @@
                     {
                         base64body: base64Uri,
                         ueln: horse.ueln,
+                        id: horse.id,
                         tokenType: 'photo',
                         mimeType: 'image/jpeg',
                         description: '',
@@ -44,7 +45,9 @@
                 )
             })
             const { uhrpUrl } = await response?.json()
-            onPhotoUploaded(horse.id, uri)
+            if (horse.id) {
+                onPhotoUploaded(horse.id, uri)
+            }
             console.log('onPhotoUploaded called with:', horse.ueln, uri)
             console.log('UHRPURL:', uhrpUrl)
             setUhrpUrl(uhrpUrl)
