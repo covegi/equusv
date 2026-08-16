@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@bsv/message-box-client": "^2.1.1",
-    "@bsv/sdk": "^2.0.12",
+    "@bsv/sdk": "2.3.1",
     "@bsv/wallet-toolbox": "^2.1.7",
     "@expo-google-fonts/inter": "^0.4.2",
     "@expo/vector-icons": "^15.1.1",

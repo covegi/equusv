@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, FlatList, ActivityIndicator, Modal, Alert } from 'react-native'
 import { useState, useEffect, useMemo } from 'react'
 import { useWallet } from '@/context/WalletContext'
-import { PushDrop, LookupResolver, Transaction, AuthFetch, LockingScript, walletErrors } from '@bsv/sdk'
+import { PushDrop, LookupResolver, Transaction, AuthFetch, LockingScript } from '@bsv/sdk'
 import * as SecureStore from 'expo-secure-store'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createMessageBoxClient, MESSAGE_BOXES, MESSAGEBOX_HOST } from '@/utils/messageBox'
@@ -45,14 +45,15 @@ export default function OwnerScreen() {
     }, [horseDraft, activeRecords])
 
     useEffect(() => {
-        if (horse.length === 0) return
-        
+        if (listData.length === 0) return
         let cancelled = false
 
         const fetchImages = async () => {
-            await Promise.all(horse.map( async (h) => {
-                if (cancelled || !h.ueln) return
-                setIsLoadingImage(prev => ({...prev, [h.id]: true})) 
+            await Promise.all(listData.map( async (record) => {
+                const h = record.horse
+                const id = h.id
+                if (cancelled || !h.ueln || !id) return
+                setIsLoadingImage(prev => ({...prev, [id]: true})) 
                 try {
                     const resolver = new LookupResolver({
                         hostOverrides: {
@@ -93,19 +94,19 @@ export default function OwnerScreen() {
                         // const mimeType = Buffer.from(fields[4]).toString('utf-8')
                         const dataUri = await fetchFromUhrp({ cdnUrl, mimeType })
                         console.log('dataUri:', dataUri)
-                        if (!cancelled && dataUri) setHorseImage(prev => ({...prev, [h.id]: dataUri}))
+                        if (!cancelled && dataUri) setHorseImage(prev => ({...prev, [id]: dataUri}))
                         console.log('horseImage:', horseImage)
                     }
                 } catch (error) {
                     console.error(error)
                 } finally {
-                    setIsLoadingImage(prev => ({...prev, [h.id]: false}))
+                    setIsLoadingImage(prev => ({...prev, [id]: false}))
                 }
             }))
         }
         fetchImages()
         return () => { cancelled = true }
-    }, [horse])
+    }, [listData])
 
     useEffect(() => {
        const fetchHorses = async () => {
@@ -122,7 +123,7 @@ export default function OwnerScreen() {
             const raw = await SecureStore.getItemAsync(`passport-draft-${id}`)
             if (raw) {
                 const draft = JSON.parse(raw)
-                if (draft.identityKey === wallet.identityKey) drafts.push(JSON.parse(draft))
+                if (draft.identityKey === wallet.identityKey) drafts.push(draft)
             }
         }
         
@@ -140,32 +141,9 @@ export default function OwnerScreen() {
             // await wallet.reviewSpendableOutputs(true, true)
             await fetchActivePasses()
             await fetchActive()
-            const key = await SecureStore.getItemAsync('rootKeyHex')
-            console.log('key:', key)
         }
         run()
     }, [wallet, refreshKey])
-
-    useEffect(() => {
-        if (!wallet) return
-        const logAll = async () => {
-            const { outputs, totalOutputs } = await wallet.listOutputs({
-                basket: PASSPORT_BASKET,
-                tags: [TAG_STATUS_ACTIVE],
-                include: 'locking scripts',
-                limit: 1000
-            })
-            console.log('WALLET active UTXOs:', totalOutputs)
-            outputs.forEach(o => console.log(' ', o.outpoint, 'spendable:', o.spendable))
-
-            const keys = await AsyncStorage.getAllKeys()
-            console.log('AsyncStorage keys:', keys)
-
-            const stored = await SecureStore.getItemAsync('draftIds')
-            console.log('draftIds:', stored ? JSON.parse(stored) : [])
-        }
-        logAll()
-    }, [walletErrors])
 
     if (!wallet) return null
 
