@@ -5,7 +5,7 @@ const OVERLAY_URL = process.env.EXPO_PUBLIC_OVERLAY_URL
 export async function discoverIdentity(identityKey: string) {
     console.log('OVERLAY_URL:', OVERLAY_URL)
     const resolver = new LookupResolver({
-        networkPreset: 'mainnet',
+        networkPreset: 'local',
         hostOverrides: { ls_identity: [OVERLAY_URL!]}
     })
     console.log('resolver created')
@@ -16,6 +16,8 @@ export async function discoverIdentity(identityKey: string) {
                 service: 'ls_identity',
                 query: { subject: identityKey }
             })
+            console.log('ANSWER:', answer.type, answer.type === 'output-list' ? answer.outputs.length : answer)
+
             if (answer.type === 'output-list' && answer.outputs.length > 0) {
                     const certs = await Promise.all(answer.outputs.map(async ({ beef, outputIndex }) => {
                         const tx = Transaction.fromBEEF(beef)

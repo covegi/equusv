@@ -1,5 +1,5 @@
 {
-  "name": "@equuscert/mobile",
+  "name": "@equusv/mobile",
   "main": "expo-router/entry",
   "version": "0.0.1",
   "scripts": {
