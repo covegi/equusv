@@ -97,9 +97,6 @@ class EquusVHorsePassportLookupService implements LookupService {
 
         const results = await this.records.find(filter).toArray()
         console.log('MongoDB results:', JSON.stringify(results, null, 2))
-        if (results.length > 0) {
-            console.log(`Query commitment: ${results}`)
-        }
 
         return results.map(result => ({
             txid: result.txid,
