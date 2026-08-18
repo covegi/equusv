@@ -13,6 +13,7 @@
     import { HorsePassportRecord, isPassportStatus, ApprovalPayload } from "@/types/horse-passport-record"
 
     const TOKEN_SERVER_URL = process.env.EXPO_PUBLIC_TOKEN_SERVER_URL
+    const OVERLAY_URL = process.env.EXPO_PUBLIC_OVERLAY_URL
 
     export default function BreedingOrgScreen({ }) {
         const { wallet } = useWallet()
@@ -29,8 +30,9 @@
             const fetchPending = async () => {
                 try {
                     const resolver = new LookupResolver({
+                        networkPreset: 'local',
                         hostOverrides: {
-                            'ls_passport': ['https://chooser-crimp-recast.ngrok-free.dev']
+                            'ls_passport': [OVERLAY_URL!]
                         }
                     })
                     const answer = await resolver.query({

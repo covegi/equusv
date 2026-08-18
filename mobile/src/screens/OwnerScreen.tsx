@@ -17,6 +17,7 @@ import DrawerMenu from '@/components/navigation/DrawerMeny'
 import { BREEDING_ORGS } from '@/constants/breeding-organisations'
 
 const TOKEN_SERVER_URL = process.env.EXPO_PUBLIC_TOKEN_SERVER_URL
+const OVERLAY_URL = process.env.EXPO_PUBLIC_OVERLAY_URL
 
 export default function OwnerScreen() {
     const [horse, setHorse] = useState<HorsePassport[]>([])
@@ -56,8 +57,9 @@ export default function OwnerScreen() {
                 setIsLoadingImage(prev => ({...prev, [id]: true})) 
                 try {
                     const resolver = new LookupResolver({
+                        networkPreset: 'local',
                         hostOverrides: {
-                            'ls_uhrp': ['https://chooser-crimp-recast.ngrok-free.dev']
+                            'ls_uhrp': [OVERLAY_URL!]
                         }
                     })
                     console.log('lookup query:', { ueln: h.ueln, tokenType: 'photo' })
