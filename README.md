@@ -347,3 +347,33 @@ When the market is ready for self custody, the app can be rebuilt to move fundin
 ## Criterion 8: Documentation and Presentation
 
 This README provides the project overview, architecture, setup instructions and course requirements mapping.
+
+# 5. Known Limitations
+
+The following are known limitations in V1. They are documented here for transparency.
+
+## UHRP Advertisements
+
+The self-hosted UHRP host stores and serves files correctly. Uploads are encrypted, stored and retrievable through the CDN, and the corresponding PushDrop token is minted and indexed on the overlay.
+
+The host's own on-chain UHRP advertisements are currently not being published. Its wallet creates the advertisement transactions, but they do not reach the network. As a result, unconfirmed transactions accumulate until the BEEF depth limit is reached.
+
+The upload path has been made resilient to this issue, so a failed advertisement no longer blocks storage.
+
+This affects the host's own registry of the files it stores. It does not affect EquusV's file tokens, which are minted by token-server and indexed through `tm_uhrp` as intended.
+
+A fix to the broadcast configuration in the host's wallet storage layer is pending.
+
+## Passport Revisions
+
+A revision is currently delivered only as a MessageBox message. The pending token remains unchanged on-chain.
+
+When the owner resubmits after a revision, a new pending token is minted. The previous token is not always spent, which can result in more than one pending token for the same horse.
+
+Moving revisions to their own on-chain state transition is planned for a later version.
+
+## Manual Refresh
+
+Approvals and revisions are currently received by manually refreshing the journal.
+
+There are no push notifications, and the breeding organization's queue is loaded once when the view is opened.
