@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, FlatList, ActivityIndicator, Modal, Alert } from 'react-native'
 import { useState, useEffect, useMemo } from 'react'
 import { useWallet } from '@/context/WalletContext'
-import { PushDrop, LookupResolver, Transaction, AuthFetch, LockingScript } from '@bsv/sdk'
+import { PushDrop, LookupResolver, Transaction, AuthFetch, LockingScript, PrivateKey } from '@bsv/sdk'
 import * as SecureStore from 'expo-secure-store'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createMessageBoxClient, MESSAGE_BOXES, MESSAGEBOX_HOST } from '@/utils/messageBox'
@@ -53,7 +53,7 @@ export default function OwnerScreen() {
             await Promise.all(listData.map( async (record) => {
                 const h = record.horse
                 const id = h.id
-                if (cancelled || !h.ueln || !id) return
+                if (cancelled || !id) return
                 setIsLoadingImage(prev => ({...prev, [id]: true})) 
                 try {
                     const resolver = new LookupResolver({
@@ -65,7 +65,7 @@ export default function OwnerScreen() {
                     console.log('lookup query:', { ueln: h.ueln, tokenType: 'photo' })
                     const answer = await resolver.query({
                         service: 'ls_uhrp',
-                        query: { ueln: h.ueln, tokenType: 'photo'}
+                        query: { id, tokenType: 'photo'}
                     })
                     console.log('answer:', JSON.stringify(answer))
 
@@ -140,6 +140,9 @@ export default function OwnerScreen() {
         if (!wallet) return
 
         const run = async () => {
+            const rootKeyHex = await SecureStore.getItemAsync('rootKeyHex')
+            console.log('rootKey pubkey:', PrivateKey.fromString(rootKeyHex!).toPublicKey().toString())
+            console.log('wallet identityKey:', wallet.identityKey)
             // await wallet.reviewSpendableOutputs(true, true)
             await fetchActivePasses()
             await fetchActive()

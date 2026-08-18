@@ -1,6 +1,6 @@
 import { Router } from "express"
 import type { Request, Response } from "express"
-import { Transaction, PushDrop, StorageUploader, PublicKey, ECIES } from '@bsv/sdk'
+import { Transaction, PushDrop, StorageUploader, PublicKey, ECIES, StorageUtils } from '@bsv/sdk'
 import type { WalletInterface } from "@bsv/sdk"
 import type { StorageUploaderInternal } from "../../types/uhrp-storage-uploader.js"
 
@@ -30,7 +30,8 @@ export default (wallet: WalletInterface) => {
             try {
                 const data = new Uint8Array(encryptedBuffer)
 
-                const { uploadURL, requiredHeaders } = await storageUploader.getUploadInfo(
+                const { uploadURL, requiredHeaders } = await storageUploader.getUploadURL(
+                    STORAGE_URL!,
                     data.byteLength,
                     180
                 )
@@ -40,13 +41,14 @@ export default (wallet: WalletInterface) => {
                     throw new Error(`uploadURL missing objectID param: ${uploadURL}`)
                 }
 
-                const uploadFileResult = await storageUploader.uploadFile(
+                await storageUploader.putFile(
                     uploadURL,
-                    { data, type: 'application/octet-stream'},
+                    data,
+                    'application/octet-stream',
                     requiredHeaders
                 )
 
-                uhrpUrl = uploadFileResult.uhrpURL
+                uhrpUrl = StorageUtils.getURLForFile(data)
                 cdnUrl = `${STORAGE_URL}/cdn/${objectID}`
                 console.log('uhrpURL:', uhrpUrl, 'cdnUrl:', cdnUrl)
             } catch (error) {
@@ -60,7 +62,7 @@ export default (wallet: WalletInterface) => {
 
             const fields = [
                 VERSION,
-                ueln,
+                id,
                 uhrpUrl,
                 tokenType,
                 mimeType,
@@ -73,19 +75,19 @@ export default (wallet: WalletInterface) => {
             const lockingScript = await pushDrop.lock(
                 fields,
                 [2, 'equusv identity file'],
-                ueln,
+                id,
                 identityKey,
                 true
             )
 
             const result = await wallet.createAction({
-                description: `Create file token for ${ueln}`,
+                description: `Create file token for ${id}`,
                 outputs: [
                     {  
                         lockingScript: lockingScript.toHex(),
                         satoshis: 1,
-                        outputDescription: `File token for ${ueln} (${tokenType})`,
-                        basket: `equusv-${ueln}`,
+                        outputDescription: `File token for ${id} (${tokenType})`,
+                        basket: `equusv-${id}`,
                         customInstructions: JSON.stringify({ type: ''})
                     }
                 ]

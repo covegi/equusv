@@ -1,6 +1,6 @@
 export interface EquusVUHRPRecord {
     version: string,
-    ueln: string,
+    id: string,
     uhrpUrl: string,
     tokenType: string,
     mimeType: string,

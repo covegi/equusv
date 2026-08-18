@@ -20,7 +20,7 @@ class EquusVUHRPLookupService implements LookupService {
     async getMetaData(): Promise<{ name: string, shortDescription: string, iconURL?: string, version?: string, informationUrl?: string}> {
         return {
             name: 'EquusV Identity UHRP Lookup Service',
-            shortDescription: 'Query UHRP file tokens by UELN, token type or parent transaction ID',
+            shortDescription: 'Query UHRP file tokens by ID, token type or parent transaction ID',
             version: '0.1.0',
             informationUrl: 'https://www.equusv.com'
         }
@@ -40,7 +40,7 @@ class EquusVUHRPLookupService implements LookupService {
             txid,
             outputIndex,
             version: Utils.toUTF8(decoded.fields[0]),
-            ueln: Utils.toUTF8(decoded.fields[1]),
+            id: Utils.toUTF8(decoded.fields[1]),
             uhrpUrl: Utils.toUTF8(decoded.fields[2]),
             tokenType: Utils.toUTF8(decoded.fields[3]),
             mimeType: Utils.toUTF8(decoded.fields[4]),
@@ -75,7 +75,7 @@ class EquusVUHRPLookupService implements LookupService {
         }
 
         let filter: any = {}
-        if (query.ueln) filter.ueln = query.ueln
+        if (query.id) filter.id = query.id
         if (query.tokenType) filter.tokenType = query.tokenType
         if (query.parentTxid) filter.parentTxid = query.parentTxid
         
