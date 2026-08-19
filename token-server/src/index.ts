@@ -32,7 +32,6 @@
             labels: ['_specOpNoSendActions' as any, 'abort'],
             labelQueryMode: 'any'
         })
-        console.log('Aborted nosend actions:', actions.length)
 
         console.log('Token-server identityKey:', wallet.identityKey)
 
