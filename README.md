@@ -1,3 +1,13 @@
+## Contents
+
+1. [Project Overview](#1-project-overview)
+2. [Demo](#2-demo)
+3. [Clone and Setup](#3-clone-and-setup)
+4. [Architecture](#4-architecture)
+5. [Course Requirements Mapping](#5-course-requirements-mapping)
+6. [Known Limitations](#6-known-limitations)
+7. [Glossary](#7-glossary)
+
 # 1. Project Overview
 
 ## EquusV: Tokenized Horse Journal
@@ -28,7 +38,141 @@ There are approximately 7 million equids in the EU, including horses, donkeys an
 
 The primary user is the horse owner. Breeding organizations are natural certifiers. Later phases include veterinarians, farriers, insurance companies, slaughterhouses, the Swedish Board of Agriculture and other stakeholders.
 
-# 2. Architecture
+# 2. Demo
+
+[Full walkthrough](https://uhrp.equusv.com/demo/demo.mov) — onboarding, passport creation, photo upload, submission and approval.
+
+## On-chain activity
+
+The same flow seen from the token-server wallet:
+
+![Wallet activity](docs/images/equusv-activity.png)
+
+The approval transaction shows the state transition on-chain. The pending passport token is consumed as an input and an active token is minted as an output:
+
+![Passport approval](docs/images/equusv-approval.png)
+
+The UHRP file token, referencing the encrypted photo stored on the self-hosted host:
+
+![UHRP file token](docs/images/equusv-uhrp.png)
+
+# 3. Clone and Setup
+
+## Before you start: the mobile client
+
+The mobile app is a React Native / Expo iOS development build. Building it requires an Expo account and Apple credentials for signing, which is why the demo is provided as a recording rather than an installable build.
+
+For reference, the build and run commands are:
+
+```bash
+cd mobile
+eas build --profile development --platform ios
+bun run expo start --dev-client --clear
+```
+
+`EXPO_PUBLIC_*` variables are compiled into the build, so `mobile/.env` must point at the machine running the token-server and overlay before building.
+
+A TestFlight build will be available once EquusV is incorporated and an Apple Developer account is in place.
+
+## What the rest of this section covers
+
+The server side runs from a clone with no native tooling. Starting the overlay and the token-server confirms that the system configures itself correctly: the overlay registers three topic managers and three lookup services against MongoDB, and the token-server loads its funded wallet and exposes its certifier identity.
+
+Creating passports, certificates and photos is initiated from the mobile client, so a fresh clone starts with an empty index. The demo shows those flows end to end.
+
+## Prerequisites
+
+- **Docker** — runs the overlay and its MongoDB container
+- **bun** — package manager and runtime
+- **LARS CLI** — installed globally
+
+No database setup and no native build tooling are required.
+
+## 1. Clone and install
+
+```bash
+git clone <repo-url>
+cd equusv
+bun install
+```
+
+## 2. Environment files
+
+The repository ships with `.env.example` files containing working values, including a funded development key for the token-server wallet.
+
+```bash
+cp token-server/.env.example token-server/.env
+cp mobile/.env.example mobile/.env
+```
+
+`token-server/.env` is ready as-is.
+
+> The included development key is intentionally low-value and dev-only, so the project runs out of the box. Production uses a separate key that is never shared.
+
+## 3. Start the overlay
+
+From the project root:
+
+```bash
+bun run start
+```
+
+This starts LARS, which boots the overlay and its MongoDB container.
+
+**What to look for.** The startup log should show three topic managers and three lookup services being configured, followed by the overlay listening on port 8080:
+
+```
+🗂️ Configured topic manager tm_horse_passport
+🗂️ Configured topic manager tm_uhrp
+🗂️ Configured topic manager tm_identity
+🔍 Configured lookup service ls_passport with MongoDB
+🔍 Configured lookup service ls_uhrp with MongoDB
+🔍 Configured lookup service ls_identity with MongoDB
+🎧 LARS is ready and listening on local port 8080
+```
+
+This is the overlay side of the three subsystems described under Architecture.
+
+## 4. Start the token-server
+
+In a second terminal:
+
+```bash
+cd token-server
+bun run src/index.ts
+```
+
+**What to look for.** The wallet loads, reports its balance, and prints the certifier identity key that the mobile client authenticates against:
+
+```
+Balance after cleanup: <sats>
+Token-server identityKey: 029b5814b8e186b7c4a2499b88db258f03171fc773a46247409865f0232b02907f
+token-server is running on port 3000
+```
+
+This identity key is the certifier for both role certificates, and matches `EXPO_PUBLIC_EQUUSV_IDENTITY_KEY` in `mobile/.env`.
+
+## 5. Query the overlay directly
+
+With both services running, the lookup services can be queried without the mobile client:
+
+```bash
+curl -X POST http://localhost:8080/lookup \
+  -H "Content-Type: application/json" \
+  -d '{"service":"ls_identity","query":{"subject":"<identityKey>"}}'
+```
+
+**What to look for.** A fresh clone returns an empty output list:
+
+```json
+{"type":"output-list","outputs":[]}
+```
+
+This is expected. The overlay indexes tokens as they are admitted, and nothing has been created yet on a new install. The response confirms that the lookup service is connected to MongoDB and answering in the correct format.
+
+Against a populated index, the same query returns UTXO references for that subject's identity certificates, which the mobile client resolves into the name and role shown in the app.
+
+# 4. Architecture
 
 EquusV is a monorepo with three applications that together form the core system, plus a marketing frontend that is separate from the application logic.
 
@@ -153,9 +297,9 @@ Throughout the system, the owner owns the tokens. They are internalized into the
 
 The owner does not yet have full control over the transaction lifecycle since funding and broadcasting are handled by token-server.
 
-This is a deliberate V1 design choice and is explained further under Design Decisions.
+This is a deliberate V1 design choice and is explained further under Course Requirements Mapping, Statement 4.
 
-# 4. Course Requirements Mapping
+# 5. Course Requirements Mapping
 
 This section maps the EquusV implementation to each grading criterion. Where the implementation differs from the default approach, a short statement explains the reasoning, as permitted by the rubric.
 
@@ -346,9 +490,9 @@ When the market is ready for self custody, the app can be rebuilt to move fundin
 
 ## Criterion 8: Documentation and Presentation
 
-This README provides the project overview, architecture, setup instructions and course requirements mapping.
+This README provides the project overview, a recorded demonstration of the complete flow, setup instructions, the architecture, this requirements mapping, known limitations and a Swedish-English glossary for the interface.
 
-# 5. Known Limitations
+# 6. Known Limitations
 
 The following are known limitations in V1. They are documented here for transparency.
 
@@ -377,3 +521,156 @@ Moving revisions to their own on-chain state transition is planned for a later v
 Approvals and revisions are currently received by manually refreshing the journal.
 
 There are no push notifications, and the breeding organization's queue is loaded once when the view is opened.
+
+## Chaintracker Rate Limits
+
+The overlay verifies merkle roots against WhatsOnChain's public API, which is rate limited. Under sustained use the limit is reached and transaction submissions are rejected with a verification error, even though the transactions themselves are valid and broadcast to the network.
+
+Configuring a dedicated ARC endpoint or a self-hosted headers service removes this dependency. This is a configuration change rather than a code change, and is required before the system can carry production load.
+
+# 7. Glossary
+
+The mobile interface is in Swedish. This glossary maps the terms shown in the app and in the demo to English.
+
+## Domain terms
+
+| Swedish | English | Note |
+|---|---|---|
+| Hästpass | Horse passport | The EU-mandated lifelong document for a horse |
+| UELN | UELN | Universal Equine Life Number, 15 digits, assigned by the issuing organisation |
+| Chipnr | Microchip number | 15 digits, the physical identifier implanted in the horse |
+| Avelsorganisation | Breeding organisation | Issues and verifies passports on behalf of the authority |
+| Hästägare | Horse owner | |
+| Livsmedelskedjan | Food chain | Whether the horse is intended for human consumption; a legal status that affects permitted medication |
+| Ingår / Ingår ej | Included / Not included | Food chain status |
+| Jordbruksverket | Swedish Board of Agriculture | The national authority for equine registration |
+| Stall | Stable | |
+| Signalement | Description of markings | Physical identification used alongside the microchip |
+
+## Horse attributes
+
+| Swedish | English |
+|---|---|
+| Namn | Name |
+| Ras | Breed |
+| Kön | Sex |
+| Född / Födelsedatum | Born / Date of birth |
+| Färg | Colour |
+| Ägare | Owner |
+| Ort / Plats | Location |
+| Organisation | Organisation |
+
+**Sex:** Hingst = stallion, Sto = mare, Valack = gelding
+
+**Breeds:** Svenskt varmblod = Swedish Warmblood, Svenskt fullblod = Swedish Thoroughbred, Nordsvensk = North Swedish Horse, Gotlandsruss = Gotland Pony, Islandshäst = Icelandic Horse, Connemara, Welsh, Shetlandsponny = Shetland Pony
+
+## Passport status
+
+| Swedish | English | Meaning |
+|---|---|---|
+| Utkast | Draft | Created locally, not yet submitted |
+| Skickat | Submitted | Sent to the breeding organisation |
+| Mottaget | Received | Visible in the organisation's queue |
+| Väntar på granskning | Awaiting review | |
+| Revision | Revision | Returned to the owner for correction |
+| Återsänd | Returned | |
+| Aktivt | Active | Approved and issued |
+| Inaktivt | Inactive | No longer valid |
+
+## Verification status
+
+| Swedish | English |
+|---|---|
+| Ej verifierat | Not verified |
+| Väntar på verifiering | Awaiting verification |
+| Verifierat | Verified |
+| Självdeklarerat | Self-declared |
+
+## Journal categories
+
+| Swedish | English |
+|---|---|
+| Alla | All |
+| Identitet | Identity |
+| Hälsa | Health |
+| Avel | Breeding |
+| Livscykel | Life cycle |
+| Aktiviteter | Activities |
+
+## Identity and certificates
+
+| Swedish | English |
+|---|---|
+| Certifikat | Certificate |
+| Certifierare | Certifier |
+| Innehavare | Holder |
+| Roll | Role |
+| Certifikat-ID | Certificate ID |
+| Hästägarcertifikat | Horse owner certificate |
+| Avelsorganisationscertifikat | Breeding organisation certificate |
+| Återställningsnyckel | Recovery key | The BIP39 mnemonic |
+| Arkiv | Archive | The user's wallet and journal, referred to as an archive in the interface |
+
+## Actions
+
+| Swedish | English |
+|---|---|
+| Skapa | Create |
+| Spara utkast | Save draft |
+| Spara ändringar | Save changes |
+| Redigera | Edit |
+| Radera / Ta bort | Delete |
+| Skicka | Send |
+| Skicka igen | Send again |
+| Skicka till avelsorganisation | Send to breeding organisation |
+| Skicka revision | Send revision |
+| Godkänn | Approve |
+| Godkänn ansökan | Approve application |
+| Återkalla / Dra tillbaka | Withdraw |
+| Avbryt | Cancel |
+| Fortsätt | Continue |
+| Återställ | Restore |
+| Uppdatera | Refresh |
+| Välj | Select |
+| Lägg till | Add |
+
+## Onboarding
+
+| Swedish | English |
+|---|---|
+| Skapa nytt arkiv | Create new archive |
+| Återställ arkiv | Restore archive |
+| Vad heter du? | What is your name? |
+| Förnamn / Efternamn | First name / Last name |
+| Skapa din PIN-kod | Create your PIN |
+| Bekräfta din PIN-kod | Confirm your PIN |
+| Din återställningsnyckel | Your recovery key |
+| Jag har sparat min nyckel | I have saved my key |
+| Dela aldrig denna nyckel med någon | Never share this key with anyone |
+
+## Interface messages
+
+| Swedish | English |
+|---|---|
+| Inga hästar ännu | No horses yet |
+| Inga inkomna ärenden | No incoming cases |
+| Passansökan | Passport application |
+| Ärende | Case |
+| Hämtar bild... | Loading image... |
+| Sparar bild... | Saving image... |
+| Skickar... | Sending... |
+| Konfigurerar... | Configuring... |
+| Något gick fel | Something went wrong |
+| Behörighet saknas / krävs | Permission missing / required |
+| Kameraåtkomst krävs | Camera access required |
+| Öppna inställningar | Open settings |
+| Ta foto | Take photo |
+| Välj från galleri | Choose from library |
+
+## Taglines
+
+| Swedish | English |
+|---|---|
+| Sanningen om din häst | The truth about your horse |
+| Hela hästens liv i en journal | The horse's entire life in one journal |
+| All historik — spårbar, delbar, verifierad | Full history: traceable, shareable, verified |
