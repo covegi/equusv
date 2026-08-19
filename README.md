@@ -255,7 +255,7 @@ From that point, the app resolves identity keys to verified names and roles inst
 
 ### Creating a Passport
 
-The owner enters the horse's official information, including UELN, chip number, name, birth year, sex, breed, colour, owner, issuer and food chain status.
+The owner enters the horse's official information, name, birth year, sex, breed, colour, owner, issuer and food chain status.
 
 token-server mints the information as a pending passport token and funds the transaction.
 
