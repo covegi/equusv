@@ -38,7 +38,7 @@ export default (wallet: Wallet) => {
             out => out.lockingScript.toHex() === lockingScript
         )
 
-        await fetch(`${LARS_URL}/submit`, {
+        const overlayResp = await fetch(`${LARS_URL}/submit`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/octet-stream',
@@ -46,7 +46,9 @@ export default (wallet: Wallet) => {
             },
             body: Buffer.from(tx)
         })
-        console.log(`Submitted to LARS overlay: ${finalTransaction}`)
+
+        const overlayBody = await overlayResp.json().catch(() => overlayResp.text())
+        console.log('Overlay submit status:', overlayResp.status, JSON.stringify(overlayBody))
 
         return res.json({
             tx: Buffer.from(tx).toString('base64'),
