@@ -105,11 +105,9 @@ cp token-server/.env.example token-server/.env
 cp mobile/.env.example mobile/.env
 ```
 
-### The token-server wallet key
+### token-server
 
-`EQUUSV_ROOT_KEY` is the private key for the token-server's wallet. It is deliberately **not** included in the repository, and `token-server/.env.example` ships with it empty.
-
-The server refuses to start without it:
+`EQUUSV_ROOT_KEY` is the private key for the token-server's wallet. It is deliberately not included in the repository, and the example ships with it empty. The server refuses to start without it:
 
 ```
 Error: EQUUSV_ROOT_KEY is required in token-server/.env
@@ -121,13 +119,19 @@ Generate a key for local use:
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-Put the result in `token-server/.env`:
-
-```properties
-EQUUSV_ROOT_KEY=<your generated key>
-```
-
 The key only needs funding if you intend to create transactions on-chain, which is initiated from the mobile client. For starting the server and inspecting the system, an unfunded key is sufficient.
+
+### mobile
+
+The mobile values are per-installation and only relevant if you build the app:
+
+| Variable | Value |
+|---|---|
+| `EXPO_PUBLIC_TOKEN_SERVER_URL` | The LAN address of the machine running token-server, port 3000 |
+| `EXPO_PUBLIC_OVERLAY_URL` | The ngrok tunnel URL that LARS prints on startup |
+| `EXPO_PUBLIC_EQUUSV_IDENTITY_KEY` | The identity key the token-server prints on startup |
+| `EXPO_PUBLIC_STORAGE_URL` | Wallet storage backend, leave as-is |
+| `EXPO_PUBLIC_UHRP_URL` | UHRP host, leave as-is |
 
 ## 3. Start the overlay
 
