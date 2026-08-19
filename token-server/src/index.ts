@@ -32,7 +32,6 @@
             labelQueryMode: 'any'
         })
         console.log('Aborted nosend actions:', actions.length)
-        console.log('Balance after cleanup:', await wallet.balance())
 
         console.log('Token-server identityKey:', wallet.identityKey)
 

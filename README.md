@@ -91,7 +91,7 @@ No database setup and no native build tooling are required.
 ## 1. Clone and install
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/covegi/equusv
 cd equusv
 bun install
 ```
@@ -142,10 +142,9 @@ cd token-server
 bun run src/index.ts
 ```
 
-**What to look for.** The wallet loads, reports its balance, and prints the certifier identity key that the mobile client authenticates against:
+**What to look for.** The wallet loads and prints the certifier identity key that the mobile client authenticates against:
 
 ```
-Balance after cleanup: <sats>
 Token-server identityKey: 029b5814b8e186b7c4a2499b88db258f03171fc773a46247409865f0232b02907f
 token-server is running on port 3000
 ```
