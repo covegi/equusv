@@ -20,10 +20,11 @@
 
     const init = async () => {
         const EQUUS_ROOT_KEY = process.env.EQUUSV_ROOT_KEY
+        if (!EQUUS_ROOT_KEY) throw Error('EQUUSV_ROOT_KEY is required in token-server/.env')
 
         const wallet = await Setup.createWalletClientNoEnv({
             chain: 'main',
-            rootKeyHex: EQUUS_ROOT_KEY!,
+            rootKeyHex: EQUUS_ROOT_KEY,
         })
 
         // list and abort all stuck nosend transaction
