@@ -98,16 +98,38 @@ bun install
 
 ## 2. Environment files
 
-The repository ships with `.env.example` files containing working values, including a funded development key for the token-server wallet.
+Copy the example files:
 
 ```bash
 cp token-server/.env.example token-server/.env
 cp mobile/.env.example mobile/.env
 ```
 
-`token-server/.env` is ready as-is.
+### The token-server wallet key
 
-> The included development key is intentionally low-value and dev-only, so the project runs out of the box. Production uses a separate key that is never shared.
+`EQUUSV_ROOT_KEY` is the private key for the token-server's wallet. It is deliberately **not** included in the repository, and `token-server/.env.example` ships with it empty.
+
+The server refuses to start without it:
+
+```
+Error: EQUUSV_ROOT_KEY is required in token-server/.env
+```
+
+Generate a key for local use:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Put the result in `token-server/.env`:
+
+```properties
+EQUUSV_ROOT_KEY=<your generated key>
+```
+
+The key only needs funding if you intend to create transactions on-chain, which is initiated from the mobile client. For starting the server and inspecting the system, an unfunded key is sufficient.
+
+> Note that `EXPO_PUBLIC_EQUUSV_IDENTITY_KEY` in `mobile/.env.example` is the public identity key of the wallet used in the recorded demo. If you generate your own root key, the token-server will print its own identity key on startup, and that is the value the mobile client would need.
 
 ## 3. Start the overlay
 
