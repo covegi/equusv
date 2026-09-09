@@ -12,6 +12,8 @@
     import horseBreederCertificate from './routes/certify/breeding-organisation.js'
     import identityPublish from './routes/identity/publish.js'
     import identityKey from './utils/identityKey.js'
+    import equusvToken from './routes/token/create.js'
+    import anchorToken from './routes/token/anchor.js'
 
     dotenv.config()
     const app = express()
@@ -87,6 +89,9 @@
         app.use('/', horseOwnerCertificate(wallet))
         app.use('/', horseBreederCertificate(wallet))
         app.use('/', identityPublish(wallet))
+
+        app.use('/', equusvToken(wallet))
+        app.use('/', anchorToken(wallet))
 
         app.use(spendRouter(wallet))
     
