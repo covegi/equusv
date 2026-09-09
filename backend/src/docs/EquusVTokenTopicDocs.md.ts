@@ -1,0 +1,2 @@
+export default `# EquusV Token Topic Manager
+Validates all EquusV Token-instances against their SubCategory schema before admission. Dispatches on the subCategory field to look up the schema, then checks field count, engine fields, and required schema fields.`

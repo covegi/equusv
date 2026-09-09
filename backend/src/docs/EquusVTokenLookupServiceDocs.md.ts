@@ -1,0 +1,2 @@
+export default `# EquusV Token Lookup Service
+Query EquusV Token-instances by anchor, category, and subCategory. Returns UTXO references to the current (or historical) versions of tokens under a given anchor.`
