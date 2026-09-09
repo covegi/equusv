@@ -4,7 +4,8 @@
     "topicManagers": {
         "tm_horse_passport": "./src/mod-passport.ts",
         "tm_uhrp": "./src/mod-uhrp.ts",
-        "tm_identity": "./src/mod-identity.ts"
+        "tm_identity": "./src/mod-identity.ts",
+        "tm_equusv": "./src/mod-equusv.ts"
     },
     "lookupServices": {
         "ls_passport": { 
@@ -17,6 +18,10 @@
         },
         "ls_identity": {
             "serviceFactory": "./src/mod-identity.ts",
+            "hydrateWith": "mongo"
+        },
+        "ls_equusv": {
+            "serviceFactory": "./src/mod-equusv.ts",
             "hydrateWith": "mongo"
         }
     }, 
