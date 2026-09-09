@@ -2,12 +2,14 @@
     "name": "equusv",
     "private": true,
     "scripts": {
+        "prestart": "cd core && bun run build:backend",
         "start": "lars"
     },
     "workspaces": [
         "mobile",
         "frontend",
         "token-server",
-        "backend"
+        "backend",
+        "core"
     ]
 }

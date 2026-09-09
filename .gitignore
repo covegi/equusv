@@ -140,3 +140,6 @@ vite.config.ts.timestamp-*
 
 # LARS local data
 local-data/
+
+# Generated from @equusv/core for the LARS backend container
+backend/src/_generated/

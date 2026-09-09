@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "rootDir": "./src",
+        "outDir": "../backend/src/_generated",
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "target": "esnext",
+        "declaration": true,
+        "skipLibCheck": true,
+        "types": []
+    },
+    "include": ["src"]
+}
