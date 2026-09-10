@@ -44,7 +44,7 @@ export default class EquusVTokenTopicManager implements TopicManager {
 
                     // Anchor: fixed contract, no schema.
                     if (subCategory === 'anchor') {
-                        if (fields.length !== 7) throw new Error('Anchor field count mismatch')
+                        if (fields.length < 7) throw new Error('Anchor field count mismatch')
                         for (let n = 0; n < 7; n++) {
                             if (!fields[n].length) throw new Error(`Empty anchor field ${n}`)
                         }
@@ -58,8 +58,8 @@ export default class EquusVTokenTopicManager implements TopicManager {
                         throw new Error(`Unknown subCategory: ${subCategory}`)
                     }
 
-                    const expected = ENGINE_FIELD_COUNT + schema.fields.length
-                    if (fields.length !== expected) throw new Error('Field count mismatch')
+                    const minimum = ENGINE_FIELD_COUNT + schema.fields.length
+                    if (fields.length < minimum) throw new Error('Field count mismatch')
 
                     for (let n = 0; n < ENGINE_FIELD_COUNT; n++) {
                         if (!fields[n].length) throw new Error(`Empty engine field ${n}`)
