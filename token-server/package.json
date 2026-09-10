@@ -11,11 +11,12 @@
         "@bsv/message-box-client": "^2.1.1",
         "@bsv/sdk": "2.3.1",
         "@bsv/wallet-toolbox": "^2.1.17",
+        "@equusv/core": "workspace:*",
         "cors": "^2.8.6",
         "dotenv": "^17.3.1",
         "express": "^5.2.1",
         "mongoose": "^9.6.1",
-        "@equusv/core": "workspace:*"
+        "uuid": "^14.0.2"
     },
     "devDependencies": {
         "@types/cors": "^2.8.19",
