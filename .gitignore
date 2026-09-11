@@ -143,3 +143,9 @@ local-data/
 
 # Generated from @equusv/core for the LARS backend container
 backend/src/_generated/
+
+# macOS
+.DS_Store
+
+# Local test scripts — hardcoded values, not for production
+token-server/src/create-*-token-test.ts
