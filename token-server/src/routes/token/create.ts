@@ -84,7 +84,7 @@ export default (wallet: WalletInterface) => {
                         satoshis: 1,
                         outputDescription: subCategory,
                         basket,
-                        tags
+                        tags    
                     }
                 ]
             }
@@ -149,8 +149,8 @@ export default (wallet: WalletInterface) => {
             const LARS_URL = process.env.LARS_URL
 
             if (!finalTx) throw new Error('No transaction produced')
-            
-            await fetch(`${LARS_URL}/submit`, {
+
+            const submitResponse = await fetch(`${LARS_URL}/submit`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/octet-stream',
@@ -158,6 +158,19 @@ export default (wallet: WalletInterface) => {
                 },
                 body: Buffer.from(finalTx)
             })
+
+            if (!submitResponse.ok) throw new Error(`Overlay submit failed: ${submitResponse.status}`)
+
+
+            type SubmitResult = {
+                [topic: string]: { outputsToAdmit: number[], coinsToRetain: number[]}
+            }
+            const submitResult = await submitResponse.json() as SubmitResult
+            const admitted = submitResult?.tm_equusv?.outputsToAdmit ?? []
+
+            if (admitted.length === 0) {
+                throw new Error('Token was not admitted by tm_equusv')
+            }
 
             return res.json({ txid: finalTxid })
 
