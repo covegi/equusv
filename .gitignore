@@ -149,3 +149,6 @@ backend/src/_generated/
 
 # Local test scripts — hardcoded values, not for production
 token-server/src/create-*-token-test.ts
+
+# Compiled output does not belong in core source
+core/src/**/*.js
