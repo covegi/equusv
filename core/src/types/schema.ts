@@ -1,5 +1,5 @@
 export type Schema = {
-    category: 'identity',
+    category: 'identity' | 'training',
     subCategory: string,
     version: number,
 
