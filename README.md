@@ -1,46 +1,12 @@
   ## Contents
 
-  1. [Project Overview](#1-project-overview)
-  2. [Demo](#2-demo)
-  3. [Clone and Setup](#3-clone-and-setup)
-  4. [Architecture](#4-architecture)
-  5. [Course Requirements Mapping](#5-course-requirements-mapping)
-  6. [Known Limitations](#6-known-limitations)
-  7. [Glossary](#7-glossary)
+  1. [Clone and Setup](#3-clone-and-setup)
+  2. [Architecture](#4-architecture)
+  3. [Course Requirements Mapping](#5-course-requirements-mapping)
+  4. [Known Limitations](#6-known-limitations)
+  5. [Glossary](#7-glossary)
 
   # 1. Project Overview
-
-  ## EquusV: Tokenized Horse Journal
-
-  A cryptographically verifiable horse journal controlled by the horse owner.
-
-  ### Background
-
-  EU Regulation 2021/963 requires a lifelong physical passport for every horse in the EU. Today's system is paper based and fragmented, making passports difficult to verify and their history difficult to trust. Information recorded on paper can be changed without detection.
-
-  The passport requirement itself is EU law and remains in place. The problem is the medium, not the requirement.
-
-  ### Concept
-
-  EquusV is a digital journal for the horse's entire life. The passport forms the root of a token tree, with the horse's identity recorded on chain and anchored to the physical animal through its microchip number and UELN.
-
-  Each subsequent event in the horse's life, such as a farrier visit or veterinary visit, is added to the tree as its own token, gradually building a verifiable history.
-
-  The owner owns the entire tree. Journal data is timestamped and immutable on chain. Photos and documents are encrypted and stored off chain through UHRP.
-
-  The journal is shared with other stakeholders on a conditional basis. For example, the horse owner sends the horse passport to a breeding organization for official issuance and verification. The breeding organization has access to the horse's journal but can only see the information it has issued itself, without gaining access to the rest of the journal.
-
-  EquusV complements the physical passport. It does not replace it, since the physical document remains a legal requirement in the EU.
-
-  ### Market
-
-  There are approximately 7 million equids in the EU, including horses, donkeys and mules. Sweden alone has around 355,000 registered horses.
-
-  The primary user is the horse owner. Breeding organizations are natural certifiers. Later phases include veterinarians, farriers, insurance companies, slaughterhouses, the Swedish Board of Agriculture and other stakeholders.
-
-  # 2. Demo
-
-  [Full walkthrough](https://uhrp.equusv.com/demo/demo.mov) — onboarding, passport creation, photo upload, submission and approval.
 
   ## On-chain activity
 
@@ -71,8 +37,6 @@
   ```
 
   `EXPO_PUBLIC_*` variables are compiled into the build, so `mobile/.env` must point at the machine running the token-server and overlay before building.
-
-  A TestFlight build will be available once EquusV is incorporated and an Apple Developer account is in place.
 
   ## What the rest of this section covers
 
